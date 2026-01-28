@@ -265,3 +265,10 @@
 - [x] Mostrar apenas equipamentos do cliente atual
 - [x] Permitir pesquisa por marca, modelo ou número de série
 - [x] Testar funcionalidade com cliente com equipamentos
+
+## Botão de Atalho "Novo Equipamento" na Página de Novo Ticket
+- [x] Criar modal de novo equipamento
+- [x] Adicionar botão ao lado do campo de pesquisa de equipamentos
+- [x] Implementar lógica de criação de equipamento via modal
+- [x] Atualizar lista de equipamentos após criação
+- [x] Testar funcionalidade completa

@@ -15,7 +15,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Search } from "lucide-react";
+import { ArrowLeft, Loader2, Search, Plus } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function NewTicket() {
   const [, setLocation] = useLocation();
@@ -37,6 +44,13 @@ export default function NewTicket() {
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [equipmentSearchQuery, setEquipmentSearchQuery] = useState("");
   const [showEquipmentDropdown, setShowEquipmentDropdown] = useState(false);
+  const [showNewEquipmentModal, setShowNewEquipmentModal] = useState(false);
+  const [newEquipmentData, setNewEquipmentData] = useState({
+    brand: "",
+    model: "",
+    serialNumber: "",
+    isCritical: 0,
+  });
 
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
@@ -60,6 +74,32 @@ export default function NewTicket() {
       toast.error(error.message);
     },
   });
+
+  const createEquipmentMutation = trpc.equipment.create.useMutation({
+    onSuccess: (data) => {
+      toast.success("Equipamento criado com sucesso!");
+      utils.equipment.getByClient.invalidate();
+      setShowNewEquipmentModal(false);
+      setNewEquipmentData({ brand: "", model: "", serialNumber: "", isCritical: 0 });
+      // Atualizar lista e limpar pesquisa para mostrar todos os equipamentos
+      setEquipmentSearchQuery("");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleCreateEquipment = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.clientId) {
+      toast.error("Selecione um cliente primeiro");
+      return;
+    }
+    createEquipmentMutation.mutate({
+      clientId: formData.clientId,
+      ...newEquipmentData,
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,24 +280,35 @@ export default function NewTicket() {
                           />
                         ) : (
                           <div className="relative">
-                            <div className="relative">
-                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                              <Input
-                                id="equipmentSearch"
-                                type="text"
-                                value={equipmentSearchQuery}
-                                onChange={(e) => {
-                                  setEquipmentSearchQuery(e.target.value);
-                                  setShowEquipmentDropdown(true);
-                                  if (!e.target.value) {
-                                    setFormData({ ...formData, equipmentId: undefined });
-                                  }
-                                }}
-                                onFocus={() => setShowEquipmentDropdown(true)}
-                                placeholder="Pesquisar por marca, modelo ou N/S..."
-                                className="pl-10"
-                                required={!useCustomEquipment}
-                              />
+                            <div className="flex gap-2">
+                              <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                <Input
+                                  id="equipmentSearch"
+                                  type="text"
+                                  value={equipmentSearchQuery}
+                                  onChange={(e) => {
+                                    setEquipmentSearchQuery(e.target.value);
+                                    setShowEquipmentDropdown(true);
+                                    if (!e.target.value) {
+                                      setFormData({ ...formData, equipmentId: undefined });
+                                    }
+                                  }}
+                                  onFocus={() => setShowEquipmentDropdown(true)}
+                                  placeholder="Pesquisar por marca, modelo ou N/S..."
+                                  className="pl-10"
+                                  required={!useCustomEquipment}
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setShowNewEquipmentModal(true)}
+                                title="Novo Equipamento"
+                              >
+                                <Plus className="h-4 w-4" />
+                              </Button>
                             </div>
                             {showEquipmentDropdown && clientEquipment && clientEquipment.filter(eq => 
                               equipmentSearchQuery === "" ||
@@ -441,6 +492,86 @@ export default function NewTicket() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal de Novo Equipamento */}
+      <Dialog open={showNewEquipmentModal} onOpenChange={setShowNewEquipmentModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Equipamento</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateEquipment} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newBrand">Marca *</Label>
+              <Input
+                id="newBrand"
+                value={newEquipmentData.brand}
+                onChange={(e) => setNewEquipmentData({ ...newEquipmentData, brand: e.target.value })}
+                required
+                placeholder="Ex: Siemens, Bosch..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newModel">Modelo *</Label>
+              <Input
+                id="newModel"
+                value={newEquipmentData.model}
+                onChange={(e) => setNewEquipmentData({ ...newEquipmentData, model: e.target.value })}
+                required
+                placeholder="Ex: EQ.9 Plus, KGN39VLDA..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newSerialNumber">Número de Série *</Label>
+              <Input
+                id="newSerialNumber"
+                value={newEquipmentData.serialNumber}
+                onChange={(e) => setNewEquipmentData({ ...newEquipmentData, serialNumber: e.target.value })}
+                required
+                placeholder="Ex: SN12345678"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="newIsCritical"
+                checked={newEquipmentData.isCritical === 1}
+                onChange={(e) => setNewEquipmentData({ ...newEquipmentData, isCritical: e.target.checked ? 1 : 0 })}
+                className="w-4 h-4"
+              />
+              <Label htmlFor="newIsCritical" className="cursor-pointer">
+                Equipamento Crítico
+              </Label>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowNewEquipmentModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-[#F15A24] hover:bg-[#D14A1A]"
+                disabled={createEquipmentMutation.isPending}
+              >
+                {createEquipmentMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    A criar...
+                  </>
+                ) : (
+                  "Criar Equipamento"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </PraiotelLayout>
   );
 }
