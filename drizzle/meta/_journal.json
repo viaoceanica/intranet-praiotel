@@ -43,6 +43,13 @@
       "when": 1769622418800,
       "tag": "0005_brave_sir_ram",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1769623223090,
+      "tag": "0006_white_rawhide_kid",
+      "breakpoints": true
     }
   ]
 }

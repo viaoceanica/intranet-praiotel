@@ -104,3 +104,20 @@
 - [x] Mostrar tempo médio de resolução
 - [x] Adicionar métricas principais (total, abertos, tempo médio, clientes ativos)
 - [x] Biblioteca de gráficos recharts já incluída no template
+
+## Filtros Avançados na Listagem de Tickets
+- [x] Adicionar filtro por técnico atribuído
+- [x] Adicionar filtro por cliente específico
+- [x] Adicionar filtro por localização (ilha)
+- [x] Adicionar filtro por intervalo de datas
+- [x] Implementar combinação de múltiplos filtros
+- [x] Adicionar botão de limpar filtros
+
+## Sistema de SLA (Service Level Agreement)
+- [x] Criar tabela de configuração de SLA por prioridade
+- [x] Definir prazos de resposta padrão (urgente: 4h, alta: 24h, média: 48h, baixa: 72h)
+- [x] Calcular tempo decorrido desde criação do ticket
+- [x] Adicionar alertas visuais quando ticket ultrapassa SLA
+- [x] Mostrar indicador de SLA na listagem de tickets
+- [ ] Adicionar métricas de cumprimento de SLA no dashboard
+- [ ] Criar página de configuração de SLA (apenas Admin)

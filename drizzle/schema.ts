@@ -126,3 +126,18 @@ export const clientEmails = mysqlTable("clientEmails", {
 
 export type ClientEmail = typeof clientEmails.$inferSelect;
 export type InsertClientEmail = typeof clientEmails.$inferInsert;
+
+/**
+ * Configuração de SLA (Service Level Agreement) por prioridade
+ */
+export const slaConfig = mysqlTable("slaConfig", {
+  id: int("id").autoincrement().primaryKey(),
+  priority: mysqlEnum("priority", ["baixa", "media", "alta", "urgente"]).notNull().unique(),
+  responseTimeHours: int("responseTimeHours").notNull(), // Tempo de resposta em horas
+  resolutionTimeHours: int("resolutionTimeHours").notNull(), // Tempo de resolução em horas
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SlaConfig = typeof slaConfig.$inferSelect;
+export type InsertSlaConfig = typeof slaConfig.$inferInsert;

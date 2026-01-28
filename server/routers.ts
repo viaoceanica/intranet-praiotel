@@ -9,6 +9,7 @@ import * as db from "./db";
 import * as ticketsDb from "./ticketsDb";
 import * as notificationsDb from "./notificationsDb";
 import * as clientsDb from "./clientsDb";
+import * as slaDb from "./slaDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -32,6 +33,49 @@ const isAdmin = isAuthenticated.use(async ({ ctx, next }) => {
 });
 
 export const appRouter = router({
+  sla: router({
+    list: isAuthenticated.query(async () => {
+      return await slaDb.getAllSlaConfigs();
+    }),
+
+    getByPriority: isAuthenticated
+      .input(z.object({ priority: z.string() }))
+      .query(async ({ input }) => {
+        return await slaDb.getSlaConfig(input.priority);
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        priority: z.string(),
+        responseTimeHours: z.number().min(1),
+        resolutionTimeHours: z.number().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const { priority, ...data } = input;
+        await slaDb.updateSlaConfig(priority, data);
+        return { success: true };
+      }),
+
+    calculateStatus: isAuthenticated
+      .input(z.object({
+        createdAt: z.date(),
+        priority: z.string(),
+        resolvedAt: z.date().optional(),
+      }))
+      .query(async ({ input }) => {
+        const slaConfig = await slaDb.getSlaConfig(input.priority);
+        if (!slaConfig) {
+          return null;
+        }
+        return slaDb.calculateSlaStatus(
+          input.createdAt,
+          input.priority,
+          slaConfig.resolutionTimeHours,
+          input.resolvedAt
+        );
+      }),
+  }),
+
   system: systemRouter,
   
   auth: router({

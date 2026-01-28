@@ -20,7 +20,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Plus, Loader2, Search, Eye } from "lucide-react";
+import { Plus, Loader2, Search, Eye, X, Calendar } from "lucide-react";
+import { SlaIndicator } from "@/components/SlaIndicator";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 
 export default function Tickets() {
@@ -28,8 +30,19 @@ export default function Tickets() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
+  const [technicianFilter, setTechnicianFilter] = useState<string>("all");
+  const [clientFilter, setClientFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   const { data: tickets, isLoading } = trpc.tickets.list.useQuery();
+  const { data: users } = trpc.users.list.useQuery();
+  const { data: clients } = trpc.clients.list.useQuery();
+
+  const technicians = users?.filter(u => u.role === 'tecnico' || u.role === 'admin') || [];
+  
+  const uniqueLocations = Array.from(new Set(tickets?.map(t => t.location).filter(Boolean))) as string[];
 
   const statusLabels: Record<string, string> = {
     aberto: "Aberto",
@@ -67,9 +80,30 @@ export default function Tickets() {
 
     const matchesStatus = statusFilter === "all" || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || ticket.priority === priorityFilter;
+    const matchesTechnician = technicianFilter === "all" || 
+      (ticket.assignedToId && ticket.assignedToId.toString() === technicianFilter);
+    const matchesClient = clientFilter === "all" || 
+      (ticket.clientId && ticket.clientId.toString() === clientFilter);
+    const matchesLocation = locationFilter === "all" || ticket.location === locationFilter;
+    
+    const ticketDate = new Date(ticket.createdAt);
+    const matchesDateFrom = !dateFrom || ticketDate >= new Date(dateFrom);
+    const matchesDateTo = !dateTo || ticketDate <= new Date(dateTo + 'T23:59:59');
 
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && matchesTechnician && 
+           matchesClient && matchesLocation && matchesDateFrom && matchesDateTo;
   });
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setTechnicianFilter("all");
+    setClientFilter("all");
+    setLocationFilter("all");
+    setDateFrom("");
+    setDateTo("");
+  };
 
   return (
     <PraiotelLayout>
@@ -89,9 +123,23 @@ export default function Tickets() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className="font-semibold text-gray-700">Filtros</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Limpar Filtros
+            </Button>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="md:col-span-2">
+              <Label className="text-sm text-gray-600 mb-2">Pesquisa</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
@@ -103,31 +151,110 @@ export default function Tickets() {
               </div>
             </div>
 
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Todos os estados" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os estados</SelectItem>
-                <SelectItem value="aberto">Aberto</SelectItem>
-                <SelectItem value="em_progresso">Em Progresso</SelectItem>
-                <SelectItem value="resolvido">Resolvido</SelectItem>
-                <SelectItem value="fechado">Fechado</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <Label className="text-sm text-gray-600 mb-2">Estado</Label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os estados</SelectItem>
+                  <SelectItem value="aberto">Aberto</SelectItem>
+                  <SelectItem value="em_progresso">Em Progresso</SelectItem>
+                  <SelectItem value="resolvido">Resolvido</SelectItem>
+                  <SelectItem value="fechado">Fechado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Todas as prioridades" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas as prioridades</SelectItem>
-                <SelectItem value="baixa">Baixa</SelectItem>
-                <SelectItem value="media">Média</SelectItem>
-                <SelectItem value="alta">Alta</SelectItem>
-                <SelectItem value="urgente">Urgente</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <Label className="text-sm text-gray-600 mb-2">Prioridade</Label>
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas as prioridades" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as prioridades</SelectItem>
+                  <SelectItem value="baixa">Baixa</SelectItem>
+                  <SelectItem value="media">Média</SelectItem>
+                  <SelectItem value="alta">Alta</SelectItem>
+                  <SelectItem value="urgente">Urgente</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <Label className="text-sm text-gray-600 mb-2">Técnico</Label>
+              <Select value={technicianFilter} onValueChange={setTechnicianFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os técnicos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os técnicos</SelectItem>
+                  {technicians.map((tech) => (
+                    <SelectItem key={tech.id} value={tech.id.toString()}>
+                      {tech.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm text-gray-600 mb-2">Cliente</Label>
+              <Select value={clientFilter} onValueChange={setClientFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os clientes" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os clientes</SelectItem>
+                  {clients?.map((client) => (
+                    <SelectItem key={client.id} value={client.id.toString()}>
+                      {client.designation}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm text-gray-600 mb-2">Localização</Label>
+              <Select value={locationFilter} onValueChange={setLocationFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todas as localizações" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as localizações</SelectItem>
+                  {uniqueLocations.map((location) => (
+                    <SelectItem key={location} value={location}>
+                      {location}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm text-gray-600 mb-2">Período</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  placeholder="De"
+                  className="text-sm"
+                />
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  placeholder="Até"
+                  className="text-sm"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -146,6 +273,7 @@ export default function Tickets() {
                   <TableHead>Localização</TableHead>
                   <TableHead>Prioridade</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>SLA</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -168,8 +296,14 @@ export default function Tickets() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(ticket.createdAt), "dd/MM/yyyy")}
+                      <SlaIndicator
+                        createdAt={new Date(ticket.createdAt)}
+                        priority={ticket.priority}
+                        status={ticket.status}
+                        resolvedAt={ticket.resolvedAt}
+                      />
                     </TableCell>
+                    <TableCell>{format(new Date(ticket.createdAt), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"
