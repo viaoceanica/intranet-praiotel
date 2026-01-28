@@ -22,6 +22,11 @@ import PrioritizationRules from "./pages/PrioritizationRules";
 import TechnicianStats from "./pages/TechnicianStats";
 import { ResponseTemplates } from "./pages/ResponseTemplates";
 import Roles from "./pages/Roles";
+import { InternalDashboard } from "./pages/InternalDashboard";
+import { Announcements } from "./pages/Announcements";
+import { BulletinBoard } from "./pages/BulletinBoard";
+import { DocumentManagement } from "./pages/DocumentManagement";
+import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -66,6 +71,11 @@ function Router() {
       <Route path="/technician-stats" component={() => <ProtectedRoute component={TechnicianStats} />} />
       <Route path="/response-templates" component={() => <ProtectedRoute component={ResponseTemplates} />} />
       <Route path="/roles" component={() => <ProtectedRoute component={Roles} />} />
+      <Route path="/internal-dashboard" component={() => <ProtectedRoute component={InternalDashboard} />} />
+      <Route path="/announcements" component={() => <ProtectedRoute component={Announcements} />} />
+      <Route path="/bulletin-board" component={() => <ProtectedRoute component={BulletinBoard} />} />
+      <Route path="/documents" component={() => <ProtectedRoute component={DocumentManagement} />} />
+      <Route path="/knowledge-base" component={() => <ProtectedRoute component={KnowledgeBase} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

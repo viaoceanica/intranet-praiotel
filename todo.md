@@ -346,3 +346,51 @@
 - [x] Estrutura base de RBAC implementada e pronta para expansão
 - [ ] Aplicar restrições em todos os endpoints (expansão futura)
 - [ ] Controlar visibilidade de botões/menus no frontend (expansão futura)
+
+## Menu de Gestão Interna
+- [x] Criar menu "Gestão Interna" na sidebar
+- [x] Adicionar estrutura de sub-menus expansível
+
+## 1. Painel Inicial
+- [x] Criar schema de notícias internas (título, conteúdo, data, autor)
+- [x] Criar schema de acessos rápidos (nome, URL, ícone, ordem)
+- [x] Implementar CRUD de notícias internas
+- [x] Implementar CRUD de acessos rápidos
+- [x] Criar página de Painel Inicial
+- [x] Mostrar últimas notícias com paginação
+- [x] Mostrar grid de acessos rápidos
+- [x] Adicionar permissões (todos podem ver, admin/gestor podem criar/editar)
+
+## 2. Área de Comunicação
+- [x] Criar schema de anúncios gerais (título, conteúdo, data, autor, prioridade)
+- [x] Criar schema de mural de mensagens (mensagem, autor, data, anexos)
+- [x] Implementar CRUD de anúncios gerais
+- [x] Implementar CRUD de mensagens do mural
+- [x] Criar página de Anúncios Gerais
+- [x] Criar página de Mural de Mensagens
+- [ ] Adicionar sistema de comentários em anúncios (funcionalidade futura)
+- [x] Adicionar reações/likes em mensagens do mural
+- [x] Adicionar permissões adequadas
+
+## 3. Gestão de Documentos
+- [x] Criar schema de categorias de documentos (nome, descrição, ícone)
+- [x] Criar schema de documentos (nome, categoria, ficheiro S3, tamanho, tipo, autor, data)
+- [x] Implementar upload de documentos para S3
+- [x] Implementar download de documentos
+- [x] Criar página de Gestão de Documentos
+- [x] Implementar organização por categorias (RH, Técnico, Administrativo)
+- [x] Adicionar pesquisa de documentos por nome
+- [x] Adicionar filtro por categoria
+- [x] Mostrar informações do ficheiro (tamanho, tipo, data upload)
+- [x] Adicionar permissões (todos podem ver/download, admin/gestor podem upload)
+
+## 4. Base de Conhecimento
+- [x] Criar schema de artigos de conhecimento (título, conteúdo, categoria, tags, autor, data)
+- [x] Criar schema de categorias de conhecimento (Tutoriais, Formação, FAQ)
+- [x] Implementar CRUD de artigos de conhecimento
+- [x] Criar página de Base de Conhecimento
+- [x] Implementar visualização por categorias (Tutoriais, Formação, FAQ)
+- [x] Adicionar pesquisa de artigos por título e conteúdo
+- [x] Adicionar sistema de tags para melhor organização
+- [x] Adicionar contador de visualizações
+- [x] Adicionar permissões (todos podem ver, admin/gestor podem criar/editar)

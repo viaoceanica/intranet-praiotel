@@ -17,6 +17,7 @@ import * as responseTemplatesDb from "./responseTemplatesDb";
 import * as technicianStatsDb from "./technicianStatsDb";
 import * as notificationHelpers from "./notificationHelpers";
 import * as customRolesDb from "./customRolesDb";
+import * as internalManagementDb from "./internalManagementDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -990,6 +991,337 @@ export const appRouter = router({
     seedDefaults: isAdmin
       .mutation(async ({ ctx }) => {
         await responseTemplatesDb.seedDefaultTemplates(ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
+  // ===== GESTÃO INTERNA =====
+
+  internalNews: router({
+    list: isAuthenticated
+      .input(z.object({ limit: z.number().optional(), offset: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.getAllNews(input.limit, input.offset);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.getNewsById(input.id);
+      }),
+
+    create: isAdmin
+      .input(z.object({
+        title: z.string().min(1),
+        content: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await internalManagementDb.createNews({
+          ...input,
+          authorId: ctx.user.id,
+        });
+        return { id };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        content: z.string().min(1).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await internalManagementDb.updateNews(id, data);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.deleteNews(input.id);
+        return { success: true };
+      }),
+  }),
+
+  quickAccess: router({
+    list: isAuthenticated.query(async () => {
+      return await internalManagementDb.getAllQuickAccess();
+    }),
+
+    create: isAdmin
+      .input(z.object({
+        name: z.string().min(1),
+        url: z.string().url(),
+        icon: z.string().min(1),
+        displayOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await internalManagementDb.createQuickAccess({
+          ...input,
+          createdById: ctx.user.id,
+        });
+        return { id };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        url: z.string().url().optional(),
+        icon: z.string().min(1).optional(),
+        displayOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await internalManagementDb.updateQuickAccess(id, data);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.deleteQuickAccess(input.id);
+        return { success: true };
+      }),
+  }),
+
+  announcements: router({
+    list: isAuthenticated
+      .input(z.object({ limit: z.number().optional(), offset: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.getAllAnnouncements(input.limit, input.offset);
+      }),
+
+    create: isAdmin
+      .input(z.object({
+        title: z.string().min(1),
+        content: z.string().min(1),
+        priority: z.enum(["baixa", "normal", "alta", "urgente"]).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await internalManagementDb.createAnnouncement({
+          ...input,
+          authorId: ctx.user.id,
+        });
+        return { id };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        content: z.string().min(1).optional(),
+        priority: z.enum(["baixa", "normal", "alta", "urgente"]).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await internalManagementDb.updateAnnouncement(id, data);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.deleteAnnouncement(input.id);
+        return { success: true };
+      }),
+  }),
+
+  bulletinMessages: router({
+    list: isAuthenticated
+      .input(z.object({ limit: z.number().optional(), offset: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.getAllBulletinMessages(input.limit, input.offset);
+      }),
+
+    create: isAuthenticated
+      .input(z.object({ message: z.string().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await internalManagementDb.createBulletinMessage({
+          ...input,
+          authorId: ctx.user.id,
+        });
+        return { id };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        // Verificar se é o autor ou admin
+        const messages = await internalManagementDb.getAllBulletinMessages(1000, 0);
+        const message = messages.find(m => m.id === input.id);
+        if (!message || (message.authorId !== ctx.user.id && ctx.user.role !== "admin")) {
+          throw new TRPCError({ code: "FORBIDDEN", message: "Sem permissão para eliminar esta mensagem" });
+        }
+        await internalManagementDb.deleteBulletinMessage(input.id);
+        return { success: true };
+      }),
+
+    like: isAuthenticated
+      .input(z.object({ messageId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        return await internalManagementDb.likeBulletinMessage(input.messageId, ctx.user.id);
+      }),
+
+    hasLiked: isAuthenticated
+      .input(z.object({ messageId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        return await internalManagementDb.hasUserLikedMessage(input.messageId, ctx.user.id);
+      }),
+  }),
+
+  documentCategories: router({
+    list: isAuthenticated.query(async () => {
+      return await internalManagementDb.getAllDocumentCategories();
+    }),
+
+    create: isAdmin
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        icon: z.string().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await internalManagementDb.createDocumentCategory(input);
+        return { id };
+      }),
+  }),
+
+  documents: router({
+    list: isAuthenticated
+      .input(z.object({ categoryId: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.getAllDocuments(input.categoryId);
+      }),
+
+    search: isAuthenticated
+      .input(z.object({ searchTerm: z.string() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.searchDocuments(input.searchTerm);
+      }),
+
+    upload: isAdmin
+      .input(z.object({
+        name: z.string().min(1),
+        categoryId: z.number(),
+        fileData: z.string(), // Base64
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Converter base64 para buffer
+        const buffer = Buffer.from(input.fileData, "base64");
+        const fileSize = buffer.length;
+
+        // Upload para S3
+        const fileKey = `documents/${Date.now()}-${input.name}`;
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+
+        // Guardar na BD
+        const id = await internalManagementDb.createDocument({
+          name: input.name,
+          categoryId: input.categoryId,
+          fileKey,
+          fileUrl: url,
+          fileSize,
+          mimeType: input.mimeType,
+          uploadedById: ctx.user.id,
+        });
+
+        return { id, url };
+      }),
+
+    incrementDownload: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.incrementDocumentDownload(input.id);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.deleteDocument(input.id);
+        return { success: true };
+      }),
+  }),
+
+  knowledgeCategories: router({
+    list: isAuthenticated.query(async () => {
+      return await internalManagementDb.getAllKnowledgeCategories();
+    }),
+
+    create: isAdmin
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        icon: z.string().min(1),
+        displayOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await internalManagementDb.createKnowledgeCategory(input);
+        return { id };
+      }),
+  }),
+
+  knowledgeArticles: router({
+    list: isAuthenticated
+      .input(z.object({ categoryId: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.getAllKnowledgeArticles(input.categoryId);
+      }),
+
+    search: isAuthenticated
+      .input(z.object({ searchTerm: z.string() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.searchKnowledgeArticles(input.searchTerm);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.getKnowledgeArticleById(input.id);
+      }),
+
+    create: isAdmin
+      .input(z.object({
+        title: z.string().min(1),
+        content: z.string().min(1),
+        categoryId: z.number(),
+        tags: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await internalManagementDb.createKnowledgeArticle({
+          ...input,
+          authorId: ctx.user.id,
+        });
+        return { id };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        content: z.string().min(1).optional(),
+        categoryId: z.number().optional(),
+        tags: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await internalManagementDb.updateKnowledgeArticle(id, data);
+        return { success: true };
+      }),
+
+    incrementView: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.incrementArticleView(input.id);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.deleteKnowledgeArticle(input.id);
         return { success: true };
       }),
   }),

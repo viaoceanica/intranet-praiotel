@@ -26,7 +26,13 @@ import {
   ChevronDown,
   ChevronRight,
   BarChart3,
-  FileText
+  FileText,
+  Briefcase,
+  Home,
+  Megaphone,
+  MessageSquare,
+  FolderOpen,
+  BookOpen
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { useState } from "react";
@@ -42,6 +48,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [ticketsExpanded, setTicketsExpanded] = useState(false);
   const [clientsExpanded, setClientsExpanded] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(false);
+  const [internalManagementExpanded, setInternalManagementExpanded] = useState(false);
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -84,6 +91,19 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       roles: ["admin"],
       subItems: [
         { name: "Roles", href: "/roles", icon: Settings, roles: ["admin"] },
+      ]
+    },
+    { 
+      name: "Gestão Interna", 
+      href: "/internal-dashboard", 
+      icon: Briefcase, 
+      roles: ["admin", "gestor", "tecnico", "visualizador"],
+      subItems: [
+        { name: "Painel Inicial", href: "/internal-dashboard", icon: Home, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Anúncios Gerais", href: "/announcements", icon: Megaphone, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Mural de Mensagens", href: "/bulletin-board", icon: MessageSquare, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Gestão de Documentos", href: "/documents", icon: FolderOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Base de Conhecimento", href: "/knowledge-base", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
       ]
     },
   ];
@@ -197,6 +217,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                             setClientsExpanded(!clientsExpanded);
                           } else if (item.name === "Utilizadores") {
                             setUsersExpanded(!usersExpanded);
+                          } else if (item.name === "Gestão Interna") {
+                            setInternalManagementExpanded(!internalManagementExpanded);
                           }
                           setLocation(item.href);
                         }}
@@ -213,9 +235,9 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                           <item.icon className="h-5 w-5" />
                           {item.name}
                         </div>
-                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </button>
-                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : false) && (
+                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) && (
                         <div className="ml-8 mt-1 space-y-1">
                           {filteredSubItems.map((subItem) => {
                             const isSubActive = location === subItem.href;

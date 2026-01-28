@@ -231,3 +231,149 @@ export const customRoles = mysqlTable("custom_roles", {
 
 export type CustomRole = typeof customRoles.$inferSelect;
 export type InsertCustomRole = typeof customRoles.$inferInsert;
+
+/**
+ * Notícias internas para o Painel Inicial
+ */
+export const internalNews = mysqlTable("internal_news", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  authorId: int("authorId").notNull(),
+  publishedAt: timestamp("publishedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type InternalNews = typeof internalNews.$inferSelect;
+export type InsertInternalNews = typeof internalNews.$inferInsert;
+
+/**
+ * Acessos rápidos para o Painel Inicial
+ */
+export const quickAccess = mysqlTable("quick_access", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  url: varchar("url", { length: 500 }).notNull(),
+  icon: varchar("icon", { length: 50 }).notNull(), // Nome do ícone lucide-react
+  displayOrder: int("displayOrder").default(0).notNull(),
+  createdById: int("createdById").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type QuickAccess = typeof quickAccess.$inferSelect;
+export type InsertQuickAccess = typeof quickAccess.$inferInsert;
+
+/**
+ * Anúncios gerais da Área de Comunicação
+ */
+export const announcements = mysqlTable("announcements", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  priority: mysqlEnum("priority", ["baixa", "normal", "alta", "urgente"]).default("normal").notNull(),
+  authorId: int("authorId").notNull(),
+  publishedAt: timestamp("publishedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = typeof announcements.$inferInsert;
+
+/**
+ * Mensagens do mural (Área de Comunicação)
+ */
+export const bulletinMessages = mysqlTable("bulletin_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  message: text("message").notNull(),
+  authorId: int("authorId").notNull(),
+  likesCount: int("likesCount").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type BulletinMessage = typeof bulletinMessages.$inferSelect;
+export type InsertBulletinMessage = typeof bulletinMessages.$inferInsert;
+
+/**
+ * Likes nas mensagens do mural
+ */
+export const bulletinLikes = mysqlTable("bulletin_likes", {
+  id: int("id").autoincrement().primaryKey(),
+  messageId: int("messageId").notNull(),
+  userId: int("userId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type BulletinLike = typeof bulletinLikes.$inferSelect;
+export type InsertBulletinLike = typeof bulletinLikes.$inferInsert;
+
+/**
+ * Categorias de documentos
+ */
+export const documentCategories = mysqlTable("document_categories", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }).notNull(), // Nome do ícone lucide-react
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DocumentCategory = typeof documentCategories.$inferSelect;
+export type InsertDocumentCategory = typeof documentCategories.$inferInsert;
+
+/**
+ * Documentos da Gestão de Documentos
+ */
+export const documents = mysqlTable("documents", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  categoryId: int("categoryId").notNull(),
+  fileKey: varchar("fileKey", { length: 500 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 1000 }).notNull(),
+  fileSize: int("fileSize").notNull(),
+  mimeType: varchar("mimeType", { length: 100 }).notNull(),
+  uploadedById: int("uploadedById").notNull(),
+  downloadCount: int("downloadCount").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Document = typeof documents.$inferSelect;
+export type InsertDocument = typeof documents.$inferInsert;
+
+/**
+ * Categorias de conhecimento (Tutoriais, Formação, FAQ)
+ */
+export const knowledgeCategories = mysqlTable("knowledge_categories", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  icon: varchar("icon", { length: 50 }).notNull(), // Nome do ícone lucide-react
+  displayOrder: int("displayOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type KnowledgeCategory = typeof knowledgeCategories.$inferSelect;
+export type InsertKnowledgeCategory = typeof knowledgeCategories.$inferInsert;
+
+/**
+ * Artigos da Base de Conhecimento
+ */
+export const knowledgeArticles = mysqlTable("knowledge_articles", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content").notNull(),
+  categoryId: int("categoryId").notNull(),
+  tags: text("tags"), // JSON array de tags
+  authorId: int("authorId").notNull(),
+  viewCount: int("viewCount").default(0).notNull(),
+  publishedAt: timestamp("publishedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type KnowledgeArticle = typeof knowledgeArticles.$inferSelect;
+export type InsertKnowledgeArticle = typeof knowledgeArticles.$inferInsert;
