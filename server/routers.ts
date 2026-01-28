@@ -10,6 +10,7 @@ import * as ticketsDb from "./ticketsDb";
 import * as notificationsDb from "./notificationsDb";
 import * as clientsDb from "./clientsDb";
 import * as slaDb from "./slaDb";
+import * as slaNotifications from "./slaNotifications";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -74,6 +75,25 @@ export const appRouter = router({
           input.resolvedAt
         );
       }),
+
+    metrics: isAuthenticated.query(async () => {
+      return await ticketsDb.getSlaMetrics();
+    }),
+
+    technicianRanking: isAuthenticated.query(async () => {
+      const ranking = await ticketsDb.getTechnicianSlaRanking();
+      // Preencher nomes dos técnicos
+      const users = await db.getAllUsers();
+      return ranking.map(r => ({
+        ...r,
+        name: users.find(u => u.id === r.technicianId)?.name || 'Desconhecido',
+      }));
+    }),
+
+    checkAndNotify: isAdmin.mutation(async () => {
+      const result = await slaNotifications.checkAndNotifySla();
+      return result;
+    }),
   }),
 
   system: systemRouter,

@@ -123,6 +123,113 @@ export async function getTicketHistory(ticketId: number) {
   return result;
 }
 
+/**
+ * Calcula métricas de cumprimento de SLA
+ */
+export async function getSlaMetrics() {
+  const db = await getDb();
+  if (!db) return null;
+
+  const allTickets = await getAllTickets();
+  const { getAllSlaConfigs } = await import('./slaDb');
+  const slaConfigs = await getAllSlaConfigs();
+
+  let totalTickets = 0;
+  let ticketsWithinSla = 0;
+  let ticketsBreachedSla = 0;
+  let totalBreachHours = 0;
+  let breachCount = 0;
+
+  for (const ticket of allTickets) {
+    const slaConfig = slaConfigs.find(c => c.priority === ticket.priority);
+    if (!slaConfig) continue;
+
+    totalTickets++;
+
+    const resolvedDate = ticket.resolvedAt || ticket.closedAt;
+    if (!resolvedDate) continue; // Apenas tickets resolvidos/fechados
+
+    const elapsed = resolvedDate.getTime() - ticket.createdAt.getTime();
+    const hoursElapsed = elapsed / (1000 * 60 * 60);
+    const slaHours = slaConfig.resolutionTimeHours;
+
+    if (hoursElapsed <= slaHours) {
+      ticketsWithinSla++;
+    } else {
+      ticketsBreachedSla++;
+      totalBreachHours += (hoursElapsed - slaHours);
+      breachCount++;
+    }
+  }
+
+  const slaCompliancePercentage = totalTickets > 0 
+    ? Math.round((ticketsWithinSla / totalTickets) * 100) 
+    : 0;
+
+  const averageBreachHours = breachCount > 0 
+    ? Math.round((totalBreachHours / breachCount) * 10) / 10 
+    : 0;
+
+  return {
+    totalTickets,
+    ticketsWithinSla,
+    ticketsBreachedSla,
+    slaCompliancePercentage,
+    averageBreachHours,
+  };
+}
+
+/**
+ * Obtém ranking de técnicos por cumprimento de SLA
+ */
+export async function getTechnicianSlaRanking() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const allTickets = await getAllTickets();
+  const { getAllSlaConfigs } = await import('./slaDb');
+  const slaConfigs = await getAllSlaConfigs();
+
+  const technicianStats: Record<number, { name: string; total: number; withinSla: number; breached: number }> = {};
+
+  for (const ticket of allTickets) {
+    if (!ticket.assignedToId) continue;
+
+    const resolvedDate = ticket.resolvedAt || ticket.closedAt;
+    if (!resolvedDate) continue;
+
+    const slaConfig = slaConfigs.find(c => c.priority === ticket.priority);
+    if (!slaConfig) continue;
+
+    if (!technicianStats[ticket.assignedToId]) {
+      technicianStats[ticket.assignedToId] = {
+        name: '', // Será preenchido depois
+        total: 0,
+        withinSla: 0,
+        breached: 0,
+      };
+    }
+
+    const elapsed = resolvedDate.getTime() - ticket.createdAt.getTime();
+    const hoursElapsed = elapsed / (1000 * 60 * 60);
+    const slaHours = slaConfig.resolutionTimeHours;
+
+    technicianStats[ticket.assignedToId].total++;
+
+    if (hoursElapsed <= slaHours) {
+      technicianStats[ticket.assignedToId].withinSla++;
+    } else {
+      technicianStats[ticket.assignedToId].breached++;
+    }
+  }
+
+  return Object.entries(technicianStats).map(([techId, stats]) => ({
+    technicianId: Number(techId),
+    ...stats,
+    compliancePercentage: stats.total > 0 ? Math.round((stats.withinSla / stats.total) * 100) : 0,
+  })).sort((a, b) => b.compliancePercentage - a.compliancePercentage);
+}
+
 export async function generateTicketNumber() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

@@ -121,3 +121,23 @@
 - [x] Mostrar indicador de SLA na listagem de tickets
 - [ ] Adicionar métricas de cumprimento de SLA no dashboard
 - [ ] Criar página de configuração de SLA (apenas Admin)
+
+## Página de Configuração de SLA (Admin)
+- [x] Criar página de configuração de SLA acessível apenas por Admin
+- [x] Formulário para editar prazos de resposta e resolução por prioridade
+- [x] Validações (tempo de resolução > tempo de resposta)
+- [x] Adicionar item no menu de navegação (apenas visível para Admin)
+
+## Métricas de Cumprimento de SLA no Dashboard
+- [x] Adicionar card de percentagem de tickets dentro do SLA
+- [x] Criar gráfico de cumprimento de SLA (dentro vs fora)
+- [x] Mostrar tempo médio de violação de SLA
+- [x] Adicionar ranking de técnicos por cumprimento de SLA
+- [ ] Filtro de período para métricas de SLA
+
+## Notificações Automáticas de SLA
+- [x] Criar job/verificação periódica de tickets próximos do limite SLA
+- [x] Enviar notificação quando ticket atinge 80% do tempo SLA
+- [x] Enviar notificação quando SLA é violado
+- [x] Notificar técnico atribuído
+- [x] Adicionar tipo de notificação específico para SLA (sla_warning, sla_breached)

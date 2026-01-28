@@ -14,6 +14,7 @@ import Notifications from "./pages/Notifications";
 import Clients from "./pages/Clients";
 import ClientForm from "./pages/ClientForm";
 import ClientTickets from "./pages/ClientTickets";
+import SlaConfig from "./pages/SlaConfig";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -49,6 +50,7 @@ function Router() {
       <Route path="/clients/new" component={() => <ProtectedRoute component={ClientForm} />} />
       <Route path="/clients/:id" component={() => <ProtectedRoute component={ClientForm} />} />
       <Route path="/clients/:id/tickets" component={() => <ProtectedRoute component={ClientTickets} />} />
+      <Route path="/sla-config" component={() => <ProtectedRoute component={SlaConfig} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

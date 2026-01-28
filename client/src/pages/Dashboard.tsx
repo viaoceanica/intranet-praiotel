@@ -1,7 +1,7 @@
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Ticket, Clock, TrendingUp, Users } from "lucide-react";
+import { Loader2, Ticket, Clock, TrendingUp, Users, CheckCircle2, AlertTriangle } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -18,6 +18,8 @@ import {
 
 export default function Dashboard() {
   const { data: stats, isLoading } = trpc.tickets.dashboardStats.useQuery();
+  const { data: slaMetrics } = trpc.sla.metrics.useQuery();
+  const { data: techRanking } = trpc.sla.technicianRanking.useQuery();
 
   if (isLoading) {
     return (
@@ -212,6 +214,131 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Métricas de SLA */}
+        {slaMetrics && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Cumprimento de SLA</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">Percentagem de Cumprimento</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {slaMetrics.slaCompliancePercentage}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 pt-4 border-t">
+                    <div>
+                      <p className="text-xs text-gray-500">Total Analisados</p>
+                      <p className="text-lg font-semibold">{slaMetrics.totalTickets}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Dentro do SLA</p>
+                      <p className="text-lg font-semibold text-green-600">
+                        {slaMetrics.ticketsWithinSla}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Fora do SLA</p>
+                      <p className="text-lg font-semibold text-red-600">
+                        {slaMetrics.ticketsBreachedSla}
+                      </p>
+                    </div>
+                  </div>
+
+                  {slaMetrics.averageBreachHours > 0 && (
+                    <div className="flex items-center gap-3 pt-4 border-t">
+                      <AlertTriangle className="h-5 w-5 text-orange-500" />
+                      <div>
+                        <p className="text-sm text-gray-500">Tempo Médio de Violação</p>
+                        <p className="text-lg font-semibold text-orange-600">
+                          {slaMetrics.averageBreachHours}h
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-4">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { name: "Dentro do SLA", value: slaMetrics.ticketsWithinSla, color: "#10B981" },
+                            { name: "Fora do SLA", value: slaMetrics.ticketsBreachedSla, color: "#EF4444" },
+                          ]}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {[
+                            { name: "Dentro do SLA", value: slaMetrics.ticketsWithinSla, color: "#10B981" },
+                            { name: "Fora do SLA", value: slaMetrics.ticketsBreachedSla, color: "#EF4444" },
+                          ].map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Ranking de Técnicos (Cumprimento SLA)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {techRanking && techRanking.length > 0 ? (
+                  <div className="space-y-3">
+                    {techRanking.slice(0, 5).map((tech, index) => (
+                      <div key={tech.technicianId} className="flex items-center gap-3">
+                        <div className="w-8 h-8 bg-[#F15A24] bg-opacity-10 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-bold text-[#F15A24]">
+                            {index + 1}
+                          </span>
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{tech.name}</p>
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span>{tech.total} tickets</span>
+                            <span className="text-green-600">{tech.withinSla} dentro</span>
+                            <span className="text-red-600">{tech.breached} fora</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-bold text-[#F15A24]">
+                            {tech.compliancePercentage}%
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-center text-gray-500 py-8">
+                    Sem dados de cumprimento de SLA
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </PraiotelLayout>
   );
