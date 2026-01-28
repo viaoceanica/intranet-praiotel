@@ -1,4 +1,5 @@
 import { trpc } from "@/lib/trpc";
+import PraiotelLayout from "@/components/PraiotelLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,14 @@ const statusColors = {
 };
 
 export default function EquipmentHistory() {
+  return (
+    <PraiotelLayout>
+      <EquipmentHistoryContent />
+    </PraiotelLayout>
+  );
+}
+
+function EquipmentHistoryContent() {
   const [, setLocation] = useLocation();
   const params = useParams();
   const equipmentId = parseInt(params.id!);

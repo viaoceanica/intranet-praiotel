@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
+import PraiotelLayout from "@/components/PraiotelLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,14 @@ import { useLocation } from "wouter";
 import { toast } from "sonner";
 
 export default function Equipment() {
+  return (
+    <PraiotelLayout>
+      <EquipmentContent />
+    </PraiotelLayout>
+  );
+}
+
+function EquipmentContent() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
 

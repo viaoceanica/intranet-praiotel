@@ -206,3 +206,8 @@
 
 ## Reorganização do Menu (Equipamentos)
 - [x] Mover "Equipamentos" para sub-menu de Clientes
+
+## Correções de Layout (Continuação)
+- [x] Corrigir falta de sidebar na página de equipamentos
+- [x] Corrigir falta de sidebar na página de formulário de equipamento
+- [x] Corrigir falta de sidebar na página de histórico de equipamento
