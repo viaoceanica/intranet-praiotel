@@ -37,8 +37,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [ticketsExpanded, setTicketsExpanded] = useState(true);
-  const [clientsExpanded, setClientsExpanded] = useState(true);
+  const [ticketsExpanded, setTicketsExpanded] = useState(false);
+  const [clientsExpanded, setClientsExpanded] = useState(false);
   
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
     refetchInterval: 30000, // Atualizar a cada 30 segundos
@@ -213,7 +213,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                         </div>
                         {(item.name === "Tickets" ? ticketsExpanded : clientsExpanded) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </button>
-                      {((item.name === "Tickets" && ticketsExpanded) || (item.name === "Clientes" && clientsExpanded)) && (
+                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : false) && (
                         <div className="ml-8 mt-1 space-y-1">
                           {filteredSubItems.map((subItem) => {
                             const isSubActive = location === subItem.href;

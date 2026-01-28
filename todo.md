@@ -230,3 +230,8 @@
 - [ ] Criar templates de email para alertas de SLA
 - [ ] Integrar envio de emails nos endpoints relevantes
 - [ ] Adicionar configuração de preferências de notificações por utilizador
+
+## Correção de Navegação na Sidebar
+- [ ] Investigar erro de expansão de submenus
+- [ ] Corrigir lógica de estado de expansão
+- [ ] Testar navegação em todos os menus
