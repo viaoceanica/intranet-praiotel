@@ -1,7 +1,12 @@
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Ticket, Clock, TrendingUp, Users, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Loader2, Ticket, Clock, TrendingUp, Users, CheckCircle2, AlertTriangle, Calendar, MapPin } from "lucide-react";
+import { useLocation } from "wouter";
+import { format } from "date-fns";
 import {
   BarChart,
   Bar,
@@ -17,9 +22,111 @@ import {
 } from "recharts";
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const { data: stats, isLoading } = trpc.tickets.dashboardStats.useQuery();
   const { data: slaMetrics } = trpc.sla.metrics.useQuery();
   const { data: techRanking } = trpc.sla.technicianRanking.useQuery();
+  const { data: myTickets } = trpc.tickets.myTickets.useQuery(undefined, {
+    enabled: user?.role === "tecnico",
+  });
+
+  // Vista simplificada para técnicos
+  if (user?.role === "tecnico") {
+    return (
+      <PraiotelLayout>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">Os Meus Tickets</h1>
+            <p className="text-muted-foreground">Tickets atribuídos a si</p>
+          </div>
+
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-[#F15A24]" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {myTickets && myTickets.length > 0 ? (
+                myTickets.map((ticket) => (
+                  <Card
+                    key={ticket.id}
+                    className="hover:bg-accent/50 transition-colors cursor-pointer"
+                    onClick={() => setLocation(`/tickets/${ticket.id}`)}
+                  >
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-2 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-semibold">{ticket.ticketNumber}</span>
+                            <Badge
+                              className={
+                                ticket.priority === "urgente"
+                                  ? "bg-red-500"
+                                  : ticket.priority === "alta"
+                                  ? "bg-orange-500"
+                                  : ticket.priority === "media"
+                                  ? "bg-yellow-500"
+                                  : "bg-blue-500"
+                              }
+                            >
+                              {ticket.priority}
+                            </Badge>
+                            <Badge
+                              className={
+                                ticket.status === "aberto"
+                                  ? "bg-red-500"
+                                  : ticket.status === "em_progresso"
+                                  ? "bg-yellow-500"
+                                  : ticket.status === "resolvido"
+                                  ? "bg-green-500"
+                                  : "bg-gray-500"
+                              }
+                            >
+                              {ticket.status.replace("_", " ")}
+                            </Badge>
+                          </div>
+
+                          <div>
+                            <p className="font-medium">{ticket.clientName}</p>
+                            <p className="text-sm text-muted-foreground">{ticket.problemType}</p>
+                          </div>
+
+                          <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="w-4 h-4" />
+                              {format(new Date(ticket.createdAt), "dd/MM/yyyy HH:mm")}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              {ticket.location}
+                            </div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          Ver Detalhes
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card>
+                  <CardContent className="pt-6">
+                    <p className="text-center text-muted-foreground">
+                      Nenhum ticket atribuído a si
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
+      </PraiotelLayout>
+    );
+  }
+
+  // Vista completa para admin/gestor/visualizador
 
   if (isLoading) {
     return (

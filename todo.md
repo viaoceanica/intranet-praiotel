@@ -163,3 +163,9 @@
 - [x] Criar interface de configuração de regras (Admin)
 - [x] Notificar quando prioridade é ajustada automaticamente
 - [x] Integrar priorização automática na criação de tickets
+
+## Dashboard de Técnicos
+- [x] Criar vista personalizada para técnicos
+- [x] Mostrar apenas tickets atribuídos ao técnico logado
+- [x] Badges visuais de estado e prioridade
+- [x] Acesso rápido aos detalhes dos tickets

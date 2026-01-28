@@ -244,6 +244,11 @@ export const appRouter = router({
       return allTickets;
     }),
 
+    myTickets: isAuthenticated.query(async ({ ctx }) => {
+      const allTickets = await ticketsDb.getAllTickets();
+      return allTickets.filter(t => t.assignedToId === ctx.user.id);
+    }),
+
     listByClient: isAuthenticated
       .input(z.object({ clientId: z.number() }))
       .query(async ({ input }) => {
