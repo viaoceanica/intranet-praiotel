@@ -1,28 +1,80 @@
 import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
+ * Utilizadores do sistema com autenticação autónoma
  */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
-  name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
+  name: text("name").notNull(),
+  role: mysqlEnum("role", ["admin", "gestor", "tecnico", "visualizador"]).default("visualizador").notNull(),
+  active: int("active").default(1).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  lastSignedIn: timestamp("lastSignedIn"),
 });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Tickets de assistência técnica
+ */
+export const tickets = mysqlTable("tickets", {
+  id: int("id").autoincrement().primaryKey(),
+  ticketNumber: varchar("ticketNumber", { length: 20 }).notNull().unique(),
+  clientName: varchar("clientName", { length: 255 }).notNull(),
+  equipment: varchar("equipment", { length: 255 }).notNull(),
+  problemType: varchar("problemType", { length: 255 }).notNull(),
+  priority: mysqlEnum("priority", ["baixa", "media", "alta", "urgente"]).default("media").notNull(),
+  status: mysqlEnum("status", ["aberto", "em_progresso", "resolvido", "fechado"]).default("aberto").notNull(),
+  assignedToId: int("assignedToId"),
+  location: varchar("location", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  notes: text("notes"),
+  createdById: int("createdById").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  resolvedAt: timestamp("resolvedAt"),
+  closedAt: timestamp("closedAt"),
+});
+
+export type Ticket = typeof tickets.$inferSelect;
+export type InsertTicket = typeof tickets.$inferInsert;
+
+/**
+ * Anexos dos tickets (fotos, documentos)
+ */
+export const attachments = mysqlTable("attachments", {
+  id: int("id").autoincrement().primaryKey(),
+  ticketId: int("ticketId").notNull(),
+  fileKey: varchar("fileKey", { length: 500 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 1000 }).notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileSize: int("fileSize").notNull(),
+  mimeType: varchar("mimeType", { length: 100 }).notNull(),
+  uploadedById: int("uploadedById").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Attachment = typeof attachments.$inferSelect;
+export type InsertAttachment = typeof attachments.$inferInsert;
+
+/**
+ * Histórico de alterações nos tickets
+ */
+export const ticketHistory = mysqlTable("ticketHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  ticketId: int("ticketId").notNull(),
+  userId: int("userId").notNull(),
+  action: varchar("action", { length: 100 }).notNull(),
+  fieldChanged: varchar("fieldChanged", { length: 100 }),
+  oldValue: text("oldValue"),
+  newValue: text("newValue"),
+  comment: text("comment"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type TicketHistory = typeof ticketHistory.$inferSelect;
+export type InsertTicketHistory = typeof ticketHistory.$inferInsert;

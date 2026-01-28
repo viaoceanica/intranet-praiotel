@@ -199,7 +199,7 @@ class SDKServer {
 
   async verifySession(
     cookieValue: string | undefined | null
-  ): Promise<{ openId: string; appId: string; name: string } | null> {
+  ): Promise<{ openId: string; appId: string; name: string; userId?: number } | null> {
     if (!cookieValue) {
       console.warn("[Auth] Missing session cookie");
       return null;
@@ -210,8 +210,19 @@ class SDKServer {
       const { payload } = await jwtVerify(cookieValue, secretKey, {
         algorithms: ["HS256"],
       });
-      const { openId, appId, name } = payload as Record<string, unknown>;
+      const { openId, appId, name, userId } = payload as Record<string, unknown>;
 
+      // Para autenticação autónoma, userId é obrigatório
+      if (userId !== undefined && typeof userId === 'number') {
+        return {
+          openId: String(userId),
+          appId: appId as string || ENV.appId,
+          name: name as string || '',
+          userId: userId as number,
+        };
+      }
+
+      // Fallback para OAuth (não utilizado)
       if (
         !isNonEmptyString(openId) ||
         !isNonEmptyString(appId) ||
@@ -266,36 +277,20 @@ class SDKServer {
       throw ForbiddenError("Invalid session cookie");
     }
 
-    const sessionUserId = session.openId;
-    const signedInAt = new Date();
-    let user = await db.getUserByOpenId(sessionUserId);
-
-    // If user not in DB, sync from OAuth server automatically
-    if (!user) {
-      try {
-        const userInfo = await this.getUserInfoWithJwt(sessionCookie ?? "");
-        await db.upsertUser({
-          openId: userInfo.openId,
-          name: userInfo.name || null,
-          email: userInfo.email ?? null,
-          loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-          lastSignedIn: signedInAt,
-        });
-        user = await db.getUserByOpenId(userInfo.openId);
-      } catch (error) {
-        console.error("[Auth] Failed to sync user from OAuth:", error);
-        throw ForbiddenError("Failed to sync user info");
-      }
+    const userId = session.userId;
+    if (!userId) {
+      throw ForbiddenError("Invalid session: missing userId");
     }
+
+    const user = await db.getUserById(userId);
 
     if (!user) {
       throw ForbiddenError("User not found");
     }
 
-    await db.upsertUser({
-      openId: user.openId,
-      lastSignedIn: signedInAt,
-    });
+    if (!user.active) {
+      throw ForbiddenError("User account is inactive");
+    }
 
     return user;
   }
