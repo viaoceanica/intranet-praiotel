@@ -26,6 +26,51 @@ export async function getAllTickets() {
   return result;
 }
 
+export async function getTicketsByClientId(clientId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(tickets)
+    .where(eq(tickets.clientId, clientId))
+    .orderBy(desc(tickets.createdAt));
+  return result;
+}
+
+export async function getClientTicketStats(clientId: number) {
+  const db = await getDb();
+  if (!db) return null;
+
+  const allTickets = await getTicketsByClientId(clientId);
+  const total = allTickets.length;
+  const abertos = allTickets.filter(t => t.status === 'aberto').length;
+  const emProgresso = allTickets.filter(t => t.status === 'em_progresso').length;
+  const resolvidos = allTickets.filter(t => t.status === 'resolvido').length;
+  const fechados = allTickets.filter(t => t.status === 'fechado').length;
+
+  // Calcular tempo médio de resolução (apenas tickets resolvidos/fechados)
+  const resolvedTickets = allTickets.filter(t => t.resolvedAt);
+  let avgResolutionTime = 0;
+  if (resolvedTickets.length > 0) {
+    const totalTime = resolvedTickets.reduce((sum, ticket) => {
+      const created = new Date(ticket.createdAt).getTime();
+      const resolved = new Date(ticket.resolvedAt!).getTime();
+      return sum + (resolved - created);
+    }, 0);
+    avgResolutionTime = totalTime / resolvedTickets.length;
+  }
+
+  return {
+    total,
+    abertos,
+    emProgresso,
+    resolvidos,
+    fechados,
+    avgResolutionTimeMs: avgResolutionTime,
+  };
+}
+
 export async function updateTicket(id: number, data: Partial<InsertTicket>) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

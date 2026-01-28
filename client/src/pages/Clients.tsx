@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { Loader2, Plus, Search, Pencil, Trash2, Building2 } from "lucide-react";
+import { Loader2, Plus, Search, Pencil, Trash2, Building2, Ticket } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Clients() {
@@ -111,6 +111,14 @@ export default function Clients() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setLocation(`/clients/${client.id}/tickets`)}
+                              title="Ver histórico de tickets"
+                            >
+                              <Ticket className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="ghost"
                               size="icon"

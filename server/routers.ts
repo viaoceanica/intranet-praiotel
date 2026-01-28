@@ -178,6 +178,75 @@ export const appRouter = router({
       return allTickets;
     }),
 
+    listByClient: isAuthenticated
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ input }) => {
+        return await ticketsDb.getTicketsByClientId(input.clientId);
+      }),
+
+    clientStats: isAuthenticated
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ input }) => {
+        return await ticketsDb.getClientTicketStats(input.clientId);
+      }),
+
+    dashboardStats: isAuthenticated.query(async () => {
+      const allTickets = await ticketsDb.getAllTickets();
+      
+      // Estatísticas gerais
+      const total = allTickets.length;
+      const porEstado = {
+        aberto: allTickets.filter(t => t.status === 'aberto').length,
+        em_progresso: allTickets.filter(t => t.status === 'em_progresso').length,
+        resolvido: allTickets.filter(t => t.status === 'resolvido').length,
+        fechado: allTickets.filter(t => t.status === 'fechado').length,
+      };
+      
+      const porPrioridade = {
+        baixa: allTickets.filter(t => t.priority === 'baixa').length,
+        media: allTickets.filter(t => t.priority === 'media').length,
+        alta: allTickets.filter(t => t.priority === 'alta').length,
+        urgente: allTickets.filter(t => t.priority === 'urgente').length,
+      };
+
+      // Ranking de clientes (apenas tickets com clientId)
+      const ticketsComCliente = allTickets.filter(t => t.clientId);
+      const clienteCount: Record<number, { count: number; clientName: string }> = {};
+      ticketsComCliente.forEach(t => {
+        if (t.clientId) {
+          if (!clienteCount[t.clientId]) {
+            clienteCount[t.clientId] = { count: 0, clientName: t.clientName };
+          }
+          clienteCount[t.clientId].count++;
+        }
+      });
+      
+      const topClientes = Object.entries(clienteCount)
+        .map(([id, data]) => ({ clientId: parseInt(id), ...data }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
+
+      // Tempo médio de resolução
+      const resolvedTickets = allTickets.filter(t => t.resolvedAt);
+      let avgResolutionTime = 0;
+      if (resolvedTickets.length > 0) {
+        const totalTime = resolvedTickets.reduce((sum, ticket) => {
+          const created = new Date(ticket.createdAt).getTime();
+          const resolved = new Date(ticket.resolvedAt!).getTime();
+          return sum + (resolved - created);
+        }, 0);
+        avgResolutionTime = totalTime / resolvedTickets.length;
+      }
+
+      return {
+        total,
+        porEstado,
+        porPrioridade,
+        topClientes,
+        avgResolutionTimeMs: avgResolutionTime,
+      };
+    }),
+
     getById: isAuthenticated
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {

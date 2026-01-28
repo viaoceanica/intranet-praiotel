@@ -88,3 +88,19 @@
 - [x] Interligar tickets com tabela de clientes
 - [x] Substituir campo clientName por relação com tabela clientes
 - [x] Atualizar formulário de criação de tickets para usar dropdown de clientes
+
+## Histórico de Tickets por Cliente
+- [x] Adicionar query para obter tickets por clientId
+- [x] Criar página separada de histórico de tickets do cliente
+- [x] Mostrar lista de tickets do cliente com filtros
+- [x] Adicionar estatísticas (total tickets, abertos, resolvidos, tempo médio)
+- [x] Adicionar botão de histórico na listagem de clientes
+
+## Dashboard com Métricas
+- [x] Criar queries para estatísticas gerais
+- [x] Implementar gráfico de tickets por estado
+- [x] Implementar gráfico de tickets por prioridade
+- [x] Implementar ranking de clientes com mais tickets
+- [x] Mostrar tempo médio de resolução
+- [x] Adicionar métricas principais (total, abertos, tempo médio, clientes ativos)
+- [x] Biblioteca de gráficos recharts já incluída no template

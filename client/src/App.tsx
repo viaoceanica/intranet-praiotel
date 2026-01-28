@@ -5,7 +5,7 @@ import Login from "@/pages/Login";
 import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Tickets from "./pages/Tickets";
 import NewTicket from "./pages/NewTicket";
@@ -13,6 +13,7 @@ import TicketDetail from "./pages/TicketDetail";
 import Notifications from "./pages/Notifications";
 import Clients from "./pages/Clients";
 import ClientForm from "./pages/ClientForm";
+import ClientTickets from "./pages/ClientTickets";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -38,7 +39,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
-      <Route path="/" component={() => <ProtectedRoute component={Home} />} />
+      <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/users" component={() => <ProtectedRoute component={Users} />} />
       <Route path="/tickets" component={() => <ProtectedRoute component={Tickets} />} />
       <Route path="/tickets/new" component={() => <ProtectedRoute component={NewTicket} />} />
@@ -47,6 +48,7 @@ function Router() {
       <Route path="/clients" component={() => <ProtectedRoute component={Clients} />} />
       <Route path="/clients/new" component={() => <ProtectedRoute component={ClientForm} />} />
       <Route path="/clients/:id" component={() => <ProtectedRoute component={ClientForm} />} />
+      <Route path="/clients/:id/tickets" component={() => <ProtectedRoute component={ClientTickets} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
