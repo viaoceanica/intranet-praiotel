@@ -203,3 +203,6 @@
 
 ## Correções de Layout
 - [x] Corrigir falta de sidebar na página de priorização
+
+## Reorganização do Menu (Equipamentos)
+- [x] Mover "Equipamentos" para sub-menu de Clientes

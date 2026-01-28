@@ -38,6 +38,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ticketsExpanded, setTicketsExpanded] = useState(true);
+  const [clientsExpanded, setClientsExpanded] = useState(true);
   
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
     refetchInterval: 30000, // Atualizar a cada 30 segundos
@@ -66,8 +67,15 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
       ]
     },
-    { name: "Clientes", href: "/clients", icon: Building2, roles: ["admin", "gestor", "tecnico", "visualizador"] },
-    { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+    { 
+      name: "Clientes", 
+      href: "/clients", 
+      icon: Building2, 
+      roles: ["admin", "gestor", "tecnico", "visualizador"],
+      subItems: [
+        { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+      ]
+    },
     { name: "Utilizadores", href: "/users", icon: Users, roles: ["admin"] },
   ];
 
@@ -185,6 +193,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                         onClick={() => {
                           if (item.name === "Tickets") {
                             setTicketsExpanded(!ticketsExpanded);
+                          } else if (item.name === "Clientes") {
+                            setClientsExpanded(!clientsExpanded);
                           }
                           setLocation(item.href);
                         }}
@@ -201,9 +211,9 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                           <item.icon className="h-5 w-5" />
                           {item.name}
                         </div>
-                        {ticketsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {(item.name === "Tickets" ? ticketsExpanded : clientsExpanded) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </button>
-                      {ticketsExpanded && (
+                      {((item.name === "Tickets" && ticketsExpanded) || (item.name === "Clientes" && clientsExpanded)) && (
                         <div className="ml-8 mt-1 space-y-1">
                           {filteredSubItems.map((subItem) => {
                             const isSubActive = location === subItem.href;
