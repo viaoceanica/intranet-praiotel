@@ -63,12 +63,12 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       roles: ["admin", "gestor", "tecnico", "visualizador"],
       subItems: [
         { name: "Configuração SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
+        { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
       ]
     },
     { name: "Clientes", href: "/clients", icon: Building2, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Utilizadores", href: "/users", icon: Users, roles: ["admin"] },
-    { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
   ];
 
   const filteredNavigation = navigation.filter(item => 

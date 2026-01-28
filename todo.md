@@ -194,3 +194,6 @@
 
 ## Correções
 - [x] Corrigir erro de tags <a> aninhadas na página /sla-config
+
+## Reorganização do Menu (Continuação)
+- [x] Mover "Priorização Automática" para sub-menu de Tickets
