@@ -45,6 +45,20 @@ export function KnowledgeBase() {
 
   const displayArticles = hasFilters ? articles : defaultArticles;
 
+  // Obter lista de artigos lidos pelo utilizador
+  const { data: readArticlesData } = trpc.articleReads.getUserReadArticles.useQuery(
+    undefined,
+    { enabled: !!user }
+  );
+  const readArticleIds = readArticlesData?.articleIds || [];
+
+  // Função para verificar se artigo é novo (publicado nos últimos 7 dias)
+  const isNewArticle = (publishedAt: Date) => {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return new Date(publishedAt) > sevenDaysAgo;
+  };
+
   const addFavoriteMutation = trpc.favorites.add.useMutation({
     onSuccess: () => {
       toast.success("Adicionado aos favoritos");
@@ -214,19 +228,34 @@ export function KnowledgeBase() {
                 { enabled: !!user }
               );
               const isFavorite = favoriteCheck?.isFavorite || false;
+              
+              const isNew = isNewArticle(article.publishedAt);
+              const isUnread = !readArticleIds.includes(article.id);
 
               return (
               <Card 
                 key={article.id} 
-                className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                className={`p-6 hover:shadow-lg transition-shadow cursor-pointer ${
+                  isUnread ? 'border-l-4 border-l-[#F15A24]' : ''
+                }`}
                 onClick={() => setLocation(`/knowledge-base/${article.id}`)}
               >
                 <div className="flex items-start gap-4">
                   <BookOpen className="h-8 w-8 text-[#F15A24] flex-shrink-0 mt-1" />
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold text-gray-900">{article.title}</h3>
+                      <h3 className={`text-xl font-semibold ${
+                        isUnread ? 'text-gray-900 font-bold' : 'text-gray-900'
+                      }`}>{article.title}</h3>
                       <Badge variant="outline">{article.categoryName}</Badge>
+                      {isNew && (
+                        <Badge className="bg-[#F15A24] text-white hover:bg-[#D14A1E]">
+                          Novo
+                        </Badge>
+                      )}
+                      {isUnread && (
+                        <span className="w-2 h-2 bg-[#F15A24] rounded-full" title="Não lido" />
+                      )}
                     </div>
                     <p className="text-gray-700 mb-4 line-clamp-2">
                       {article.content.substring(0, 200)}...

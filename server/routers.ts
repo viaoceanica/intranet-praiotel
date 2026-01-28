@@ -21,6 +21,7 @@ import * as internalManagementDb from "./internalManagementDb";
 import * as favoritesDb from "./favoritesDb";
 import * as internalManagementAnalyticsDb from "./internalManagementAnalyticsDb";
 import * as articleCommentsDb from "./articleCommentsDb";
+import * as articleReadsDb from "./articleReadsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1490,6 +1491,27 @@ export const appRouter = router({
         await articleCommentsDb.deleteComment(input.commentId);
         return { success: true };
       }),
+  }),
+
+  articleReads: router({
+    markAsRead: isAuthenticated
+      .input(z.object({ articleId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await articleReadsDb.markArticleAsRead(input.articleId, ctx.user.id);
+        return { id };
+      }),
+
+    hasRead: isAuthenticated
+      .input(z.object({ articleId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const hasRead = await articleReadsDb.hasUserReadArticle(input.articleId, ctx.user.id);
+        return { hasRead };
+      }),
+
+    getUserReadArticles: isAuthenticated.query(async ({ ctx }) => {
+      const articleIds = await articleReadsDb.getUserReadArticles(ctx.user.id);
+      return { articleIds };
+    }),
   }),
 });
 

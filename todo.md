@@ -434,3 +434,12 @@
 - [x] Criar interface de pesquisa avançada
 - [x] Testar sistema de notificações de comentários
 - [x] Testar pesquisa avançada com filtros e ordenação
+
+## Sistema de Indicadores de Artigos Não Lidos
+- [x] Criar schema de leituras de artigos (userId, articleId, readAt)
+- [x] Implementar backend para marcar artigo como lido
+- [x] Implementar backend para verificar se artigo foi lido
+- [x] Adicionar badge "Novo" em artigos publicados nos últimos 7 dias
+- [x] Marcar automaticamente artigo como lido ao visualizar página de detalhes
+- [x] Mostrar indicador visual de artigos não lidos na listagem
+- [x] Testar sistema de marcação de leitura

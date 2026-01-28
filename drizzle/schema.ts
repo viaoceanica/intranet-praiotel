@@ -406,3 +406,16 @@ export const articleComments = mysqlTable("article_comments", {
 
 export type ArticleComment = typeof articleComments.$inferSelect;
 export type InsertArticleComment = typeof articleComments.$inferInsert;
+
+/**
+ * Registo de leituras de artigos de conhecimento
+ */
+export const articleReads = mysqlTable("article_reads", {
+  id: int("id").autoincrement().primaryKey(),
+  articleId: int("articleId").notNull(),
+  userId: int("userId").notNull(),
+  readAt: timestamp("readAt").defaultNow().notNull(),
+});
+
+export type ArticleRead = typeof articleReads.$inferSelect;
+export type InsertArticleRead = typeof articleReads.$inferInsert;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { Card } from "@/components/ui/card";
@@ -27,6 +27,16 @@ export function ArticleDetail() {
     { articleId },
     { enabled: articleId > 0 }
   );
+
+  // Marcar artigo como lido automaticamente
+  const markAsReadMutation = trpc.articleReads.markAsRead.useMutation();
+
+  // Marcar como lido quando o artigo é carregado
+  useEffect(() => {
+    if (article && user) {
+      markAsReadMutation.mutate({ articleId: article.id });
+    }
+  }, [article?.id, user?.id]);
 
   const { data: favoriteCheck } = trpc.favorites.check.useQuery(
     { itemType: "article", itemId: articleId },
