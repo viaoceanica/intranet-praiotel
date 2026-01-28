@@ -41,6 +41,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ticketsExpanded, setTicketsExpanded] = useState(false);
   const [clientsExpanded, setClientsExpanded] = useState(false);
+  const [usersExpanded, setUsersExpanded] = useState(false);
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -76,7 +77,15 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
       ]
     },
-    { name: "Utilizadores", href: "/users", icon: Users, roles: ["admin"] },
+    { 
+      name: "Utilizadores", 
+      href: "/users", 
+      icon: Users, 
+      roles: ["admin"],
+      subItems: [
+        { name: "Roles", href: "/roles", icon: Settings, roles: ["admin"] },
+      ]
+    },
   ];
 
   const filteredNavigation = navigation.filter(item => 
@@ -186,6 +195,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                             setTicketsExpanded(!ticketsExpanded);
                           } else if (item.name === "Clientes") {
                             setClientsExpanded(!clientsExpanded);
+                          } else if (item.name === "Utilizadores") {
+                            setUsersExpanded(!usersExpanded);
                           }
                           setLocation(item.href);
                         }}
@@ -202,9 +213,9 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                           <item.icon className="h-5 w-5" />
                           {item.name}
                         </div>
-                        {(item.name === "Tickets" ? ticketsExpanded : clientsExpanded) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </button>
-                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : false) && (
+                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : false) && (
                         <div className="ml-8 mt-1 space-y-1">
                           {filteredSubItems.map((subItem) => {
                             const isSubActive = location === subItem.href;

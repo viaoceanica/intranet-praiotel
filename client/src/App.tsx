@@ -21,6 +21,7 @@ import EquipmentHistory from "./pages/EquipmentHistory";
 import PrioritizationRules from "./pages/PrioritizationRules";
 import TechnicianStats from "./pages/TechnicianStats";
 import { ResponseTemplates } from "./pages/ResponseTemplates";
+import Roles from "./pages/Roles";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/prioritization" component={() => <ProtectedRoute component={PrioritizationRules} />} />
       <Route path="/technician-stats" component={() => <ProtectedRoute component={TechnicianStats} />} />
       <Route path="/response-templates" component={() => <ProtectedRoute component={ResponseTemplates} />} />
+      <Route path="/roles" component={() => <ProtectedRoute component={Roles} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

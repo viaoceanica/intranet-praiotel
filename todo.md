@@ -311,3 +311,10 @@
 - [x] Adicionar tipos de notificação (novo ticket, comentário, atualização, SLA)
 - [x] Integrar notificações no header do PraiotelLayout
 - [x] Testar sistema completo de notificações
+
+## Sub-menu de Roles em Utilizadores
+- [x] Criar página de gestão de roles
+- [x] Adicionar sub-menu "Roles" em Utilizadores
+- [x] Implementar listagem de utilizadores por role
+- [x] Adicionar descrição de permissões por role
+- [x] Testar navegação e visualização
