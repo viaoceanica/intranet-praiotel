@@ -121,3 +121,49 @@ export async function notifyUrgentAnnouncement(
     });
   }
 }
+
+/**
+ * Envia notificação ao autor do artigo quando recebe um comentário
+ */
+export async function notifyArticleComment(
+  articleId: number,
+  articleTitle: string,
+  authorId: number,
+  commentAuthorId: number,
+  commentAuthorName: string
+) {
+  // Não notificar se o autor comentou no próprio artigo
+  if (authorId === commentAuthorId) return;
+
+  await createNotification({
+    userId: authorId,
+    type: "article_comment",
+    title: "💬 Novo comentário no seu artigo",
+    message: `${commentAuthorName} comentou no artigo "${articleTitle}"`,
+    ticketId: null,
+  });
+}
+
+/**
+ * Envia notificações aos participantes da discussão quando há um novo comentário
+ */
+export async function notifyArticleCommentParticipants(
+  articleId: number,
+  articleTitle: string,
+  participantIds: number[],
+  newCommentAuthorId: number,
+  newCommentAuthorName: string
+) {
+  // Notificar cada participante (exceto o autor do novo comentário)
+  for (const userId of participantIds) {
+    if (userId !== newCommentAuthorId) {
+      await createNotification({
+        userId,
+        type: "article_comment",
+        title: "💬 Nova resposta na discussão",
+        message: `${newCommentAuthorName} comentou no artigo "${articleTitle}"`,
+        ticketId: null,
+      });
+    }
+  }
+}

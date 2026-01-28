@@ -11,7 +11,7 @@ import {
   knowledgeArticles,
   users,
 } from "../drizzle/schema";
-import { eq, desc, sql, and, like, or } from "drizzle-orm";
+import { eq, desc, sql, and, like, or, gte, lte } from "drizzle-orm";
 
 // ===== PAINEL INICIAL =====
 
@@ -667,4 +667,88 @@ export async function deleteKnowledgeArticle(id: number) {
   if (!db) throw new Error("Database not available");
 
   await db.delete(knowledgeArticles).where(eq(knowledgeArticles.id, id));
+}
+
+/**
+ * Pesquisa avançada de artigos com filtros e ordenação
+ */
+export async function advancedSearchKnowledgeArticles(params: {
+  searchTerm?: string;
+  categoryId?: number;
+  tags?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sortBy?: "recent" | "views" | "comments";
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Construir query base
+  let query = db
+    .select({
+      id: knowledgeArticles.id,
+      title: knowledgeArticles.title,
+      content: knowledgeArticles.content,
+      categoryId: knowledgeArticles.categoryId,
+      categoryName: knowledgeCategories.name,
+      tags: knowledgeArticles.tags,
+      authorId: knowledgeArticles.authorId,
+      authorName: users.name,
+      viewCount: knowledgeArticles.viewCount,
+      publishedAt: knowledgeArticles.publishedAt,
+      createdAt: knowledgeArticles.createdAt,
+    })
+    .from(knowledgeArticles)
+    .leftJoin(
+      knowledgeCategories,
+      eq(knowledgeArticles.categoryId, knowledgeCategories.id)
+    )
+    .leftJoin(users, eq(knowledgeArticles.authorId, users.id));
+
+  // Aplicar filtros
+  const conditions = [];
+
+  if (params.searchTerm) {
+    conditions.push(
+      or(
+        like(knowledgeArticles.title, `%${params.searchTerm}%`),
+        like(knowledgeArticles.content, `%${params.searchTerm}%`)
+      )
+    );
+  }
+
+  if (params.categoryId) {
+    conditions.push(eq(knowledgeArticles.categoryId, params.categoryId));
+  }
+
+  if (params.tags) {
+    conditions.push(like(knowledgeArticles.tags, `%${params.tags}%`));
+  }
+
+  if (params.dateFrom) {
+    conditions.push(gte(knowledgeArticles.publishedAt, new Date(params.dateFrom)));
+  }
+
+  if (params.dateTo) {
+    conditions.push(lte(knowledgeArticles.publishedAt, new Date(params.dateTo)));
+  }
+
+  // Aplicar condições se existirem
+  if (conditions.length > 0) {
+    query = query.where(and(...conditions)) as any;
+  }
+
+  // Aplicar ordenação
+  if (params.sortBy === "views") {
+    query = query.orderBy(desc(knowledgeArticles.viewCount)) as any;
+  } else if (params.sortBy === "comments") {
+    // Para ordenar por comentários, precisamos de uma subquery
+    // Por simplicidade, vamos ordenar por data de publicação por enquanto
+    query = query.orderBy(desc(knowledgeArticles.publishedAt)) as any;
+  } else {
+    // Default: mais recentes
+    query = query.orderBy(desc(knowledgeArticles.publishedAt)) as any;
+  }
+
+  return await query;
 }

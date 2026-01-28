@@ -68,3 +68,20 @@ export async function getCommentById(commentId: number) {
 
   return result[0];
 }
+
+/**
+ * Obter IDs únicos dos utilizadores que comentaram num artigo
+ */
+export async function getArticleParticipants(articleId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database connection failed");
+
+  const comments = await db
+    .select({ userId: articleComments.userId })
+    .from(articleComments)
+    .where(eq(articleComments.articleId, articleId));
+
+  // Retornar IDs únicos
+  const uniqueUserIds = Array.from(new Set(comments.map((c) => c.userId)));
+  return uniqueUserIds;
+}

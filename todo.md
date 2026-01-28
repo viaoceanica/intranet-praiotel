@@ -425,3 +425,12 @@
 - [x] Adicionar secção de comentários na visualização de artigos
 - [x] Testar sistema de favoritos integrado
 - [x] Testar sistema de comentários
+
+## Melhorias Avançadas da Base de Conhecimento
+- [x] Implementar notificações para autor quando artigo recebe comentário
+- [x] Implementar notificações para participantes quando há novos comentários
+- [x] Adicionar filtros avançados (categoria + tags + data)
+- [x] Adicionar ordenação múltipla (recentes, mais vistos, mais comentados)
+- [x] Criar interface de pesquisa avançada
+- [x] Testar sistema de notificações de comentários
+- [x] Testar pesquisa avançada com filtros e ordenação

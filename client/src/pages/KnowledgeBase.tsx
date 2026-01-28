@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Search, Calendar, User, Eye, Star, MessageCircle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BookOpen, Search, Calendar, User, Eye, Star, Filter, X } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
@@ -16,9 +17,33 @@ export function KnowledgeBase() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
+  const [selectedTags, setSelectedTags] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "views" | "comments">("recent");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const { data: categories = [] } = trpc.knowledgeCategories.list.useQuery();
-  const { data: articles = [] } = trpc.knowledgeArticles.list.useQuery({ categoryId: selectedCategory });
+  
+  // Usar pesquisa avançada quando há filtros ativos
+  const hasFilters = searchTerm || selectedCategory || selectedTags || dateFrom || dateTo || sortBy !== "recent";
+  
+  const { data: articles = [] } = trpc.knowledgeArticles.advancedSearch.useQuery(
+    {
+      searchTerm: searchTerm || undefined,
+      categoryId: selectedCategory,
+      tags: selectedTags || undefined,
+      dateFrom: dateFrom || undefined,
+      dateTo: dateTo || undefined,
+      sortBy,
+    }
+  );
+
+  const { data: defaultArticles = [] } = trpc.knowledgeArticles.list.useQuery(
+    { categoryId: selectedCategory }
+  );
+
+  const displayArticles = hasFilters ? articles : defaultArticles;
 
   const addFavoriteMutation = trpc.favorites.add.useMutation({
     onSuccess: () => {
@@ -40,58 +65,150 @@ export function KnowledgeBase() {
     }
   };
 
-  const filteredArticles = searchTerm
-    ? articles.filter((article: any) =>
-        article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        article.content.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : articles;
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setSelectedCategory(undefined);
+    setSelectedTags("");
+    setDateFrom("");
+    setDateTo("");
+    setSortBy("recent");
+  };
+
+  const sortLabels = {
+    recent: "Mais Recentes",
+    views: "Mais Vistos",
+    comments: "Mais Comentados",
+  };
 
   return (
     <PraiotelLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-gray-900">Base de Conhecimento</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Base de Conhecimento</h1>
+          <p className="text-gray-600">
+            Tutoriais, guias e documentação técnica da Praiotel
+          </p>
         </div>
 
-        {/* Pesquisa */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Pesquisar artigos..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+        {/* Barra de Pesquisa e Filtros */}
+        <Card className="p-6">
+          <div className="space-y-4">
+            {/* Pesquisa e Botão de Filtros Avançados */}
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <Input
+                  placeholder="Pesquisar artigos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                variant={showAdvancedFilters ? "default" : "outline"}
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filtros Avançados
+              </Button>
+              {hasFilters && (
+                <Button variant="ghost" onClick={handleClearFilters}>
+                  <X className="h-4 w-4 mr-2" />
+                  Limpar
+                </Button>
+              )}
+            </div>
 
-        {/* Categorias */}
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant={selectedCategory === undefined ? "default" : "outline"}
-            onClick={() => setSelectedCategory(undefined)}
-          >
-            Todos
-          </Button>
-          {categories.map((cat: any) => (
-            <Button
-              key={cat.id}
-              variant={selectedCategory === cat.id ? "default" : "outline"}
-              onClick={() => setSelectedCategory(cat.id)}
-            >
-              {cat.name}
-            </Button>
-          ))}
-        </div>
+            {/* Filtros Avançados */}
+            {showAdvancedFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Categoria
+                  </label>
+                  <Select
+                    value={selectedCategory?.toString() || "all"}
+                    onValueChange={(value) =>
+                      setSelectedCategory(value === "all" ? undefined : parseInt(value))
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todas as categorias" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todas as categorias</SelectItem>
+                      {categories.map((cat: any) => (
+                        <SelectItem key={cat.id} value={cat.id.toString()}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-        {/* Lista de artigos */}
-        <div className="grid gap-4">
-          {filteredArticles.length === 0 ? (
-            <Card className="p-6 text-center text-gray-500">
-              Nenhum artigo encontrado
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Tags
+                  </label>
+                  <Input
+                    placeholder="Ex: tutorial, guia"
+                    value={selectedTags}
+                    onChange={(e) => setSelectedTags(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Data Inicial
+                  </label>
+                  <Input
+                    type="date"
+                    value={dateFrom}
+                    onChange={(e) => setDateFrom(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 mb-2 block">
+                    Data Final
+                  </label>
+                  <Input
+                    type="date"
+                    value={dateTo}
+                    onChange={(e) => setDateTo(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Ordenação */}
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">Ordenar por:</span>
+              <div className="flex gap-2">
+                {(["recent", "views", "comments"] as const).map((option) => (
+                  <Button
+                    key={option}
+                    variant={sortBy === option ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSortBy(option)}
+                  >
+                    {sortLabels[option]}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Lista de Artigos */}
+        <div className="space-y-4">
+          {displayArticles.length === 0 ? (
+            <Card className="p-12 text-center">
+              <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">Nenhum artigo encontrado</p>
             </Card>
           ) : (
-            filteredArticles.map((article: any) => {
+            displayArticles.map((article: any) => {
               const { data: favoriteCheck } = trpc.favorites.check.useQuery(
                 { itemType: "article", itemId: article.id },
                 { enabled: !!user }

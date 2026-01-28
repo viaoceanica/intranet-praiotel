@@ -1299,6 +1299,19 @@ export const appRouter = router({
         return await internalManagementDb.searchKnowledgeArticles(input.searchTerm);
       }),
 
+    advancedSearch: isAuthenticated
+      .input(z.object({
+        searchTerm: z.string().optional(),
+        categoryId: z.number().optional(),
+        tags: z.string().optional(),
+        dateFrom: z.string().optional(),
+        dateTo: z.string().optional(),
+        sortBy: z.enum(["recent", "views", "comments"]).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.advancedSearchKnowledgeArticles(input);
+      }),
+
     create: isAdmin
       .input(z.object({
         title: z.string().min(1),
@@ -1425,6 +1438,35 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         const id = await articleCommentsDb.createComment(input.articleId, ctx.user.id, input.comment);
+        
+        // Obter informações do artigo
+        const article = await internalManagementDb.getKnowledgeArticleById(input.articleId);
+        if (article) {
+          // Notificar o autor do artigo
+          await notificationHelpers.notifyArticleComment(
+            input.articleId,
+            article.title,
+            article.authorId,
+            ctx.user.id,
+            ctx.user.name
+          );
+
+          // Obter participantes da discussão e notificá-los
+          const participants = await articleCommentsDb.getArticleParticipants(input.articleId);
+          // Remover o autor do artigo da lista de participantes (já foi notificado)
+          const participantsToNotify = participants.filter(p => p !== article.authorId);
+          
+          if (participantsToNotify.length > 0) {
+            await notificationHelpers.notifyArticleCommentParticipants(
+              input.articleId,
+              article.title,
+              participantsToNotify,
+              ctx.user.id,
+              ctx.user.name
+            );
+          }
+        }
+        
         return { id };
       }),
 
