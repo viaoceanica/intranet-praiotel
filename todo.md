@@ -178,3 +178,8 @@
 - [x] Manter campo texto "equipment" como fallback quando não há equipamento registado
 - [ ] Atualizar formulário de edição de ticket com mesma funcionalidade
 - [ ] Mostrar nome do equipamento na listagem e detalhes de tickets
+
+## Reorganização do Menu
+- [x] Mover "Configuração SLA" para sub-menu de Tickets
+- [x] Criar estrutura de menu expansível para Tickets
+- [x] Atualizar navegação no PraiotelLayout

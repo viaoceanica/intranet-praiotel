@@ -23,7 +23,9 @@ import {
   Building2,
   Settings,
   Wrench,
-  Zap
+  Zap,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { useState } from "react";
 
@@ -35,6 +37,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [ticketsExpanded, setTicketsExpanded] = useState(true);
   
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
     refetchInterval: 30000, // Atualizar a cada 30 segundos
@@ -53,11 +56,18 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "gestor", "tecnico", "visualizador"] },
-    { name: "Tickets", href: "/tickets", icon: Ticket, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+    { 
+      name: "Tickets", 
+      href: "/tickets", 
+      icon: Ticket, 
+      roles: ["admin", "gestor", "tecnico", "visualizador"],
+      subItems: [
+        { name: "Configuração SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
+      ]
+    },
     { name: "Clientes", href: "/clients", icon: Building2, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Utilizadores", href: "/users", icon: Users, roles: ["admin"] },
-    { name: "Configuração SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
     { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
   ];
 
@@ -163,23 +173,81 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
           <nav className="p-4 space-y-1">
             {filteredNavigation.map((item) => {
               const isActive = location === item.href;
+              const hasSubItems = item.subItems && item.subItems.length > 0;
+              const filteredSubItems = hasSubItems ? item.subItems!.filter(sub => user && sub.roles.includes(user.role)) : [];
+              const showSubItems = hasSubItems && filteredSubItems.length > 0;
+              
               return (
-                <Link key={item.name} href={item.href}>
-                  <a
-                    className={`
-                      flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                      transition-colors
-                      ${isActive 
-                        ? "bg-[#F15A24] text-white" 
-                        : "text-gray-700 hover:bg-gray-100"
-                      }
-                    `}
-                    onClick={() => setSidebarOpen(false)}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    {item.name}
-                  </a>
-                </Link>
+                <div key={item.name}>
+                  {showSubItems ? (
+                    <div>
+                      <button
+                        onClick={() => {
+                          if (item.name === "Tickets") {
+                            setTicketsExpanded(!ticketsExpanded);
+                          }
+                          setLocation(item.href);
+                        }}
+                        className={`
+                          w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                          transition-colors
+                          ${isActive 
+                            ? "bg-[#F15A24] text-white" 
+                            : "text-gray-700 hover:bg-gray-100"
+                          }
+                        `}
+                      >
+                        <div className="flex items-center gap-3">
+                          <item.icon className="h-5 w-5" />
+                          {item.name}
+                        </div>
+                        {ticketsExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </button>
+                      {ticketsExpanded && (
+                        <div className="ml-8 mt-1 space-y-1">
+                          {filteredSubItems.map((subItem) => {
+                            const isSubActive = location === subItem.href;
+                            return (
+                              <Link key={subItem.name} href={subItem.href}>
+                                <a
+                                  className={`
+                                    flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                                    transition-colors
+                                    ${isSubActive 
+                                      ? "bg-[#F15A24] text-white" 
+                                      : "text-gray-600 hover:bg-gray-100"
+                                    }
+                                  `}
+                                  onClick={() => setSidebarOpen(false)}
+                                >
+                                  <subItem.icon className="h-4 w-4" />
+                                  {subItem.name}
+                                </a>
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <Link href={item.href}>
+                      <a
+                        className={`
+                          flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                          transition-colors
+                          ${isActive 
+                            ? "bg-[#F15A24] text-white" 
+                            : "text-gray-700 hover:bg-gray-100"
+                          }
+                        `}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.name}
+                      </a>
+                    </Link>
+                  )}
+                </div>
               );
             })}
           </nav>
