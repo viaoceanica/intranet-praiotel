@@ -15,6 +15,7 @@ import * as equipmentDb from "./equipmentDb";
 import * as prioritizationDb from "./prioritizationDb";
 import * as responseTemplatesDb from "./responseTemplatesDb";
 import * as technicianStatsDb from "./technicianStatsDb";
+import * as notificationHelpers from "./notificationHelpers";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -432,6 +433,15 @@ export const appRouter = router({
 
         // Obter ID do ticket recém-criado
         const createdTicket = await ticketsDb.getTicketByNumber(ticketNumber);
+
+        // Notificar técnico se ticket foi atribuído
+        if (input.assignedToId) {
+          await notificationHelpers.notifyTicketAssigned(
+            createdTicket!.id,
+            ticketNumber,
+            input.assignedToId
+          );
+        }
         if (!createdTicket) {
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao criar ticket" });
         }
@@ -513,27 +523,23 @@ export const appRouter = router({
             dataToUpdate.closedAt = new Date();
           }
 
-          // Notificar criador do ticket sobre mudança de estado
-          if (ticket.createdById !== ctx.user.id) {
-            await notificationsDb.createNotification({
-              userId: ticket.createdById,
-              type: "ticket_updated",
-              title: "Ticket atualizado",
-              message: `O ticket ${ticket.ticketNumber} mudou de estado para: ${input.status}`,
-              ticketId: id,
-            });
-          }
+          // Notificar técnico atribuído sobre mudança de estado
+          await notificationHelpers.notifyTicketStatusChanged(
+            id,
+            ticket.ticketNumber,
+            ticket.assignedToId,
+            input.status,
+            ctx.user.id
+          );
         }
 
         // Notificar sobre nova atribuição
         if (input.assignedToId && input.assignedToId !== ticket.assignedToId) {
-          await notificationsDb.createNotification({
-            userId: input.assignedToId,
-            type: "ticket_assigned",
-            title: "Ticket atribuído",
-            message: `O ticket ${ticket.ticketNumber} foi-lhe atribuído`,
-            ticketId: id,
-          });
+          await notificationHelpers.notifyTicketAssigned(
+            id,
+            ticket.ticketNumber,
+            input.assignedToId
+          );
         }
 
         await ticketsDb.updateTicket(id, dataToUpdate);
@@ -614,25 +620,15 @@ export const appRouter = router({
           newValue: input.note,
         });
 
-        // Notificar técnico atribuído e criador
+        // Notificar técnico atribuído sobre novo comentário
         const ticket = await ticketsDb.getTicketById(input.ticketId);
         if (ticket) {
-          const usersToNotify = [ticket.createdById];
-          if (ticket.assignedToId && ticket.assignedToId !== ctx.user.id) {
-            usersToNotify.push(ticket.assignedToId);
-          }
-
-          for (const userId of usersToNotify) {
-            if (userId !== ctx.user.id) {
-              await notificationsDb.createNotification({
-                userId,
-                type: "note_added",
-                title: "Nova nota no ticket",
-                message: `${ctx.user.name} adicionou uma nota ao ticket ${ticket.ticketNumber}`,
-                ticketId: input.ticketId,
-              });
-            }
-          }
+          await notificationHelpers.notifyCommentAdded(
+            input.ticketId,
+            ticket.ticketNumber,
+            ticket.assignedToId,
+            ctx.user.id
+          );
         }
 
         return { success: true };

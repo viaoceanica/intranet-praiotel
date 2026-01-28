@@ -318,3 +318,11 @@
 - [x] Implementar listagem de utilizadores por role
 - [x] Adicionar descrição de permissões por role
 - [x] Testar navegação e visualização
+
+## Gatilhos Automáticos de Notificações
+- [x] Criar função auxiliar para enviar notificações
+- [x] Implementar gatilho de notificação ao atribuir ticket
+- [x] Implementar gatilho de notificação ao adicionar comentário
+- [x] Implementar gatilho de notificação ao mudar estado do ticket
+- [x] Criar funções de alerta e violação de SLA
+- [x] Testar todos os gatilhos de notificação
