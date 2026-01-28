@@ -26,4 +26,42 @@ export const systemRouter = router({
         success: delivered,
       } as const;
     }),
+
+  // Sistema de monitorização de erros
+  logError: publicProcedure
+    .input(
+      z.object({
+        message: z.string(),
+        stack: z.string().optional(),
+        componentStack: z.string().optional(),
+        timestamp: z.string(),
+        userAgent: z.string(),
+        url: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // Log error to console in development
+      if (process.env.NODE_ENV === "development") {
+        console.error("[Frontend Error]", {
+          message: input.message,
+          url: input.url,
+          timestamp: input.timestamp,
+          stack: input.stack,
+        });
+      }
+
+      // Notify owner of critical errors
+      if (input.message.includes("TypeError") || input.message.includes("ReferenceError")) {
+        try {
+          await notifyOwner({
+            title: "Erro Crítico na Intranet",
+            content: `Erro detectado em produção:\n\nMensagem: ${input.message}\nURL: ${input.url}\nTimestamp: ${input.timestamp}`,
+          });
+        } catch (err) {
+          console.error("Failed to notify owner of error:", err);
+        }
+      }
+
+      return { success: true };
+    }),
 });

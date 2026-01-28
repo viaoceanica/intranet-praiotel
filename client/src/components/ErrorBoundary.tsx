@@ -21,6 +21,41 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
+  componentDidCatch(error: Error, errorInfo: any) {
+    // Log error to backend
+    this.logErrorToBackend(error, errorInfo);
+
+    // Log to console in development
+    if (import.meta.env.DEV) {
+      console.error("ErrorBoundary caught an error:", error, errorInfo);
+    }
+  }
+
+  logErrorToBackend = async (error: Error, errorInfo: any) => {
+    try {
+      const errorData = {
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo?.componentStack || "",
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+      };
+
+      // Send to backend endpoint
+      await fetch("/api/trpc/system.logError", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(errorData),
+      });
+    } catch (err) {
+      // Silently fail if logging fails
+      console.error("Failed to log error to backend:", err);
+    }
+  };
+
   render() {
     if (this.state.hasError) {
       return (

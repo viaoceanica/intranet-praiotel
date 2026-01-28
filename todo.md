@@ -447,3 +447,9 @@
 ## Bugs Reportados
 - [x] Corrigir erro de hooks do React na página de DocumentManagement (/documents)
 - [x] Corrigir erro React #310 (useEffect) na versão publicada da página /documents
+
+## Melhorias de Produção e Monitorização
+- [x] Criar guia de testes de produção
+- [x] Investigar e implementar monitorização de erros (Sentry ou similar)
+- [x] Configurar captura automática de erros em produção
+- [x] Documentar processo de monitorização
