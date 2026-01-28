@@ -59,6 +59,32 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    create: isAdmin
+      .input(z.object({
+        priority: z.string().min(1).max(50),
+        displayName: z.string().min(1).max(100),
+        responseTimeHours: z.number().min(1),
+        resolutionTimeHours: z.number().min(1),
+      }))
+      .mutation(async ({ input }) => {
+        await slaDb.createSlaConfig({ ...input, isCustom: 1 });
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ priority: z.string() }))
+      .mutation(async ({ input }) => {
+        const config = await slaDb.getSlaConfig(input.priority);
+        if (!config || !config.isCustom) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: "Não é possível eliminar prioridades base" 
+          });
+        }
+        await slaDb.deleteSlaConfig(input.priority);
+        return { success: true };
+      }),
+
     calculateStatus: isAuthenticated
       .input(z.object({
         createdAt: z.date(),

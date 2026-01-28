@@ -29,7 +29,7 @@ export const tickets = mysqlTable("tickets", {
   equipmentId: int("equipmentId"),
   equipment: varchar("equipment", { length: 255 }).notNull(),
   problemType: varchar("problemType", { length: 255 }).notNull(),
-  priority: mysqlEnum("priority", ["baixa", "media", "alta", "urgente"]).default("media").notNull(),
+  priority: varchar("priority", { length: 50 }).default("media").notNull(), // Alterado para varchar
   status: mysqlEnum("status", ["aberto", "em_progresso", "resolvido", "fechado"]).default("aberto").notNull(),
   assignedToId: int("assignedToId"),
   location: varchar("location", { length: 100 }).notNull(),
@@ -133,7 +133,9 @@ export type InsertClientEmail = typeof clientEmails.$inferInsert;
  */
 export const slaConfig = mysqlTable("slaConfig", {
   id: int("id").autoincrement().primaryKey(),
-  priority: mysqlEnum("priority", ["baixa", "media", "alta", "urgente"]).notNull().unique(),
+  priority: varchar("priority", { length: 50 }).notNull().unique(), // Alterado para varchar para suportar prioridades personalizadas
+  displayName: varchar("displayName", { length: 100 }).notNull(), // Nome de exibição
+  isCustom: int("isCustom").default(0).notNull(), // 0 = prioridade base, 1 = personalizada
   responseTimeHours: int("responseTimeHours").notNull(), // Tempo de resposta em horas
   resolutionTimeHours: int("resolutionTimeHours").notNull(), // Tempo de resolução em horas
   createdAt: timestamp("createdAt").defaultNow().notNull(),

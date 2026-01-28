@@ -6,11 +6,15 @@ import { ArrowLeft, Calendar, User, MapPin } from "lucide-react";
 import { useLocation, useParams } from "wouter";
 import { format } from "date-fns";
 
-const priorityColors = {
+const priorityColors: Record<string, string> = {
   baixa: "bg-blue-500",
   media: "bg-yellow-500",
   alta: "bg-orange-500",
   urgente: "bg-red-500",
+};
+
+const getPriorityColor = (priority: string) => {
+  return priorityColors[priority] || "bg-gray-500";
 };
 
 const statusColors = {
@@ -124,7 +128,7 @@ export default function EquipmentHistory() {
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-semibold">{ticket.ticketNumber}</span>
-                        <Badge className={priorityColors[ticket.priority]}>
+                        <Badge className={getPriorityColor(ticket.priority)}>
                           {ticket.priority}
                         </Badge>
                         <Badge className={statusColors[ticket.status]}>

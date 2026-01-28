@@ -33,6 +33,22 @@ export async function updateSlaConfig(priority: string, data: Partial<InsertSlaC
     .where(eq(slaConfig.priority, priority as any));
 }
 
+export async function createSlaConfig(data: InsertSlaConfig) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db.insert(slaConfig).values(data);
+}
+
+export async function deleteSlaConfig(priority: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .delete(slaConfig)
+    .where(eq(slaConfig.priority, priority as any));
+}
+
 /**
  * Calcula se um ticket está dentro do SLA
  */

@@ -176,10 +176,18 @@
 - [x] Atualizar formulário de criação de ticket com dropdown de equipamentos
 - [x] Filtrar equipamentos dinamicamente quando cliente é selecionado
 - [x] Manter campo texto "equipment" como fallback quando não há equipamento registado
-- [ ] Atualizar formulário de edição de ticket com mesma funcionalidade
+- [x] Atualizar formulário de edição de ticket com mesma funcionalidade
 - [ ] Mostrar nome do equipamento na listagem e detalhes de tickets
 
 ## Reorganização do Menu
 - [x] Mover "Configuração SLA" para sub-menu de Tickets
 - [x] Criar estrutura de menu expansível para Tickets
 - [x] Atualizar navegação no PraiotelLayout
+
+## Gestão de Prioridades (SLA Config)
+- [x] Manter 4 prioridades base (baixa, media, alta, urgente) editáveis
+- [x] Permitir admin criar novas prioridades personalizadas
+- [x] Permitir admin eliminar prioridades personalizadas (não as 4 base)
+- [x] Adicionar campo de nome personalizado para novas prioridades
+- [x] Atualizar schema para suportar prioridades dinâmicas
+- [ ] Atualizar dropdowns de tickets para incluir prioridades personalizadas

@@ -15,6 +15,11 @@ export default function SlaConfig() {
   const [editingPriority, setEditingPriority] = useState<string | null>(null);
   const [responseTime, setResponseTime] = useState<number>(0);
   const [resolutionTime, setResolutionTime] = useState<number>(0);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [newPriority, setNewPriority] = useState("");
+  const [newDisplayName, setNewDisplayName] = useState("");
+  const [newResponseTime, setNewResponseTime] = useState<number>(0);
+  const [newResolutionTime, setNewResolutionTime] = useState<number>(0);
 
   const updateMutation = trpc.sla.update.useMutation({
     onSuccess: () => {
@@ -27,11 +32,34 @@ export default function SlaConfig() {
     },
   });
 
-  const priorityLabels: Record<string, string> = {
-    baixa: "Baixa",
-    media: "Média",
-    alta: "Alta",
-    urgente: "Urgente",
+  const createMutation = trpc.sla.create.useMutation({
+    onSuccess: () => {
+      toast.success("Prioridade criada com sucesso");
+      utils.sla.list.invalidate();
+      setShowCreateForm(false);
+      setNewPriority("");
+      setNewDisplayName("");
+      setNewResponseTime(0);
+      setNewResolutionTime(0);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const deleteMutation = trpc.sla.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Prioridade eliminada com sucesso");
+      utils.sla.list.invalidate();
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const getPriorityLabel = (priority: string) => {
+    const config = slaConfigs?.find(c => c.priority === priority);
+    return config?.displayName || priority;
   };
 
   const priorityColors: Record<string, string> = {
@@ -73,6 +101,41 @@ export default function SlaConfig() {
     setResolutionTime(0);
   };
 
+  const handleCreate = () => {
+    if (!newPriority.trim() || !newDisplayName.trim()) {
+      toast.error("Preencha todos os campos");
+      return;
+    }
+
+    if (newResolutionTime <= newResponseTime) {
+      toast.error("O tempo de resolução deve ser maior que o tempo de resposta");
+      return;
+    }
+
+    if (newResponseTime < 1 || newResolutionTime < 1) {
+      toast.error("Os tempos devem ser maiores que zero");
+      return;
+    }
+
+    createMutation.mutate({
+      priority: newPriority.toLowerCase().replace(/\s+/g, "_"),
+      displayName: newDisplayName,
+      responseTimeHours: newResponseTime,
+      resolutionTimeHours: newResolutionTime,
+    });
+  };
+
+  const handleDelete = (priority: string, isCustom: number) => {
+    if (!isCustom) {
+      toast.error("Não é possível eliminar prioridades base");
+      return;
+    }
+
+    if (confirm("Tem a certeza que deseja eliminar esta prioridade?")) {
+      deleteMutation.mutate({ priority });
+    }
+  };
+
   return (
     <PraiotelLayout>
       <div className="space-y-6">
@@ -97,11 +160,11 @@ export default function SlaConfig() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5" />
-                    Prioridade {priorityLabels[config.priority]}
+                    Prioridade {config.displayName}
                   </CardTitle>
                   <CardDescription>
                     Prazos de atendimento para tickets de prioridade{" "}
-                    {priorityLabels[config.priority].toLowerCase()}
+                    {config.displayName.toLowerCase()}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -186,19 +249,122 @@ export default function SlaConfig() {
                         </div>
                       </div>
 
-                      <Button
-                        onClick={() => handleEdit(config)}
-                        variant="outline"
-                        className="w-full"
-                      >
-                        Editar Configuração
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => handleEdit(config)}
+                          variant="outline"
+                          className="flex-1"
+                        >
+                          Editar Configuração
+                        </Button>
+                        {config.isCustom === 1 && (
+                          <Button
+                            onClick={() => handleDelete(config.priority, config.isCustom)}
+                            variant="destructive"
+                            disabled={deleteMutation.isPending}
+                          >
+                            Eliminar
+                          </Button>
+                        )}
+                      </div>
                     </>
                   )}
                 </CardContent>
               </Card>
             ))}
           </div>
+        )}
+
+        {!showCreateForm ? (
+          <Button
+            onClick={() => setShowCreateForm(true)}
+            className="w-full bg-[#F15A24] hover:bg-[#D14A1A]"
+          >
+            + Criar Nova Prioridade
+          </Button>
+        ) : (
+          <Card className="border-2 border-[#F15A24]">
+            <CardHeader>
+              <CardTitle>Criar Nova Prioridade</CardTitle>
+              <CardDescription>
+                Adicionar uma prioridade personalizada ao sistema
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="newPriority">Código da Prioridade</Label>
+                <Input
+                  id="newPriority"
+                  value={newPriority}
+                  onChange={(e) => setNewPriority(e.target.value)}
+                  placeholder="Ex: critica, moderada"
+                  className="mt-1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Identificador único (sem espaços ou caracteres especiais)
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="newDisplayName">Nome de Exibição</Label>
+                <Input
+                  id="newDisplayName"
+                  value={newDisplayName}
+                  onChange={(e) => setNewDisplayName(e.target.value)}
+                  placeholder="Ex: Crítica, Moderada"
+                  className="mt-1"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Nome que aparecerá nos dropdowns e listagens
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="newResponseTime">Tempo de Resposta (horas)</Label>
+                <Input
+                  id="newResponseTime"
+                  type="number"
+                  min="1"
+                  value={newResponseTime}
+                  onChange={(e) => setNewResponseTime(Number(e.target.value))}
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="newResolutionTime">Tempo de Resolução (horas)</Label>
+                <Input
+                  id="newResolutionTime"
+                  type="number"
+                  min="1"
+                  value={newResolutionTime}
+                  onChange={(e) => setNewResolutionTime(Number(e.target.value))}
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <Button
+                  onClick={handleCreate}
+                  disabled={createMutation.isPending}
+                  className="flex-1 bg-[#F15A24] hover:bg-[#D14A1A]"
+                >
+                  {createMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Criar Prioridade"
+                  )}
+                </Button>
+                <Button
+                  onClick={() => setShowCreateForm(false)}
+                  variant="outline"
+                  disabled={createMutation.isPending}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         <Card className="bg-blue-50 border-blue-200">

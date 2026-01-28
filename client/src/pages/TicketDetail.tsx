@@ -47,6 +47,7 @@ export default function TicketDetail() {
   const [editMode, setEditMode] = useState(false);
   const [note, setNote] = useState("");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [useCustomEquipment, setUseCustomEquipment] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const utils = trpc.useUtils();
@@ -54,11 +55,17 @@ export default function TicketDetail() {
   const { data: attachments } = trpc.tickets.getAttachments.useQuery({ ticketId });
   const { data: history } = trpc.tickets.getHistory.useQuery({ ticketId });
   const { data: users } = trpc.users.list.useQuery();
+  const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
+    { clientId: ticket?.clientId || 0 },
+    { enabled: !!ticket?.clientId }
+  );
 
   const [editData, setEditData] = useState({
     status: "" as "aberto" | "em_progresso" | "resolvido" | "fechado" | "",
-    priority: "" as "baixa" | "media" | "alta" | "urgente" | "",
+    priority: "" as string,
     assignedToId: undefined as number | undefined,
+    equipmentId: undefined as number | undefined,
+    equipment: "",
     notes: "",
   });
 
@@ -113,8 +120,11 @@ export default function TicketDetail() {
         status: ticket.status,
         priority: ticket.priority,
         assignedToId: ticket.assignedToId || undefined,
+        equipmentId: ticket.equipmentId || undefined,
+        equipment: ticket.equipment || "",
         notes: ticket.notes || "",
       });
+      setUseCustomEquipment(!ticket.equipmentId && !!ticket.equipment);
       setEditMode(true);
     }
   };
@@ -127,6 +137,8 @@ export default function TicketDetail() {
     if (editData.status) updatePayload.status = editData.status;
     if (editData.priority) updatePayload.priority = editData.priority;
     if (editData.assignedToId !== undefined) updatePayload.assignedToId = editData.assignedToId;
+    if (editData.equipmentId !== undefined) updatePayload.equipmentId = editData.equipmentId;
+    if (editData.equipment) updatePayload.equipment = editData.equipment;
     if (editData.notes) updatePayload.notes = editData.notes;
     
     updateMutation.mutate(updatePayload);
@@ -523,6 +535,55 @@ export default function TicketDetail() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Equipamento</Label>
+                      {ticket?.clientId && clientEquipment && clientEquipment.length > 0 ? (
+                        <div className="space-y-2">
+                          <Select
+                            value={useCustomEquipment ? "custom" : editData.equipmentId?.toString() || "none"}
+                            onValueChange={(value) => {
+                              if (value === "custom") {
+                                setUseCustomEquipment(true);
+                                setEditData({ ...editData, equipmentId: undefined, equipment: "" });
+                              } else if (value === "none") {
+                                setUseCustomEquipment(false);
+                                setEditData({ ...editData, equipmentId: undefined, equipment: "" });
+                              } else {
+                                setUseCustomEquipment(false);
+                                setEditData({ ...editData, equipmentId: parseInt(value), equipment: "" });
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecionar equipamento" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="none">Nenhum</SelectItem>
+                              {clientEquipment.map((eq) => (
+                                <SelectItem key={eq.id} value={eq.id.toString()}>
+                                  {eq.brand} {eq.model} (N/S: {eq.serialNumber})
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="custom">Inserir manualmente</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {useCustomEquipment && (
+                            <Input
+                              value={editData.equipment}
+                              onChange={(e) => setEditData({ ...editData, equipment: e.target.value })}
+                              placeholder="Ex: Máquina de café, Frigorífico..."
+                            />
+                          )}
+                        </div>
+                      ) : (
+                        <Input
+                          value={editData.equipment}
+                          onChange={(e) => setEditData({ ...editData, equipment: e.target.value })}
+                          placeholder="Ex: Máquina de café, Frigorífico..."
+                        />
+                      )}
                     </div>
 
                     <div className="flex gap-2 pt-4">

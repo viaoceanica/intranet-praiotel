@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE slaConfig SET displayName = 'Baixa', isCustom = 0 WHERE priority = 'baixa';\nUPDATE slaConfig SET displayName = 'Média', isCustom = 0 WHERE priority = 'media';\nUPDATE slaConfig SET displayName = 'Alta', isCustom = 0 WHERE priority = 'alta';\nUPDATE slaConfig SET displayName = 'Urgente', isCustom = 0 WHERE priority = 'urgente';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute UPDATE slaConfig SET displayName = 'Baixa', isCustom = 0 WHERE priority = 'baixa';\nUPDATE slaConfig SET displayName = 'Média', isCustom = 0 WHERE priority = 'media';\nUPDATE slaConfig SET displayName = 'Alta', isCustom = 0 WHERE priority = 'alta';\nUPDATE slaConfig SET displayName = 'Urgente', isCustom = 0 WHERE priority = 'urgente';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 151
+}
