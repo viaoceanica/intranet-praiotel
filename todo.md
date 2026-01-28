@@ -259,3 +259,9 @@
 - [x] Implementar componente de autocomplete com resultados em tempo real
 - [x] Substituir Select por campo de pesquisa com autocomplete
 - [x] Testar pesquisa por nome, NIF e email
+
+## Autocomplete de Equipamentos no Novo Ticket
+- [x] Implementar autocomplete de equipamentos filtrado por cliente selecionado
+- [x] Mostrar apenas equipamentos do cliente atual
+- [x] Permitir pesquisa por marca, modelo ou número de série
+- [x] Testar funcionalidade com cliente com equipamentos

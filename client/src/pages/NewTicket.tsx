@@ -32,9 +32,11 @@ export default function NewTicket() {
   });
 
   const [useCustomClient, setUseCustomClient] = useState(false);
-  const [useCustomEquipment, setUseCustomEquipment] = useState(true);
+  const [useCustomEquipment, setUseCustomEquipment] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [equipmentSearchQuery, setEquipmentSearchQuery] = useState("");
+  const [showEquipmentDropdown, setShowEquipmentDropdown] = useState(false);
 
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
@@ -208,43 +210,109 @@ export default function NewTicket() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="equipment">Equipamento *</Label>
-                  {!useCustomClient && formData.clientId && clientEquipment && clientEquipment.length > 0 ? (
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Select
-                          value={useCustomEquipment ? "custom" : formData.equipmentId?.toString()}
-                          onValueChange={(value) => {
-                            if (value === "custom") {
-                              setUseCustomEquipment(true);
-                              setFormData({ ...formData, equipmentId: undefined, equipment: "" });
-                            } else {
-                              setUseCustomEquipment(false);
-                              setFormData({ ...formData, equipmentId: parseInt(value), equipment: "" });
-                            }
-                          }}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecionar equipamento" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {clientEquipment.map((eq) => (
-                              <SelectItem key={eq.id} value={eq.id.toString()}>
-                                {eq.brand} {eq.model} (N/S: {eq.serialNumber})
-                              </SelectItem>
-                            ))}
-                            <SelectItem value="custom">Inserir manualmente</SelectItem>
-                          </SelectContent>
-                        </Select>
+                  {!useCustomClient && formData.clientId ? (
+                    clientEquipment && clientEquipment.length > 0 ? (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 mb-2">
+                          <input
+                            type="checkbox"
+                            id="useCustomEquipment"
+                            checked={useCustomEquipment}
+                            onChange={(e) => {
+                              setUseCustomEquipment(e.target.checked);
+                              if (e.target.checked) {
+                                setFormData({ ...formData, equipmentId: undefined, equipment: "" });
+                                setEquipmentSearchQuery("");
+                              }
+                            }}
+                            className="w-4 h-4"
+                          />
+                          <Label htmlFor="useCustomEquipment" className="cursor-pointer">
+                            Inserir equipamento manualmente
+                          </Label>
+                        </div>
+                        {useCustomEquipment ? (
+                          <Input
+                            value={formData.equipment}
+                            onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
+                            required
+                            placeholder="Ex: Máquina de café, Frigorífico..."
+                          />
+                        ) : (
+                          <div className="relative">
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                              <Input
+                                id="equipmentSearch"
+                                type="text"
+                                value={equipmentSearchQuery}
+                                onChange={(e) => {
+                                  setEquipmentSearchQuery(e.target.value);
+                                  setShowEquipmentDropdown(true);
+                                  if (!e.target.value) {
+                                    setFormData({ ...formData, equipmentId: undefined });
+                                  }
+                                }}
+                                onFocus={() => setShowEquipmentDropdown(true)}
+                                placeholder="Pesquisar por marca, modelo ou N/S..."
+                                className="pl-10"
+                                required={!useCustomEquipment}
+                              />
+                            </div>
+                            {showEquipmentDropdown && clientEquipment && clientEquipment.filter(eq => 
+                              equipmentSearchQuery === "" ||
+                              eq.brand.toLowerCase().includes(equipmentSearchQuery.toLowerCase()) ||
+                              eq.model.toLowerCase().includes(equipmentSearchQuery.toLowerCase()) ||
+                              eq.serialNumber.toLowerCase().includes(equipmentSearchQuery.toLowerCase())
+                            ).length > 0 && (
+                              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                                {clientEquipment
+                                  .filter(eq => 
+                                    equipmentSearchQuery === "" ||
+                                    eq.brand.toLowerCase().includes(equipmentSearchQuery.toLowerCase()) ||
+                                    eq.model.toLowerCase().includes(equipmentSearchQuery.toLowerCase()) ||
+                                    eq.serialNumber.toLowerCase().includes(equipmentSearchQuery.toLowerCase())
+                                  )
+                                  .map((eq) => (
+                                    <button
+                                      key={eq.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setFormData({ ...formData, equipmentId: eq.id });
+                                        setEquipmentSearchQuery(`${eq.brand} ${eq.model} (N/S: ${eq.serialNumber})`);
+                                        setShowEquipmentDropdown(false);
+                                      }}
+                                      className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                                    >
+                                      <div className="font-medium">{eq.brand} {eq.model}</div>
+                                      <div className="text-sm text-gray-500">
+                                        N/S: {eq.serialNumber} | {eq.isCritical ? "⚠️ Crítico" : "Normal"}
+                                      </div>
+                                    </button>
+                                  ))}
+                              </div>
+                            )}
+                            {showEquipmentDropdown && equipmentSearchQuery && clientEquipment && clientEquipment.filter(eq => 
+                              eq.brand.toLowerCase().includes(equipmentSearchQuery.toLowerCase()) ||
+                              eq.model.toLowerCase().includes(equipmentSearchQuery.toLowerCase()) ||
+                              eq.serialNumber.toLowerCase().includes(equipmentSearchQuery.toLowerCase())
+                            ).length === 0 && (
+                              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center text-gray-500">
+                                Nenhum equipamento encontrado
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      {useCustomEquipment && (
-                        <Input
-                          value={formData.equipment}
-                          onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
-                          required
-                          placeholder="Ex: Máquina de café, Frigorífico..."
-                        />
-                      )}
-                    </div>
+                    ) : (
+                      <Input
+                        id="equipment"
+                        value={formData.equipment}
+                        onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
+                        required
+                        placeholder="Ex: Máquina de café, Frigorífico... (Cliente sem equipamentos registados)"
+                      />
+                    )
                   ) : (
                     <Input
                       id="equipment"
