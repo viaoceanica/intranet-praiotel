@@ -209,10 +209,10 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                             const isSubActive = location === subItem.href;
                             return (
                               <Link key={subItem.name} href={subItem.href}>
-                                <a
+                                <div
                                   className={`
                                     flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                                    transition-colors
+                                    transition-colors cursor-pointer
                                     ${isSubActive 
                                       ? "bg-[#F15A24] text-white" 
                                       : "text-gray-600 hover:bg-gray-100"
@@ -222,7 +222,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                                 >
                                   <subItem.icon className="h-4 w-4" />
                                   {subItem.name}
-                                </a>
+                                </div>
                               </Link>
                             );
                           })}
@@ -231,10 +231,10 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                     </div>
                   ) : (
                     <Link href={item.href}>
-                      <a
+                      <div
                         className={`
                           flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                          transition-colors
+                          transition-colors cursor-pointer
                           ${isActive 
                             ? "bg-[#F15A24] text-white" 
                             : "text-gray-700 hover:bg-gray-100"
@@ -244,7 +244,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                       >
                         <item.icon className="h-5 w-5" />
                         {item.name}
-                      </a>
+                      </div>
                     </Link>
                   )}
                 </div>

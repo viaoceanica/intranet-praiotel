@@ -191,3 +191,6 @@
 - [x] Adicionar campo de nome personalizado para novas prioridades
 - [x] Atualizar schema para suportar prioridades dinâmicas
 - [ ] Atualizar dropdowns de tickets para incluir prioridades personalizadas
+
+## Correções
+- [x] Corrigir erro de tags <a> aninhadas na página /sla-config
