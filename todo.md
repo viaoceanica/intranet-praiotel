@@ -232,6 +232,21 @@
 - [ ] Adicionar configuração de preferências de notificações por utilizador
 
 ## Correção de Navegação na Sidebar
-- [ ] Investigar erro de expansão de submenus
-- [ ] Corrigir lógica de estado de expansão
-- [ ] Testar navegação em todos os menus
+- [x] Investigar erro de expansão de submenus
+- [x] Corrigir lógica de estado de expansão
+- [x] Testar navegação em todos os menus
+
+## Coluna de Equipamento na Listagem de Tickets
+- [x] Adicionar coluna "Equipamento" na tabela de tickets
+- [x] Mostrar nome do equipamento (marca + modelo + N/S)
+- [x] Adicionar badge visual para equipamentos críticos
+- [x] Atualizar query para incluir dados do equipamento
+
+## Página de Estatísticas por Técnico
+- [x] Criar schema/queries para estatísticas de técnicos
+- [x] Criar página de estatísticas por técnico
+- [x] Mostrar tickets resolvidos por técnico
+- [x] Mostrar tempo médio de resolução por técnico
+- [x] Mostrar taxa de cumprimento de SLA por técnico
+- [x] Adicionar comparação com média da equipa
+- [x] Adicionar menu na sidebar para acesso às estatísticas

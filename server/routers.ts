@@ -13,6 +13,7 @@ import * as slaDb from "./slaDb";
 import * as slaNotifications from "./slaNotifications";
 import * as equipmentDb from "./equipmentDb";
 import * as prioritizationDb from "./prioritizationDb";
+import * as technicianStatsDb from "./technicianStatsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -125,6 +126,27 @@ export const appRouter = router({
   }),
 
   system: systemRouter,
+
+  technicianStats: router({
+    // Estatísticas de um técnico específico
+    byTechnician: isAuthenticated
+      .input(z.object({ technicianId: z.number() }))
+      .query(async ({ input }) => {
+        return await technicianStatsDb.getTechnicianStats(input.technicianId);
+      }),
+
+    // Comparação de todos os técnicos
+    comparison: isAuthenticated.query(async () => {
+      return await technicianStatsDb.getAllTechniciansComparison();
+    }),
+
+    // Histórico mensal de um técnico
+    monthlyHistory: isAuthenticated
+      .input(z.object({ technicianId: z.number() }))
+      .query(async ({ input }) => {
+        return await technicianStatsDb.getTechnicianMonthlyHistory(input.technicianId);
+      }),
+  }),
   
   auth: router({
     me: publicProcedure.query(({ ctx }) => ctx.user),

@@ -30,7 +30,38 @@ export async function getAllTickets() {
   const db = await getDb();
   if (!db) return [];
 
-  const result = await db.select().from(tickets).orderBy(desc(tickets.createdAt));
+  const { equipment } = await import("../drizzle/schema");
+  
+  const result = await db
+    .select({
+      id: tickets.id,
+      ticketNumber: tickets.ticketNumber,
+      clientName: tickets.clientName,
+      clientId: tickets.clientId,
+      equipment: tickets.equipment,
+      equipmentId: tickets.equipmentId,
+      problemType: tickets.problemType,
+      priority: tickets.priority,
+      status: tickets.status,
+      assignedToId: tickets.assignedToId,
+      location: tickets.location,
+      description: tickets.description,
+      createdAt: tickets.createdAt,
+      updatedAt: tickets.updatedAt,
+      resolvedAt: tickets.resolvedAt,
+      closedAt: tickets.closedAt,
+      equipmentData: {
+        id: equipment.id,
+        brand: equipment.brand,
+        model: equipment.model,
+        serialNumber: equipment.serialNumber,
+        isCritical: equipment.isCritical,
+      },
+    })
+    .from(tickets)
+    .leftJoin(equipment, eq(tickets.equipmentId, equipment.id))
+    .orderBy(desc(tickets.createdAt));
+  
   return result;
 }
 

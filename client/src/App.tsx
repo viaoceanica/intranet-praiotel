@@ -19,6 +19,7 @@ import Equipment from "./pages/Equipment";
 import EquipmentForm from "./pages/EquipmentForm";
 import EquipmentHistory from "./pages/EquipmentHistory";
 import PrioritizationRules from "./pages/PrioritizationRules";
+import TechnicianStats from "./pages/TechnicianStats";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -60,6 +61,7 @@ function Router() {
       <Route path="/equipment/:id/edit" component={() => <ProtectedRoute component={EquipmentForm} />} />
       <Route path="/equipment/:id/history" component={() => <ProtectedRoute component={EquipmentHistory} />} />
       <Route path="/prioritization" component={() => <ProtectedRoute component={PrioritizationRules} />} />
+      <Route path="/technician-stats" component={() => <ProtectedRoute component={TechnicianStats} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

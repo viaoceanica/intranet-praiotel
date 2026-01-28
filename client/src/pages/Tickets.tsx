@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Plus, Loader2, Search, Eye, X, Calendar } from "lucide-react";
+import { Plus, Loader2, Search, Eye, X, Calendar, AlertTriangle } from "lucide-react";
 import { SlaIndicator } from "@/components/SlaIndicator";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
@@ -283,7 +283,26 @@ export default function Tickets() {
                   <TableRow key={ticket.id}>
                     <TableCell className="font-medium">{ticket.ticketNumber}</TableCell>
                     <TableCell>{ticket.clientName}</TableCell>
-                    <TableCell>{ticket.equipment}</TableCell>
+                    <TableCell>
+                      {ticket.equipmentData?.id ? (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">
+                            {ticket.equipmentData.brand} {ticket.equipmentData.model}
+                            <span className="text-gray-500 text-xs ml-1">
+                              (N/S: {ticket.equipmentData.serialNumber})
+                            </span>
+                          </span>
+                          {ticket.equipmentData.isCritical && (
+                            <Badge className="bg-red-100 text-red-800 flex items-center gap-1">
+                              <AlertTriangle className="h-3 w-3" />
+                              Crítico
+                            </Badge>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-gray-500">{ticket.equipment || '-'}</span>
+                      )}
+                    </TableCell>
                     <TableCell>{ticket.location}</TableCell>
                     <TableCell>
                       <Badge className={priorityColors[ticket.priority]}>

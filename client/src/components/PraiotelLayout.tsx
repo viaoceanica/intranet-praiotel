@@ -25,7 +25,8 @@ import {
   Wrench,
   Zap,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  BarChart3
 } from "lucide-react";
 import { useState } from "react";
 
@@ -77,6 +78,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       ]
     },
     { name: "Utilizadores", href: "/users", icon: Users, roles: ["admin"] },
+    { name: "Estat\u00edsticas", href: "/technician-stats", icon: BarChart3, roles: ["admin", "gestor"] },
   ];
 
   const filteredNavigation = navigation.filter(item => 
