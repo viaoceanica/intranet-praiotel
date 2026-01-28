@@ -1103,6 +1103,14 @@ export const appRouter = router({
           ...input,
           authorId: ctx.user.id,
         });
+
+        // Se for urgente, notificar todos os utilizadores
+        if (input.priority === "urgente") {
+          const allUsers = await db.getAllUsers();
+          const userIds = allUsers.map(u => u.id);
+          await notificationHelpers.notifyUrgentAnnouncement(id, input.title, userIds);
+        }
+
         return { id };
       }),
 
@@ -1324,6 +1332,14 @@ export const appRouter = router({
         await internalManagementDb.deleteKnowledgeArticle(input.id);
         return { success: true };
       }),
+  }),
+
+  internalManagementSeed: router({
+    seedAll: isAdmin.mutation(async ({ ctx }) => {
+      const { seedInternalManagement } = await import("./seedInternalManagement");
+      await seedInternalManagement(ctx.user.id);
+      return { success: true };
+    }),
   }),
 });
 

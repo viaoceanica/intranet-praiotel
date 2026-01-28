@@ -5,22 +5,84 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Download, Search, Calendar, User } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileText, Download, Search, Calendar, User, Upload, Loader2 } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 
 export function DocumentManagement() {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploadCategory, setUploadCategory] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
 
-  const { data: categories = [] } = trpc.documentCategories.list.useQuery();
-  const { data: documents = [] } = trpc.documents.list.useQuery({ categoryId: selectedCategory });
+  const { data: categories = [], refetch: refetchCategories } = trpc.documentCategories.list.useQuery();
+  const { data: documents = [], refetch: refetchDocuments } = trpc.documents.list.useQuery({ categoryId: selectedCategory });
 
   const incrementDownloadMutation = trpc.documents.incrementDownload.useMutation();
+  const uploadDocumentMutation = trpc.documents.upload.useMutation({
+    onSuccess: () => {
+      toast.success("Documento carregado com sucesso");
+      refetchDocuments();
+      setIsUploadDialogOpen(false);
+      setUploadFile(null);
+      setUploadCategory("");
+      setIsUploading(false);
+    },
+    onError: (error) => {
+      toast.error("Erro ao carregar documento: " + error.message);
+      setIsUploading(false);
+    },
+  });
 
   const handleDownload = (doc: any) => {
     incrementDownloadMutation.mutate({ id: doc.id });
     window.open(doc.fileUrl, "_blank");
     toast.success("Download iniciado");
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      // Verificar tamanho máximo de 10MB
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("O ficheiro não pode exceder 10MB");
+        return;
+      }
+      setUploadFile(file);
+    }
+  };
+
+  const handleUploadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!uploadFile || !uploadCategory) {
+      toast.error("Por favor selecione um ficheiro e uma categoria");
+      return;
+    }
+
+    setIsUploading(true);
+
+    // Converter ficheiro para base64
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = (reader.result as string).split(",")[1];
+      uploadDocumentMutation.mutate({
+        name: uploadFile.name,
+        categoryId: parseInt(uploadCategory),
+        fileData: base64,
+        mimeType: uploadFile.type || "application/octet-stream",
+      });
+    };
+    reader.onerror = () => {
+      toast.error("Erro ao ler o ficheiro");
+      setIsUploading(false);
+    };
+    reader.readAsDataURL(uploadFile);
   };
 
   const formatFileSize = (bytes: number) => {
@@ -35,11 +97,87 @@ export function DocumentManagement() {
       )
     : documents;
 
+  const isAdmin = user?.role === "admin" || user?.role === "gestor";
+
   return (
     <PraiotelLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Gestão de Documentos</h1>
+          {isAdmin && (
+            <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Carregar Documento
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Carregar Novo Documento</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleUploadSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="category">Categoria</Label>
+                    <Select value={uploadCategory} onValueChange={setUploadCategory} required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat: any) => (
+                          <SelectItem key={cat.id} value={cat.id.toString()}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="file">Ficheiro (máx. 10MB)</Label>
+                    <Input
+                      id="file"
+                      type="file"
+                      onChange={handleFileChange}
+                      required
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.zip"
+                    />
+                    {uploadFile && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        {uploadFile.name} ({formatFileSize(uploadFile.size)})
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setIsUploadDialogOpen(false);
+                        setUploadFile(null);
+                        setUploadCategory("");
+                      }}
+                      disabled={isUploading}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button type="submit" disabled={isUploading}>
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          A carregar...
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="h-4 w-4 mr-2" />
+                          Carregar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         {/* Filtros */}

@@ -101,3 +101,23 @@ export async function notifySlaBreached(
     });
   }
 }
+
+/**
+ * Envia notificação para todos os utilizadores quando um anúncio urgente é publicado
+ */
+export async function notifyUrgentAnnouncement(
+  announcementId: number,
+  announcementTitle: string,
+  allUserIds: number[]
+) {
+  // Criar notificação para cada utilizador
+  for (const userId of allUserIds) {
+    await createNotification({
+      userId,
+      type: "urgent_announcement",
+      title: "📢 Anúncio Urgente",
+      message: announcementTitle,
+      ticketId: null,
+    });
+  }
+}

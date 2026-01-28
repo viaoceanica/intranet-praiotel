@@ -394,3 +394,12 @@
 - [x] Adicionar sistema de tags para melhor organização
 - [x] Adicionar contador de visualizações
 - [x] Adicionar permissões (todos podem ver, admin/gestor podem criar/editar)
+
+## Melhorias de Gestão Interna
+- [x] Adicionar interface de upload de documentos no frontend
+- [x] Criar categorias pré-definidas para documentos (RH, Técnico, Administrativo)
+- [x] Criar categorias pré-definidas para conhecimento (Tutoriais, Formação, FAQ)
+- [x] Popular base de dados com conteúdo de exemplo
+- [x] Implementar notificações push automáticas para anúncios urgentes
+- [x] Testar upload de documentos com diferentes tipos de ficheiros
+- [x] Verificar envio de notificações ao criar anúncio urgente
