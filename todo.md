@@ -253,3 +253,9 @@
 
 ## Reorganização do Menu de Estatísticas
 - [x] Mover "Estatísticas" para sub-menu de Tickets
+
+## Autocomplete de Clientes no Novo Ticket
+- [x] Criar endpoint de pesquisa de clientes por nome, NIF ou email
+- [x] Implementar componente de autocomplete com resultados em tempo real
+- [x] Substituir Select por campo de pesquisa com autocomplete
+- [x] Testar pesquisa por nome, NIF e email

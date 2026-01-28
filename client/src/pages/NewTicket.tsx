@@ -15,7 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Search } from "lucide-react";
 
 export default function NewTicket() {
   const [, setLocation] = useLocation();
@@ -33,11 +33,16 @@ export default function NewTicket() {
 
   const [useCustomClient, setUseCustomClient] = useState(false);
   const [useCustomEquipment, setUseCustomEquipment] = useState(true);
+  const [clientSearchQuery, setClientSearchQuery] = useState("");
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
 
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
-  const { data: clients } = trpc.clients.list.useQuery();
   const { data: priorities } = trpc.sla.list.useQuery();
+  const { data: searchResults } = trpc.clients.search.useQuery(
+    { query: clientSearchQuery },
+    { enabled: clientSearchQuery.length > 0 && !useCustomClient }
+  );
   const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
     { clientId: formData.clientId! },
     { enabled: !!formData.clientId && !useCustomClient }
@@ -60,7 +65,7 @@ export default function NewTicket() {
     // Se usar cliente da lista, preencher clientName
     let finalData = { ...formData };
     if (!useCustomClient && formData.clientId) {
-      const selectedClient = clients?.find(c => c.id === formData.clientId);
+      const selectedClient = searchResults?.find((c: any) => c.id === formData.clientId);
       if (selectedClient) {
         finalData.clientName = selectedClient.designation;
       }
@@ -149,24 +154,53 @@ export default function NewTicket() {
                     />
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <Label htmlFor="clientId">Selecionar Cliente *</Label>
-                    <Select
-                      value={formData.clientId?.toString() || ""}
-                      onValueChange={(value) => setFormData({ ...formData, clientId: parseInt(value) })}
-                      required={!useCustomClient}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Escolher cliente..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients?.map((client) => (
-                          <SelectItem key={client.id} value={client.id.toString()}>
-                            {client.designation} - {client.nif}
-                          </SelectItem>
+                  <div className="space-y-2 relative">
+                    <Label htmlFor="clientSearch">Selecionar Cliente *</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        id="clientSearch"
+                        type="text"
+                        value={clientSearchQuery}
+                        onChange={(e) => {
+                          setClientSearchQuery(e.target.value);
+                          setShowClientDropdown(true);
+                          if (!e.target.value) {
+                            setFormData({ ...formData, clientId: undefined });
+                          }
+                        }}
+                        onFocus={() => setShowClientDropdown(true)}
+                        placeholder="Pesquisar por nome, NIF ou email..."
+                        className="pl-10"
+                        required={!useCustomClient}
+                      />
+                    </div>
+                    {showClientDropdown && searchResults && searchResults.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        {searchResults.map((client) => (
+                          <button
+                            key={client.id}
+                            type="button"
+                            onClick={() => {
+                              setFormData({ ...formData, clientId: client.id });
+                              setClientSearchQuery(`${client.designation} - ${client.nif}`);
+                              setShowClientDropdown(false);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                          >
+                            <div className="font-medium">{client.designation}</div>
+                            <div className="text-sm text-gray-500">
+                              NIF: {client.nif} | Email: {client.primaryEmail}
+                            </div>
+                          </button>
                         ))}
-                      </SelectContent>
-                    </Select>
+                      </div>
+                    )}
+                    {showClientDropdown && clientSearchQuery && searchResults && searchResults.length === 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center text-gray-500">
+                        Nenhum cliente encontrado
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
