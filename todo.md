@@ -302,3 +302,12 @@
 - [x] Implementar opções pré-definidas (último mês, trimestre, semestre, ano, tudo)
 - [x] Atualizar queries para filtrar por intervalo de datas
 - [x] Testar filtro com diferentes períodos
+
+## Sistema de Notificações em Tempo Real
+- [x] Criar componente de notificações com polling automático
+- [x] Implementar badge de contador de notificações não lidas
+- [x] Criar dropdown de notificações com lista de alertas
+- [x] Implementar marcação de notificações como lidas
+- [x] Adicionar tipos de notificação (novo ticket, comentário, atualização, SLA)
+- [x] Integrar notificações no header do PraiotelLayout
+- [x] Testar sistema completo de notificações

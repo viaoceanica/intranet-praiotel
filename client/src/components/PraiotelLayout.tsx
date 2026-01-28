@@ -19,7 +19,6 @@ import {
   LogOut,
   Menu,
   X,
-  Bell,
   Building2,
   Settings,
   Wrench,
@@ -29,6 +28,7 @@ import {
   BarChart3,
   FileText
 } from "lucide-react";
+import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { useState } from "react";
 
 interface PraiotelLayoutProps {
@@ -41,10 +41,6 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [ticketsExpanded, setTicketsExpanded] = useState(false);
   const [clientsExpanded, setClientsExpanded] = useState(false);
-  
-  const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
-    refetchInterval: 30000, // Atualizar a cada 30 segundos
-  });
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -129,16 +125,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link href="/notifications">
-              <Button variant="ghost" size="icon" className="relative">
-                <Bell className="h-5 w-5" />
-                {unreadCount && unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#F15A24] text-white text-xs rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
+            <NotificationsDropdown />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

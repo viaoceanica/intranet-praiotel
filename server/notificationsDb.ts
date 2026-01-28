@@ -35,6 +35,20 @@ export async function getUnreadCount(userId: number) {
   return result.length;
 }
 
+export async function getUnreadNotifications(userId: number, limit: number = 20) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(notifications)
+    .where(and(eq(notifications.userId, userId), eq(notifications.isRead, 0)))
+    .orderBy(desc(notifications.createdAt))
+    .limit(limit);
+
+  return result;
+}
+
 export async function markAsRead(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");

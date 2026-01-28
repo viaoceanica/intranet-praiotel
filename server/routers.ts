@@ -644,6 +644,10 @@ export const appRouter = router({
       return await notificationsDb.getUserNotifications(ctx.user.id);
     }),
 
+    getUnread: isAuthenticated.query(async ({ ctx }) => {
+      return await notificationsDb.getUnreadNotifications(ctx.user.id);
+    }),
+
     unreadCount: isAuthenticated.query(async ({ ctx }) => {
       return await notificationsDb.getUnreadCount(ctx.user.id);
     }),
