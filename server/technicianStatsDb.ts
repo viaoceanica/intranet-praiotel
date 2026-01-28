@@ -1,20 +1,31 @@
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, sql, gte, lte } from "drizzle-orm";
 import { getDb } from "./db";
 import { tickets } from "../drizzle/schema";
 import { getAllSlaConfigs } from "./slaDb";
 
 /**
  * Estatísticas detalhadas de um técnico específico
+ * @param technicianId ID do técnico
+ * @param startDate Data inicial do período (opcional)
+ * @param endDate Data final do período (opcional)
  */
-export async function getTechnicianStats(technicianId: number) {
+export async function getTechnicianStats(technicianId: number, startDate?: Date, endDate?: Date) {
   const db = await getDb();
   if (!db) return null;
 
-  // Obter todos os tickets do técnico
+  // Obter todos os tickets do técnico (com filtro de período opcional)
+  const whereConditions = [eq(tickets.assignedToId, technicianId)];
+  
+  // Aplicar filtro de período se fornecido
+  if (startDate && endDate) {
+    whereConditions.push(gte(tickets.createdAt, startDate));
+    whereConditions.push(lte(tickets.createdAt, endDate));
+  }
+
   const technicianTickets = await db
     .select()
     .from(tickets)
-    .where(eq(tickets.assignedToId, technicianId))
+    .where(and(...whereConditions))
     .orderBy(desc(tickets.createdAt));
 
   const total = technicianTickets.length;
@@ -75,9 +86,11 @@ export async function getTechnicianStats(technicianId: number) {
 }
 
 /**
- * Comparação de todos os técnicos
+ * Comparação de todos os técnicos com médias da equipa
+ * @param startDate Data inicial do período (opcional)
+ * @param endDate Data final do período (opcional)
  */
-export async function getAllTechniciansComparison() {
+export async function getAllTechniciansComparison(startDate?: Date, endDate?: Date) {
   const db = await getDb();
   if (!db) return [];
 
@@ -92,7 +105,7 @@ export async function getAllTechniciansComparison() {
 
   const stats = [];
   for (const tech of technicians) {
-    const techStats = await getTechnicianStats(tech.id);
+    const techStats = await getTechnicianStats(tech.id, startDate, endDate);
     if (techStats) {
       stats.push({
         id: tech.id,

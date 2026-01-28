@@ -26,7 +26,8 @@ import {
   Zap,
   ChevronDown,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  FileText
 } from "lucide-react";
 import { useState } from "react";
 
@@ -67,6 +68,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Configura\u00e7\u00e3o SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
         { name: "Prioriza\u00e7\u00e3o Autom\u00e1tica", href: "/prioritization", icon: Zap, roles: ["admin"] },
         { name: "Estat\u00edsticas", href: "/technician-stats", icon: BarChart3, roles: ["admin", "gestor"] },
+        { name: "Templates", href: "/response-templates", icon: FileText, roles: ["admin", "gestor"] },
       ]
     },
     { 

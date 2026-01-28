@@ -3,7 +3,8 @@ import PraiotelLayout from "@/components/PraiotelLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
-import { Loader2, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, Users } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Clock, CheckCircle, XCircle, Users, Calendar } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -15,7 +16,34 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 export default function TechnicianStats() {
-  const { data: comparison, isLoading } = trpc.technicianStats.comparison.useQuery();
+  const [period, setPeriod] = useState<string>("all");
+  
+  // Calcular datas baseadas no período selecionado
+  const getPeriodDates = () => {
+    if (period === "all") return {};
+    
+    const endDate = new Date();
+    const startDate = new Date();
+    
+    switch (period) {
+      case "month":
+        startDate.setMonth(startDate.getMonth() - 1);
+        break;
+      case "quarter":
+        startDate.setMonth(startDate.getMonth() - 3);
+        break;
+      case "semester":
+        startDate.setMonth(startDate.getMonth() - 6);
+        break;
+      case "year":
+        startDate.setFullYear(startDate.getFullYear() - 1);
+        break;
+    }
+    
+    return { startDate, endDate };
+  };
+  
+  const { data: comparison, isLoading } = trpc.technicianStats.comparison.useQuery(getPeriodDates());
 
   const formatTime = (ms: number) => {
     const hours = Math.floor(ms / (1000 * 60 * 60));
@@ -58,8 +86,27 @@ export default function TechnicianStats() {
     <PraiotelLayout>
       <div className="container py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Estatísticas por Técnico</h1>
-          <p className="text-gray-600 mt-2">Desempenho individual e comparação com a média da equipa</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Estatísticas por Técnico</h1>
+              <p className="text-gray-600 mt-2">Desempenho individual e comparação com a média da equipa</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-gray-600" />
+              <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Selecione o período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os Períodos</SelectItem>
+                  <SelectItem value="month">Último Mês</SelectItem>
+                  <SelectItem value="quarter">Último Trimestre</SelectItem>
+                  <SelectItem value="semester">Último Semestre</SelectItem>
+                  <SelectItem value="year">Último Ano</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
 
         {isLoading ? (

@@ -287,3 +287,18 @@
 - [x] Permitir inserção rápida de template no campo de texto
 - [x] Adicionar templates padrão (ex: "Equipamento reparado", "Aguarda peça")
 - [x] Testar funcionalidade em página de detalhes de ticket
+
+## Interface de Gestão de Templates de Resposta
+- [x] Criar página de gestão de templates (acessível para Admin/Gestor)
+- [x] Implementar listagem de templates existentes
+- [x] Adicionar formulário de criação de novos templates
+- [x] Implementar edição de templates existentes
+- [x] Implementar eliminação de templates
+- [x] Adicionar validações (nome e conteúdo obrigatórios)
+- [x] Adicionar menu na sidebar para acesso à gestão de templates
+
+## Filtro de Período nas Estatísticas
+- [x] Adicionar dropdown de período na página de estatísticas
+- [x] Implementar opções pré-definidas (último mês, trimestre, semestre, ano, tudo)
+- [x] Atualizar queries para filtrar por intervalo de datas
+- [x] Testar filtro com diferentes períodos

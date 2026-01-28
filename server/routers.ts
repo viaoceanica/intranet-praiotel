@@ -131,15 +131,24 @@ export const appRouter = router({
   technicianStats: router({
     // Estatísticas de um técnico específico
     byTechnician: isAuthenticated
-      .input(z.object({ technicianId: z.number() }))
+      .input(z.object({ 
+        technicianId: z.number(),
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }))
       .query(async ({ input }) => {
-        return await technicianStatsDb.getTechnicianStats(input.technicianId);
+        return await technicianStatsDb.getTechnicianStats(input.technicianId, input.startDate, input.endDate);
       }),
 
     // Comparação de todos os técnicos
-    comparison: isAuthenticated.query(async () => {
-      return await technicianStatsDb.getAllTechniciansComparison();
-    }),
+    comparison: isAuthenticated
+      .input(z.object({
+        startDate: z.date().optional(),
+        endDate: z.date().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await technicianStatsDb.getAllTechniciansComparison(input?.startDate, input?.endDate);
+      }),
 
     // Histórico mensal de um técnico
     monthlyHistory: isAuthenticated
