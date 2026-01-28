@@ -250,3 +250,6 @@
 - [x] Mostrar taxa de cumprimento de SLA por técnico
 - [x] Adicionar comparação com média da equipa
 - [x] Adicionar menu na sidebar para acesso às estatísticas
+
+## Reorganização do Menu de Estatísticas
+- [x] Mover "Estatísticas" para sub-menu de Tickets
