@@ -20,6 +20,7 @@ import * as customRolesDb from "./customRolesDb";
 import * as internalManagementDb from "./internalManagementDb";
 import * as favoritesDb from "./favoritesDb";
 import * as internalManagementAnalyticsDb from "./internalManagementAnalyticsDb";
+import * as articleCommentsDb from "./articleCommentsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1280,16 +1281,22 @@ export const appRouter = router({
         return await internalManagementDb.getAllKnowledgeArticles(input.categoryId);
       }),
 
-    search: isAuthenticated
-      .input(z.object({ searchTerm: z.string() }))
-      .query(async ({ input }) => {
-        return await internalManagementDb.searchKnowledgeArticles(input.searchTerm);
-      }),
-
     getById: isAuthenticated
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
-        return await internalManagementDb.getKnowledgeArticleById(input.id);
+        const article = await internalManagementDb.getKnowledgeArticleById(input.id);
+        if (!article) throw new Error("Artigo não encontrado");
+        
+        // Incrementar contador de visualizações
+        await internalManagementDb.incrementArticleView(input.id);
+        
+        return article;
+      }),
+
+    searchArticles: isAuthenticated
+      .input(z.object({ searchTerm: z.string() }))
+      .query(async ({ input }) => {
+        return await internalManagementDb.searchKnowledgeArticles(input.searchTerm);
       }),
 
     create: isAdmin
@@ -1407,6 +1414,39 @@ export const appRouter = router({
       .input(z.object({ days: z.number().optional() }))
       .query(async ({ input }) => {
         return await internalManagementAnalyticsDb.getRecentDocuments(input.days);
+      }),
+  }),
+
+  articleComments: router({
+    create: isAuthenticated
+      .input(z.object({
+        articleId: z.number(),
+        comment: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await articleCommentsDb.createComment(input.articleId, ctx.user.id, input.comment);
+        return { id };
+      }),
+
+    list: isAuthenticated
+      .input(z.object({ articleId: z.number() }))
+      .query(async ({ input }) => {
+        return await articleCommentsDb.getArticleComments(input.articleId);
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ commentId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        const comment = await articleCommentsDb.getCommentById(input.commentId);
+        if (!comment) throw new Error("Comentário não encontrado");
+        
+        // Apenas o autor ou admin pode eliminar
+        if (comment.userId !== ctx.user.id && ctx.user.role !== "admin") {
+          throw new Error("Sem permissão para eliminar este comentário");
+        }
+
+        await articleCommentsDb.deleteComment(input.commentId);
+        return { success: true };
       }),
   }),
 });

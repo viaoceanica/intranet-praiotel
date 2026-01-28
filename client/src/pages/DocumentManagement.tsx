@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Download, Search, Calendar, User, Upload, Loader2 } from "lucide-react";
+import { FileText, Download, Search, Calendar, User, Upload, Loader2, Star } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -25,6 +25,26 @@ export function DocumentManagement() {
   const { data: documents = [], refetch: refetchDocuments } = trpc.documents.list.useQuery({ categoryId: selectedCategory });
 
   const incrementDownloadMutation = trpc.documents.incrementDownload.useMutation();
+
+  const addFavoriteMutation = trpc.favorites.add.useMutation({
+    onSuccess: () => {
+      toast.success("Adicionado aos favoritos");
+    },
+  });
+
+  const removeFavoriteMutation = trpc.favorites.remove.useMutation({
+    onSuccess: () => {
+      toast.success("Removido dos favoritos");
+    },
+  });
+
+  const handleToggleFavorite = (documentId: number, isFavorite: boolean) => {
+    if (isFavorite) {
+      removeFavoriteMutation.mutate({ itemType: "document", itemId: documentId });
+    } else {
+      addFavoriteMutation.mutate({ itemType: "document", itemId: documentId });
+    }
+  };
   const uploadDocumentMutation = trpc.documents.upload.useMutation({
     onSuccess: () => {
       toast.success("Documento carregado com sucesso");
@@ -219,7 +239,14 @@ export function DocumentManagement() {
               Nenhum documento encontrado
             </Card>
           ) : (
-            filteredDocuments.map((doc: any) => (
+            filteredDocuments.map((doc: any) => {
+              const { data: favoriteCheck } = trpc.favorites.check.useQuery(
+                { itemType: "document", itemId: doc.id },
+                { enabled: !!user }
+              );
+              const isFavorite = favoriteCheck?.isFavorite || false;
+
+              return (
               <Card key={doc.id} className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4 flex-1">
@@ -241,13 +268,23 @@ export function DocumentManagement() {
                       </div>
                     </div>
                   </div>
-                  <Button onClick={() => handleDownload(doc)}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleToggleFavorite(doc.id, isFavorite)}
+                    >
+                      <Star className={`h-5 w-5 ${isFavorite ? 'fill-[#F15A24] text-[#F15A24]' : 'text-gray-400'}`} />
+                    </Button>
+                    <Button onClick={() => handleDownload(doc)}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
                 </div>
               </Card>
-            ))
+              );
+            })
           )}
         </div>
       </div>

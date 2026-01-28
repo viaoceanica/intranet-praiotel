@@ -416,3 +416,12 @@
 - [x] Mostrar documentos mais descarregados
 - [x] Calcular taxa de leitura de anúncios
 - [x] Testar todas as funcionalidades
+
+## Melhorias Finais de Gestão Interna
+- [x] Adicionar botão de favoritos na página de Base de Conhecimento
+- [x] Adicionar botão de favoritos na página de Gestão de Documentos
+- [x] Criar schema de comentários (articleId, userId, comment, createdAt)
+- [x] Implementar backend de comentários (criar, listar, eliminar)
+- [x] Adicionar secção de comentários na visualização de artigos
+- [x] Testar sistema de favoritos integrado
+- [x] Testar sistema de comentários

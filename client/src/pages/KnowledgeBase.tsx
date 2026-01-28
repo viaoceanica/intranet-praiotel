@@ -5,15 +5,40 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Search, Calendar, User, Eye } from "lucide-react";
+import { BookOpen, Search, Calendar, User, Eye, Star, MessageCircle } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { toast } from "sonner";
+import { useLocation } from "wouter";
 
 
 export function KnowledgeBase() {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
 
   const { data: categories = [] } = trpc.knowledgeCategories.list.useQuery();
   const { data: articles = [] } = trpc.knowledgeArticles.list.useQuery({ categoryId: selectedCategory });
+
+  const addFavoriteMutation = trpc.favorites.add.useMutation({
+    onSuccess: () => {
+      toast.success("Adicionado aos favoritos");
+    },
+  });
+
+  const removeFavoriteMutation = trpc.favorites.remove.useMutation({
+    onSuccess: () => {
+      toast.success("Removido dos favoritos");
+    },
+  });
+
+  const handleToggleFavorite = (articleId: number, isFavorite: boolean) => {
+    if (isFavorite) {
+      removeFavoriteMutation.mutate({ itemType: "article", itemId: articleId });
+    } else {
+      addFavoriteMutation.mutate({ itemType: "article", itemId: articleId });
+    }
+  };
 
   const filteredArticles = searchTerm
     ? articles.filter((article: any) =>
@@ -66,8 +91,19 @@ export function KnowledgeBase() {
               Nenhum artigo encontrado
             </Card>
           ) : (
-            filteredArticles.map((article: any) => (
-              <Card key={article.id} className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            filteredArticles.map((article: any) => {
+              const { data: favoriteCheck } = trpc.favorites.check.useQuery(
+                { itemType: "article", itemId: article.id },
+                { enabled: !!user }
+              );
+              const isFavorite = favoriteCheck?.isFavorite || false;
+
+              return (
+              <Card 
+                key={article.id} 
+                className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => setLocation(`/knowledge-base/${article.id}`)}
+              >
                 <div className="flex items-start gap-4">
                   <BookOpen className="h-8 w-8 text-[#F15A24] flex-shrink-0 mt-1" />
                   <div className="flex-1">
@@ -93,9 +129,21 @@ export function KnowledgeBase() {
                       </span>
                     </div>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleFavorite(article.id, isFavorite);
+                    }}
+                    className="flex-shrink-0"
+                  >
+                    <Star className={`h-5 w-5 ${isFavorite ? 'fill-[#F15A24] text-[#F15A24]' : 'text-gray-400'}`} />
+                  </Button>
                 </div>
               </Card>
-            ))
+              );
+            })
           )}
         </div>
       </div>

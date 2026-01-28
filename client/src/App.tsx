@@ -29,6 +29,7 @@ import { DocumentManagement } from "./pages/DocumentManagement";
 import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { Favorites } from "./pages/Favorites";
 import { InternalManagementAnalytics } from "./pages/InternalManagementAnalytics";
+import { ArticleDetail } from "./pages/ArticleDetail";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -78,6 +79,7 @@ function Router() {
       <Route path="/bulletin-board" component={() => <ProtectedRoute component={BulletinBoard} />} />
       <Route path="/documents" component={() => <ProtectedRoute component={DocumentManagement} />} />
       <Route path="/knowledge-base" component={() => <ProtectedRoute component={KnowledgeBase} />} />
+      <Route path="/knowledge-base/:id" component={() => <ProtectedRoute component={ArticleDetail} />} />
       <Route path="/favorites" component={() => <ProtectedRoute component={Favorites} />} />
       <Route path="/internal-management-analytics" component={() => <ProtectedRoute component={InternalManagementAnalytics} />} />
       <Route path="/404" component={NotFound} />
