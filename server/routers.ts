@@ -39,6 +39,25 @@ const isAdmin = isAuthenticated.use(async ({ ctx, next }) => {
   return next({ ctx });
 });
 
+// Middleware para verificar permissões específicas
+const requirePermissions = (permissions: string[]) => {
+  return isAuthenticated.use(async ({ ctx, next }) => {
+    const { hasPermission } = await import("./permissions");
+    
+    for (const permission of permissions) {
+      const hasAccess = await hasPermission(ctx.user.role, permission as any);
+      if (!hasAccess) {
+        throw new TRPCError({ 
+          code: "FORBIDDEN", 
+          message: `Permissão necessária: ${permission}` 
+        });
+      }
+    }
+    
+    return next({ ctx });
+  });
+};
+
 export const appRouter = router({
   sla: router({
     list: isAuthenticated.query(async () => {
@@ -215,6 +234,12 @@ export const appRouter = router({
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true };
+    }),
+
+    getPermissions: isAuthenticated.query(async ({ ctx }) => {
+      const { getUserPermissions } = await import("./permissions");
+      const permissions = await getUserPermissions(ctx.user.role);
+      return Array.from(permissions);
     }),
   }),
 
@@ -714,10 +739,10 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    delete: isAuthenticated
+    delete: requirePermissions(["canDeleteTickets"])
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
-        await clientsDb.deleteClient(input.id);
+        await ticketsDb.deleteTicket(input.id);
         return { success: true };
       }),
 

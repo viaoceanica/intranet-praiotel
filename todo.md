@@ -337,3 +337,12 @@
 - [x] Integrar roles personalizados no select de utilizadores
 - [x] Testar criação, edição e eliminação de roles
 - [x] Testar atribuição de roles personalizados a utilizadores
+
+## Controlo de Acesso Baseado em Permissões (RBAC)
+- [x] Criar função auxiliar getUserPermissions() no backend
+- [x] Criar middleware requirePermission() para endpoints tRPC
+- [x] Implementar hook usePermissions() no frontend
+- [x] Criar endpoint auth.getPermissions para carregar permissões
+- [x] Estrutura base de RBAC implementada e pronta para expansão
+- [ ] Aplicar restrições em todos os endpoints (expansão futura)
+- [ ] Controlar visibilidade de botões/menus no frontend (expansão futura)
