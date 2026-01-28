@@ -76,3 +76,15 @@
 - [x] Criar sistema de notificações para atribuições
 - [x] Criar sistema de notificações para atualizações
 - [x] Criar sistema de notificações para novos comentários
+
+## Gestão de Clientes
+- [x] Criar schema de clientes na base de dados
+- [x] Criar schema de emails adicionais de clientes
+- [x] Adicionar menu "Clientes" na sidebar
+- [x] Criar página de listagem de clientes
+- [x] Criar página de adicionar cliente
+- [x] Implementar pesquisa por NIF, nome e email
+- [x] Permitir adicionar múltiplos emails por cliente
+- [x] Interligar tickets com tabela de clientes
+- [x] Substituir campo clientName por relação com tabela clientes
+- [x] Atualizar formulário de criação de tickets para usar dropdown de clientes

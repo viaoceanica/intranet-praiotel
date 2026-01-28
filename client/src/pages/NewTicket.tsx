@@ -20,6 +20,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 export default function NewTicket() {
   const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
+    clientId: undefined as number | undefined,
     clientName: "",
     equipment: "",
     problemType: "",
@@ -29,8 +30,11 @@ export default function NewTicket() {
     assignedToId: undefined as number | undefined,
   });
 
+  const [useCustomClient, setUseCustomClient] = useState(false);
+
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
+  const { data: clients } = trpc.clients.list.useQuery();
 
   const createMutation = trpc.tickets.create.useMutation({
     onSuccess: (data) => {
@@ -45,7 +49,17 @@ export default function NewTicket() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate(formData);
+    
+    // Se usar cliente da lista, preencher clientName
+    let finalData = { ...formData };
+    if (!useCustomClient && formData.clientId) {
+      const selectedClient = clients?.find(c => c.id === formData.clientId);
+      if (selectedClient) {
+        finalData.clientName = selectedClient.designation;
+      }
+    }
+    
+    createMutation.mutate(finalData);
   };
 
   const technicians = users?.filter(u => 
@@ -87,18 +101,62 @@ export default function NewTicket() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="clientName">Cliente / Empresa *</Label>
-                  <Input
-                    id="clientName"
-                    value={formData.clientName}
-                    onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-                    required
-                    placeholder="Nome do cliente ou empresa"
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="useCustomClient"
+                    checked={useCustomClient}
+                    onChange={(e) => {
+                      setUseCustomClient(e.target.checked);
+                      if (!e.target.checked) {
+                        setFormData({ ...formData, clientName: "" });
+                      } else {
+                        setFormData({ ...formData, clientId: undefined });
+                      }
+                    }}
+                    className="w-4 h-4"
                   />
+                  <Label htmlFor="useCustomClient" className="cursor-pointer">
+                    Inserir cliente manualmente
+                  </Label>
                 </div>
 
+                {useCustomClient ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="clientName">Cliente / Empresa *</Label>
+                    <Input
+                      id="clientName"
+                      value={formData.clientName}
+                      onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+                      required
+                      placeholder="Nome do cliente ou empresa"
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="clientId">Selecionar Cliente *</Label>
+                    <Select
+                      value={formData.clientId?.toString() || ""}
+                      onValueChange={(value) => setFormData({ ...formData, clientId: parseInt(value) })}
+                      required={!useCustomClient}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Escolher cliente..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clients?.map((client) => (
+                          <SelectItem key={client.id} value={client.id.toString()}>
+                            {client.designation} - {client.nif}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="equipment">Equipamento *</Label>
                   <Input
@@ -109,9 +167,7 @@ export default function NewTicket() {
                     placeholder="Ex: Máquina de café, Frigorífico..."
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="problemType">Tipo de Problema *</Label>
                   <Input

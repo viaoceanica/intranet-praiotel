@@ -24,6 +24,7 @@ export type InsertUser = typeof users.$inferInsert;
 export const tickets = mysqlTable("tickets", {
   id: int("id").autoincrement().primaryKey(),
   ticketNumber: varchar("ticketNumber", { length: 20 }).notNull().unique(),
+  clientId: int("clientId"),
   clientName: varchar("clientName", { length: 255 }).notNull(),
   equipment: varchar("equipment", { length: 255 }).notNull(),
   problemType: varchar("problemType", { length: 255 }).notNull(),
@@ -95,3 +96,33 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * Clientes
+ */
+export const clients = mysqlTable("clients", {
+  id: int("id").autoincrement().primaryKey(),
+  designation: varchar("designation", { length: 255 }).notNull(),
+  address: text("address"),
+  primaryEmail: varchar("primaryEmail", { length: 320 }).notNull(),
+  nif: varchar("nif", { length: 20 }).notNull().unique(),
+  responsiblePerson: varchar("responsiblePerson", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Client = typeof clients.$inferSelect;
+export type InsertClient = typeof clients.$inferInsert;
+
+/**
+ * Emails adicionais dos clientes
+ */
+export const clientEmails = mysqlTable("clientEmails", {
+  id: int("id").autoincrement().primaryKey(),
+  clientId: int("clientId").notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ClientEmail = typeof clientEmails.$inferSelect;
+export type InsertClientEmail = typeof clientEmails.$inferInsert;

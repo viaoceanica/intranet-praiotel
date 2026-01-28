@@ -8,6 +8,7 @@ import { publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import * as ticketsDb from "./ticketsDb";
 import * as notificationsDb from "./notificationsDb";
+import * as clientsDb from "./clientsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -189,6 +190,7 @@ export const appRouter = router({
 
     create: isAuthenticated
       .input(z.object({
+        clientId: z.number().optional(),
         clientName: z.string().min(1),
         equipment: z.string().min(1),
         problemType: z.string().min(1),
@@ -418,6 +420,82 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await notificationsDb.deleteNotification(input.id);
+        return { success: true };
+      }),
+  }),
+
+  clients: router({
+    list: isAuthenticated.query(async () => {
+      return await clientsDb.getAllClients();
+    }),
+
+    search: isAuthenticated
+      .input(z.object({ query: z.string() }))
+      .query(async ({ input }) => {
+        return await clientsDb.searchClients(input.query);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await clientsDb.getClientById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(z.object({
+        designation: z.string().min(1),
+        address: z.string().optional(),
+        primaryEmail: z.string().email(),
+        nif: z.string().min(1),
+        responsiblePerson: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await clientsDb.createClient(input);
+        return { success: true };
+      }),
+
+    update: isAuthenticated
+      .input(z.object({
+        id: z.number(),
+        designation: z.string().min(1).optional(),
+        address: z.string().optional(),
+        primaryEmail: z.string().email().optional(),
+        nif: z.string().min(1).optional(),
+        responsiblePerson: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await clientsDb.updateClient(id, data);
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await clientsDb.deleteClient(input.id);
+        return { success: true };
+      }),
+
+    getEmails: isAuthenticated
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ input }) => {
+        return await clientsDb.getClientEmails(input.clientId);
+      }),
+
+    addEmail: isAuthenticated
+      .input(z.object({
+        clientId: z.number(),
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        await clientsDb.addClientEmail(input);
+        return { success: true };
+      }),
+
+    deleteEmail: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await clientsDb.deleteClientEmail(input.id);
         return { success: true };
       }),
   }),

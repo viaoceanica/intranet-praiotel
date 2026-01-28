@@ -11,6 +11,8 @@ import Tickets from "./pages/Tickets";
 import NewTicket from "./pages/NewTicket";
 import TicketDetail from "./pages/TicketDetail";
 import Notifications from "./pages/Notifications";
+import Clients from "./pages/Clients";
+import ClientForm from "./pages/ClientForm";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -42,6 +44,9 @@ function Router() {
       <Route path="/tickets/new" component={() => <ProtectedRoute component={NewTicket} />} />
       <Route path="/tickets/:id" component={() => <ProtectedRoute component={TicketDetail} />} />
       <Route path="/notifications" component={() => <ProtectedRoute component={Notifications} />} />
+      <Route path="/clients" component={() => <ProtectedRoute component={Clients} />} />
+      <Route path="/clients/new" component={() => <ProtectedRoute component={ClientForm} />} />
+      <Route path="/clients/:id" component={() => <ProtectedRoute component={ClientForm} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

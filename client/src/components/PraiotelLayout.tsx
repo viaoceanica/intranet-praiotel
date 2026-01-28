@@ -19,7 +19,8 @@ import {
   LogOut,
   Menu,
   X,
-  Bell
+  Bell,
+  Building2
 } from "lucide-react";
 import { useState } from "react";
 
@@ -50,6 +51,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Tickets", href: "/tickets", icon: Ticket, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+    { name: "Clientes", href: "/clients", icon: Building2, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Utilizadores", href: "/users", icon: Users, roles: ["admin"] },
   ];
 
