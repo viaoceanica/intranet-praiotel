@@ -446,3 +446,4 @@
 
 ## Bugs Reportados
 - [x] Corrigir erro de hooks do React na página de DocumentManagement (/documents)
+- [x] Corrigir erro React #310 (useEffect) na versão publicada da página /documents
