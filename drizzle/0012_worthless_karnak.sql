@@ -1,0 +1,1 @@
+ALTER TABLE `users` MODIFY COLUMN `role` varchar(100) NOT NULL DEFAULT 'visualizador';

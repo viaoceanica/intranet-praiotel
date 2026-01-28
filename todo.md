@@ -326,3 +326,14 @@
 - [x] Implementar gatilho de notificação ao mudar estado do ticket
 - [x] Criar funções de alerta e violação de SLA
 - [x] Testar todos os gatilhos de notificação
+
+## Sistema de Roles Personalizados
+- [x] Criar schema de roles personalizados na base de dados
+- [x] Criar schema de permissões granulares
+- [x] Implementar queries para CRUD de roles personalizados
+- [x] Criar interface de gestão de roles (criar, editar, eliminar)
+- [x] Implementar seletor de permissões configuráveis
+- [x] Proteger roles padrão contra eliminação
+- [x] Integrar roles personalizados no select de utilizadores
+- [x] Testar criação, edição e eliminação de roles
+- [x] Testar atribuição de roles personalizados a utilizadores

@@ -16,6 +16,7 @@ import * as prioritizationDb from "./prioritizationDb";
 import * as responseTemplatesDb from "./responseTemplatesDb";
 import * as technicianStatsDb from "./technicianStatsDb";
 import * as notificationHelpers from "./notificationHelpers";
+import * as customRolesDb from "./customRolesDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -867,6 +868,58 @@ export const appRouter = router({
       .input(z.object({ ticketId: z.number() }))
       .query(async ({ input }) => {
         return await prioritizationDb.getPriorityChangesByTicket(input.ticketId);
+      }),
+  }),
+
+  customRoles: router({
+    list: isAdmin.query(async () => {
+      return await customRolesDb.getAllCustomRoles(false); // Apenas roles personalizados
+    }),
+
+    listAll: isAdmin.query(async () => {
+      return await customRolesDb.getAllCustomRoles(true); // Todos os roles incluindo sistema
+    }),
+
+    listForSelect: isAuthenticated.query(async () => {
+      return await customRolesDb.getAllRolesForSelect();
+    }),
+
+    getPermissions: isAdmin.query(async () => {
+      return customRolesDb.AVAILABLE_PERMISSIONS;
+    }),
+
+    create: isAdmin
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        permissions: z.array(z.string()),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await customRolesDb.createCustomRole({
+          ...input,
+          createdById: ctx.user.id,
+        });
+        return { success: true };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        permissions: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await customRolesDb.updateCustomRole(id, data);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await customRolesDb.deleteCustomRole(input.id);
+        return { success: true };
       }),
   }),
 

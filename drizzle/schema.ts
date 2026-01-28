@@ -8,7 +8,7 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }).notNull().unique(),
   passwordHash: varchar("passwordHash", { length: 255 }).notNull(),
   name: text("name").notNull(),
-  role: mysqlEnum("role", ["admin", "gestor", "tecnico", "visualizador"]).default("visualizador").notNull(),
+  role: varchar("role", { length: 100 }).default("visualizador").notNull(),
   active: int("active").default(1).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -214,3 +214,20 @@ export const responseTemplates = mysqlTable("response_templates", {
 
 export type ResponseTemplate = typeof responseTemplates.$inferSelect;
 export type InsertResponseTemplate = typeof responseTemplates.$inferInsert;
+
+/**
+ * Roles personalizados do sistema
+ */
+export const customRoles = mysqlTable("custom_roles", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  description: text("description"),
+  isSystem: int("is_system").default(0).notNull(), // 1 para roles padrão (não podem ser eliminados)
+  permissions: text("permissions").notNull(), // JSON com array de permissões
+  createdById: int("createdById").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CustomRole = typeof customRoles.$inferSelect;
+export type InsertCustomRole = typeof customRoles.$inferInsert;
