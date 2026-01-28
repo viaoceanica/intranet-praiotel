@@ -22,6 +22,7 @@ export default function NewTicket() {
   const [formData, setFormData] = useState({
     clientId: undefined as number | undefined,
     clientName: "",
+    equipmentId: undefined as number | undefined,
     equipment: "",
     problemType: "",
     priority: "media" as "baixa" | "media" | "alta" | "urgente",
@@ -31,10 +32,15 @@ export default function NewTicket() {
   });
 
   const [useCustomClient, setUseCustomClient] = useState(false);
+  const [useCustomEquipment, setUseCustomEquipment] = useState(true);
 
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
   const { data: clients } = trpc.clients.list.useQuery();
+  const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
+    { clientId: formData.clientId! },
+    { enabled: !!formData.clientId && !useCustomClient }
+  );
 
   const createMutation = trpc.tickets.create.useMutation({
     onSuccess: (data) => {
@@ -56,6 +62,14 @@ export default function NewTicket() {
       const selectedClient = clients?.find(c => c.id === formData.clientId);
       if (selectedClient) {
         finalData.clientName = selectedClient.designation;
+      }
+    }
+
+    // Se usar equipamento da lista, preencher equipment
+    if (!useCustomEquipment && formData.equipmentId) {
+      const selectedEquipment = clientEquipment?.find(e => e.id === formData.equipmentId);
+      if (selectedEquipment) {
+        finalData.equipment = `${selectedEquipment.brand} ${selectedEquipment.model} (N/S: ${selectedEquipment.serialNumber})`;
       }
     }
     
@@ -159,13 +173,52 @@ export default function NewTicket() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="equipment">Equipamento *</Label>
-                  <Input
-                    id="equipment"
-                    value={formData.equipment}
-                    onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
-                    required
-                    placeholder="Ex: Máquina de café, Frigorífico..."
-                  />
+                  {!useCustomClient && formData.clientId && clientEquipment && clientEquipment.length > 0 ? (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={useCustomEquipment ? "custom" : formData.equipmentId?.toString()}
+                          onValueChange={(value) => {
+                            if (value === "custom") {
+                              setUseCustomEquipment(true);
+                              setFormData({ ...formData, equipmentId: undefined, equipment: "" });
+                            } else {
+                              setUseCustomEquipment(false);
+                              setFormData({ ...formData, equipmentId: parseInt(value), equipment: "" });
+                            }
+                          }}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecionar equipamento" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {clientEquipment.map((eq) => (
+                              <SelectItem key={eq.id} value={eq.id.toString()}>
+                                {eq.brand} {eq.model} (N/S: {eq.serialNumber})
+                              </SelectItem>
+                            ))}
+                            <SelectItem value="custom">Inserir manualmente</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      {useCustomEquipment && (
+                        <Input
+                          value={formData.equipment}
+                          onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
+                          required
+                          placeholder="Ex: Máquina de café, Frigorífico..."
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <Input
+                      id="equipment"
+                      value={formData.equipment}
+                      onChange={(e) => setFormData({ ...formData, equipment: e.target.value })}
+                      required
+                      placeholder="Ex: Máquina de café, Frigorífico..."
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-2">

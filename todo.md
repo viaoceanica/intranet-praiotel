@@ -169,3 +169,12 @@
 - [x] Mostrar apenas tickets atribuídos ao técnico logado
 - [x] Badges visuais de estado e prioridade
 - [x] Acesso rápido aos detalhes dos tickets
+
+## Integração de Equipamentos nos Tickets
+- [x] Adicionar campo equipmentId (opcional) ao schema de tickets
+- [x] Criar endpoint para listar equipamentos por clientId
+- [x] Atualizar formulário de criação de ticket com dropdown de equipamentos
+- [x] Filtrar equipamentos dinamicamente quando cliente é selecionado
+- [x] Manter campo texto "equipment" como fallback quando não há equipamento registado
+- [ ] Atualizar formulário de edição de ticket com mesma funcionalidade
+- [ ] Mostrar nome do equipamento na listagem e detalhes de tickets

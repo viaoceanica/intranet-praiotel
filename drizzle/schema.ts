@@ -26,6 +26,7 @@ export const tickets = mysqlTable("tickets", {
   ticketNumber: varchar("ticketNumber", { length: 20 }).notNull().unique(),
   clientId: int("clientId"),
   clientName: varchar("clientName", { length: 255 }).notNull(),
+  equipmentId: int("equipmentId"),
   equipment: varchar("equipment", { length: 255 }).notNull(),
   problemType: varchar("problemType", { length: 255 }).notNull(),
   priority: mysqlEnum("priority", ["baixa", "media", "alta", "urgente"]).default("media").notNull(),

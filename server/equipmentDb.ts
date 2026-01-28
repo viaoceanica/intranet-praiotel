@@ -26,6 +26,18 @@ export async function getAllEquipment() {
   return result;
 }
 
+export async function getEquipmentByClientId(clientId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(equipment)
+    .where(eq(equipment.clientId, clientId))
+    .orderBy(desc(equipment.createdAt));
+  return result;
+}
+
 export async function searchEquipment(query: string) {
   const db = await getDb();
   if (!db) return [];
@@ -57,19 +69,6 @@ export async function deleteEquipment(id: number) {
   if (!db) throw new Error("Database not available");
 
   await db.delete(equipment).where(eq(equipment.id, id));
-}
-
-export async function getEquipmentByClientId(clientId: number) {
-  const db = await getDb();
-  if (!db) return [];
-
-  const result = await db
-    .select()
-    .from(equipment)
-    .where(eq(equipment.clientId, clientId))
-    .orderBy(desc(equipment.createdAt));
-
-  return result;
 }
 
 /**

@@ -57,6 +57,13 @@
       "when": 1769624193422,
       "tag": "0007_volatile_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1769625179522,
+      "tag": "0008_complete_madame_hydra",
+      "breakpoints": true
     }
   ]
 }
