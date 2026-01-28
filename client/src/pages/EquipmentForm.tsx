@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft } from "lucide-react";
 import { useLocation, useParams } from "wouter";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { toast } from "sonner";
 
 export default function EquipmentForm() {
@@ -102,6 +103,13 @@ function EquipmentFormContent() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Clientes", href: "/clients" },
+          { label: "Equipamentos", href: "/equipment" },
+          { label: isEdit ? "Editar Equipamento" : "Novo Equipamento" },
+        ]}
+      />
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => setLocation("/equipment")}>
           <ArrowLeft className="w-4 h-4" />

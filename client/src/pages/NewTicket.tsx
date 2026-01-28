@@ -37,6 +37,7 @@ export default function NewTicket() {
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
   const { data: clients } = trpc.clients.list.useQuery();
+  const { data: priorities } = trpc.sla.list.useQuery();
   const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
     { clientId: formData.clientId! },
     { enabled: !!formData.clientId && !useCustomClient }
@@ -263,10 +264,11 @@ export default function NewTicket() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="baixa">Baixa</SelectItem>
-                      <SelectItem value="media">Média</SelectItem>
-                      <SelectItem value="alta">Alta</SelectItem>
-                      <SelectItem value="urgente">Urgente</SelectItem>
+                      {priorities?.map((p) => (
+                        <SelectItem key={p.priority} value={p.priority}>
+                          {p.displayName}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>

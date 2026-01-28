@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { ArrowLeft, Loader2, Plus, X } from "lucide-react";
 
 export default function ClientForm() {
@@ -146,6 +147,12 @@ export default function ClientForm() {
   return (
     <PraiotelLayout>
       <div className="max-w-3xl mx-auto space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Clientes", href: "/clients" },
+            { label: isEdit ? "Editar Cliente" : "Novo Cliente" },
+          ]}
+        />
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"

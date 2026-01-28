@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, User, MapPin } from "lucide-react";
 import { useLocation, useParams } from "wouter";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
 
 const priorityColors: Record<string, string> = {
@@ -72,6 +73,13 @@ function EquipmentHistoryContent() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Clientes", href: "/clients" },
+          { label: "Equipamentos", href: "/equipment" },
+          { label: `${equipment.brand} ${equipment.model}` },
+        ]}
+      />
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => setLocation("/equipment")}>
           <ArrowLeft className="w-4 h-4" />

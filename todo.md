@@ -211,3 +211,22 @@
 - [x] Corrigir falta de sidebar na página de equipamentos
 - [x] Corrigir falta de sidebar na página de formulário de equipamento
 - [x] Corrigir falta de sidebar na página de histórico de equipamento
+
+## Dropdowns Dinâmicos de Prioridade
+- [x] Carregar prioridades da base de dados em NewTicket
+- [x] Carregar prioridades da base de dados em TicketDetail
+- [x] Atualizar todos os componentes que usam prioridades hardcoded
+
+## Breadcrumbs de Navegação
+- [x] Criar componente Breadcrumbs reutilizável
+- [x] Adicionar breadcrumbs em TicketDetail
+- [x] Adicionar breadcrumbs em ClientForm
+- [x] Adicionar breadcrumbs em EquipmentForm/EquipmentHistory
+
+## Sistema de Notificações por Email (ADIADO)
+- [ ] Pesquisar e escolher serviço de email (ex: Resend, SendGrid)
+- [ ] Criar templates de email para atribuição de tickets
+- [ ] Criar templates de email para atualizações de tickets
+- [ ] Criar templates de email para alertas de SLA
+- [ ] Integrar envio de emails nos endpoints relevantes
+- [ ] Adicionar configuração de preferências de notificações por utilizador

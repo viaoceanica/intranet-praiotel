@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { 
   ArrowLeft, 
   Loader2, 
@@ -55,6 +56,7 @@ export default function TicketDetail() {
   const { data: attachments } = trpc.tickets.getAttachments.useQuery({ ticketId });
   const { data: history } = trpc.tickets.getHistory.useQuery({ ticketId });
   const { data: users } = trpc.users.list.useQuery();
+  const { data: priorities } = trpc.sla.list.useQuery();
   const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
     { clientId: ticket?.clientId || 0 },
     { enabled: !!ticket?.clientId }
@@ -235,6 +237,12 @@ export default function TicketDetail() {
   return (
     <PraiotelLayout>
       <div className="max-w-6xl mx-auto space-y-6">
+        <Breadcrumbs
+          items={[
+            { label: "Tickets", href: "/tickets" },
+            { label: `Ticket ${ticket.ticketNumber}` },
+          ]}
+        />
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button
@@ -504,10 +512,11 @@ export default function TicketDetail() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="baixa">Baixa</SelectItem>
-                          <SelectItem value="media">Média</SelectItem>
-                          <SelectItem value="alta">Alta</SelectItem>
-                          <SelectItem value="urgente">Urgente</SelectItem>
+                          {priorities?.map((p) => (
+                            <SelectItem key={p.priority} value={p.priority}>
+                              {p.displayName}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
