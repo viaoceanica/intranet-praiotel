@@ -13,6 +13,7 @@ import * as slaDb from "./slaDb";
 import * as slaNotifications from "./slaNotifications";
 import * as equipmentDb from "./equipmentDb";
 import * as prioritizationDb from "./prioritizationDb";
+import * as responseTemplatesDb from "./responseTemplatesDb";
 import * as technicianStatsDb from "./technicianStatsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
@@ -857,6 +858,52 @@ export const appRouter = router({
       .input(z.object({ ticketId: z.number() }))
       .query(async ({ input }) => {
         return await prioritizationDb.getPriorityChangesByTicket(input.ticketId);
+      }),
+  }),
+
+  responseTemplates: router({
+    list: isAuthenticated.query(async () => {
+      return await responseTemplatesDb.getAllTemplates();
+    }),
+
+    create: isAuthenticated
+      .input(z.object({
+        title: z.string().min(1),
+        content: z.string().min(1),
+        category: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await responseTemplatesDb.createTemplate({
+          ...input,
+          createdById: ctx.user.id,
+        });
+        return { success: true };
+      }),
+
+    update: isAuthenticated
+      .input(z.object({
+        id: z.number(),
+        title: z.string().min(1).optional(),
+        content: z.string().min(1).optional(),
+        category: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await responseTemplatesDb.updateTemplate(id, data);
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await responseTemplatesDb.deleteTemplate(input.id);
+        return { success: true };
+      }),
+
+    seedDefaults: isAdmin
+      .mutation(async ({ ctx }) => {
+        await responseTemplatesDb.seedDefaultTemplates(ctx.user.id);
+        return { success: true };
       }),
   }),
 });

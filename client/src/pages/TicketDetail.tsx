@@ -47,12 +47,14 @@ export default function TicketDetail() {
 
   const [editMode, setEditMode] = useState(false);
   const [note, setNote] = useState("");
+  const [showTemplates, setShowTemplates] = useState(false);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
   const [useCustomEquipment, setUseCustomEquipment] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const utils = trpc.useUtils();
   const { data: ticket, isLoading } = trpc.tickets.getById.useQuery({ id: ticketId });
+  const { data: templates } = trpc.responseTemplates.list.useQuery();
   const { data: attachments } = trpc.tickets.getAttachments.useQuery({ ticketId });
   const { data: history } = trpc.tickets.getHistory.useQuery({ ticketId });
   const { data: users } = trpc.users.list.useQuery();
@@ -406,6 +408,31 @@ export default function TicketDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
+                  {templates && templates.length > 0 && (
+                    <div className="flex gap-2 items-center">
+                      <Label className="text-sm text-gray-600">Templates:</Label>
+                      <Select
+                        value=""
+                        onValueChange={(value) => {
+                          const template = templates.find(t => t.id.toString() === value);
+                          if (template) {
+                            setNote(template.content);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-[300px]">
+                          <SelectValue placeholder="Selecione um template..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {templates.map((template) => (
+                            <SelectItem key={template.id} value={template.id.toString()}>
+                              {template.title}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <Textarea
                     placeholder="Adicionar uma nota..."
                     value={note}

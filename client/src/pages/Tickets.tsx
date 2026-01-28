@@ -20,10 +20,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { Plus, Loader2, Search, Eye, X, Calendar, AlertTriangle } from "lucide-react";
+import { Plus, Loader2, Search, Eye, X, Calendar, AlertTriangle, Edit2 } from "lucide-react";
 import { SlaIndicator } from "@/components/SlaIndicator";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export default function Tickets() {
   const [, setLocation] = useLocation();
@@ -35,8 +36,52 @@ export default function Tickets() {
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
+  const [showQuickEditModal, setShowQuickEditModal] = useState(false);
+  const [editingTicket, setEditingTicket] = useState<any>(null);
+  const [quickEditData, setQuickEditData] = useState({
+    status: "",
+    priority: "",
+    assignedToId: undefined as number | undefined,
+  });
+
+  const utils = trpc.useUtils();
 
   const { data: tickets, isLoading } = trpc.tickets.list.useQuery();
+  const { data: priorities } = trpc.sla.list.useQuery();
+
+  const quickEditMutation = trpc.tickets.update.useMutation({
+    onSuccess: () => {
+      alert("Ticket atualizado com sucesso!");
+      utils.tickets.list.invalidate();
+      setShowQuickEditModal(false);
+      setEditingTicket(null);
+    },
+    onError: (error) => {
+      alert("Erro ao atualizar ticket: " + error.message);
+    },
+  });
+
+  const handleQuickEdit = (ticket: any) => {
+    setEditingTicket(ticket);
+    setQuickEditData({
+      status: ticket.status,
+      priority: ticket.priority,
+      assignedToId: ticket.assignedToId,
+    });
+    setShowQuickEditModal(true);
+  };
+
+  const handleQuickEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingTicket) return;
+    
+    quickEditMutation.mutate({
+      id: editingTicket.id,
+      status: quickEditData.status as any,
+      priority: quickEditData.priority as any,
+      assignedToId: quickEditData.assignedToId,
+    });
+  };
   const { data: users } = trpc.users.list.useQuery();
   const { data: clients } = trpc.clients.list.useQuery();
 
@@ -324,13 +369,24 @@ export default function Tickets() {
                     </TableCell>
                     <TableCell>{format(new Date(ticket.createdAt), "dd/MM/yyyy")}</TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setLocation(`/tickets/${ticket.id}`)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <div className="flex gap-1 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleQuickEdit(ticket)}
+                          title="Edição Rápida"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setLocation(`/tickets/${ticket.id}`)}
+                          title="Ver Detalhes"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -343,6 +399,102 @@ export default function Tickets() {
           )}
         </div>
       </div>
+
+      {/* Modal de Edição Rápida */}
+      <Dialog open={showQuickEditModal} onOpenChange={setShowQuickEditModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edição Rápida - {editingTicket?.ticketNumber}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleQuickEditSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="quickEditStatus">Estado</Label>
+              <Select
+                value={quickEditData.status}
+                onValueChange={(value) => setQuickEditData({ ...quickEditData, status: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="aberto">Aberto</SelectItem>
+                  <SelectItem value="em_progresso">Em Progresso</SelectItem>
+                  <SelectItem value="resolvido">Resolvido</SelectItem>
+                  <SelectItem value="fechado">Fechado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="quickEditPriority">Prioridade</Label>
+              <Select
+                value={quickEditData.priority}
+                onValueChange={(value) => setQuickEditData({ ...quickEditData, priority: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione a prioridade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priorities?.map((p) => (
+                    <SelectItem key={p.priority} value={p.priority}>
+                      {p.displayName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="quickEditTechnician">Técnico Atribuído</Label>
+              <Select
+                value={quickEditData.assignedToId?.toString() || "none"}
+                onValueChange={(value) => 
+                  setQuickEditData({ 
+                    ...quickEditData, 
+                    assignedToId: value === "none" ? undefined : parseInt(value) 
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um técnico" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Não atribuído</SelectItem>
+                  {technicians?.map((tech) => (
+                    <SelectItem key={tech.id} value={tech.id.toString()}>
+                      {tech.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowQuickEditModal(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-[#F15A24] hover:bg-[#D14A1A]"
+                disabled={quickEditMutation.isPending}
+              >
+                {quickEditMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    A guardar...
+                  </>
+                ) : (
+                  "Guardar Alterações"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </PraiotelLayout>
   );
 }

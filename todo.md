@@ -272,3 +272,18 @@
 - [x] Implementar lógica de criação de equipamento via modal
 - [x] Atualizar lista de equipamentos após criação
 - [x] Testar funcionalidade completa
+
+## Edição Rápida de Tickets na Listagem
+- [x] Adicionar botão de edição rápida na listagem de tickets
+- [x] Criar modal inline com campos de estado, prioridade e técnico
+- [x] Implementar mutation de atualização rápida
+- [x] Atualizar lista após edição sem recarregar página
+- [x] Testar funcionalidade completa
+
+## Sistema de Templates de Resposta
+- [x] Criar schema de templates de resposta na base de dados
+- [ ] Criar interface de gestão de templates (Admin/Gestor)
+- [x] Implementar dropdown de templates na área de comentários
+- [x] Permitir inserção rápida de template no campo de texto
+- [x] Adicionar templates padrão (ex: "Equipamento reparado", "Aguarda peça")
+- [x] Testar funcionalidade em página de detalhes de ticket

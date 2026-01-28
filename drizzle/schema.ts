@@ -198,3 +198,19 @@ export const priorityChangeLog = mysqlTable("priorityChangeLog", {
 
 export type PriorityChangeLog = typeof priorityChangeLog.$inferSelect;
 export type InsertPriorityChangeLog = typeof priorityChangeLog.$inferInsert;
+
+/**
+ * Templates de resposta para comentários
+ */
+export const responseTemplates = mysqlTable("response_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 100 }).notNull(),
+  content: text("content").notNull(),
+  category: varchar("category", { length: 50 }),
+  createdById: int("createdById").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ResponseTemplate = typeof responseTemplates.$inferSelect;
+export type InsertResponseTemplate = typeof responseTemplates.$inferInsert;
