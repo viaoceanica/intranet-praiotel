@@ -78,3 +78,20 @@ export const ticketHistory = mysqlTable("ticketHistory", {
 
 export type TicketHistory = typeof ticketHistory.$inferSelect;
 export type InsertTicketHistory = typeof ticketHistory.$inferInsert;
+
+/**
+ * Notificações do sistema
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), // ticket_assigned, ticket_updated, note_added
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  ticketId: int("ticketId"),
+  isRead: int("isRead").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

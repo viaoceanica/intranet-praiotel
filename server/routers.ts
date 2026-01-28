@@ -7,6 +7,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 import * as db from "./db";
 import * as ticketsDb from "./ticketsDb";
+import * as notificationsDb from "./notificationsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -212,6 +213,17 @@ export const appRouter = router({
           createdById: ctx.user.id,
         });
 
+        // Notificar técnico atribuído
+        if (input.assignedToId) {
+          await notificationsDb.createNotification({
+            userId: input.assignedToId,
+            type: "ticket_assigned",
+            title: "Novo ticket atribuído",
+            message: `O ticket ${ticketNumber} foi-lhe atribuído: ${input.clientName} - ${input.equipment}`,
+            ticketId: undefined, // Será preenchido após obter o ID
+          });
+        }
+
         return { success: true, ticketNumber };
       }),
 
@@ -254,6 +266,28 @@ export const appRouter = router({
           } else if (input.status === "fechado") {
             dataToUpdate.closedAt = new Date();
           }
+
+          // Notificar criador do ticket sobre mudança de estado
+          if (ticket.createdById !== ctx.user.id) {
+            await notificationsDb.createNotification({
+              userId: ticket.createdById,
+              type: "ticket_updated",
+              title: "Ticket atualizado",
+              message: `O ticket ${ticket.ticketNumber} mudou de estado para: ${input.status}`,
+              ticketId: id,
+            });
+          }
+        }
+
+        // Notificar sobre nova atribuição
+        if (input.assignedToId && input.assignedToId !== ticket.assignedToId) {
+          await notificationsDb.createNotification({
+            userId: input.assignedToId,
+            type: "ticket_assigned",
+            title: "Ticket atribuído",
+            message: `O ticket ${ticket.ticketNumber} foi-lhe atribuído`,
+            ticketId: id,
+          });
         }
 
         await ticketsDb.updateTicket(id, dataToUpdate);
@@ -277,6 +311,114 @@ export const appRouter = router({
       .input(z.object({ ticketId: z.number() }))
       .query(async ({ input }) => {
         return await ticketsDb.getTicketHistory(input.ticketId);
+      }),
+
+    uploadAttachment: isAuthenticated
+      .input(z.object({
+        ticketId: z.number(),
+        fileName: z.string(),
+        fileData: z.string(), // base64
+        mimeType: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const ticket = await ticketsDb.getTicketById(input.ticketId);
+        if (!ticket) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Ticket não encontrado" });
+        }
+
+        // Converter base64 para buffer
+        const buffer = Buffer.from(input.fileData, 'base64');
+        
+        // Upload para S3
+        const fileKey = `tickets/${input.ticketId}/${Date.now()}-${input.fileName}`;
+        const { url } = await storagePut(fileKey, buffer, input.mimeType);
+
+        // Guardar na base de dados
+        await ticketsDb.createAttachment({
+          ticketId: input.ticketId,
+          fileName: input.fileName,
+          fileUrl: url,
+          fileKey: fileKey,
+          mimeType: input.mimeType,
+          fileSize: buffer.length,
+          uploadedById: ctx.user.id,
+        });
+
+        return { success: true, url };
+      }),
+
+    deleteAttachment: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await ticketsDb.deleteAttachment(input.id);
+        return { success: true };
+      }),
+
+    addNote: isAuthenticated
+      .input(z.object({
+        ticketId: z.number(),
+        note: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await ticketsDb.createTicketHistory({
+          ticketId: input.ticketId,
+          userId: ctx.user.id,
+          action: "note_added",
+          fieldChanged: "notes",
+          newValue: input.note,
+        });
+
+        // Notificar técnico atribuído e criador
+        const ticket = await ticketsDb.getTicketById(input.ticketId);
+        if (ticket) {
+          const usersToNotify = [ticket.createdById];
+          if (ticket.assignedToId && ticket.assignedToId !== ctx.user.id) {
+            usersToNotify.push(ticket.assignedToId);
+          }
+
+          for (const userId of usersToNotify) {
+            if (userId !== ctx.user.id) {
+              await notificationsDb.createNotification({
+                userId,
+                type: "note_added",
+                title: "Nova nota no ticket",
+                message: `${ctx.user.name} adicionou uma nota ao ticket ${ticket.ticketNumber}`,
+                ticketId: input.ticketId,
+              });
+            }
+          }
+        }
+
+        return { success: true };
+      }),
+  }),
+
+  notifications: router({
+    list: isAuthenticated.query(async ({ ctx }) => {
+      return await notificationsDb.getUserNotifications(ctx.user.id);
+    }),
+
+    unreadCount: isAuthenticated.query(async ({ ctx }) => {
+      return await notificationsDb.getUnreadCount(ctx.user.id);
+    }),
+
+    markAsRead: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await notificationsDb.markAsRead(input.id);
+        return { success: true };
+      }),
+
+    markAllAsRead: isAuthenticated.mutation(async ({ ctx }) => {
+      await notificationsDb.markAllAsRead(ctx.user.id);
+      return { success: true };
+    }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await notificationsDb.deleteNotification(input.id);
+        return { success: true };
       }),
   }),
 });

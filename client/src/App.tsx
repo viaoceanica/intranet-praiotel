@@ -9,6 +9,8 @@ import Home from "./pages/Home";
 import Users from "./pages/Users";
 import Tickets from "./pages/Tickets";
 import NewTicket from "./pages/NewTicket";
+import TicketDetail from "./pages/TicketDetail";
+import Notifications from "./pages/Notifications";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -38,6 +40,8 @@ function Router() {
       <Route path="/users" component={() => <ProtectedRoute component={Users} />} />
       <Route path="/tickets" component={() => <ProtectedRoute component={Tickets} />} />
       <Route path="/tickets/new" component={() => <ProtectedRoute component={NewTicket} />} />
+      <Route path="/tickets/:id" component={() => <ProtectedRoute component={TicketDetail} />} />
+      <Route path="/notifications" component={() => <ProtectedRoute component={Notifications} />} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

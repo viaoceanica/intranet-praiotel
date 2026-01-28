@@ -22,6 +22,13 @@
       "when": 1769619840091,
       "tag": "0002_youthful_skullbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1769621549739,
+      "tag": "0003_burly_spirit",
+      "breakpoints": true
     }
   ]
 }

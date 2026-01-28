@@ -67,3 +67,12 @@
 ## Alterações Solicitadas
 - [x] Alterar username para email no sistema de autenticação
 - [x] Atualizar utilizador admin para usar email
+
+## Novas Funcionalidades Solicitadas
+- [x] Criar página de visualização detalhada de tickets
+- [x] Implementar upload de anexos (fotos) nos tickets
+- [x] Criar sistema de notas/comentários em tickets
+- [x] Implementar histórico de alterações visível
+- [x] Criar sistema de notificações para atribuições
+- [x] Criar sistema de notificações para atualizações
+- [x] Criar sistema de notificações para novos comentários

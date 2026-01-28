@@ -18,7 +18,8 @@ import {
   Ticket, 
   LogOut,
   Menu,
-  X
+  X,
+  Bell
 } from "lucide-react";
 import { useState } from "react";
 
@@ -30,6 +31,10 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
+    refetchInterval: 30000, // Atualizar a cada 30 segundos
+  });
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -93,8 +98,20 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
             </div>
           </div>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <div className="flex items-center gap-2">
+            <Link href="/notifications">
+              <Button variant="ghost" size="icon" className="relative">
+                <Bell className="h-5 w-5" />
+                {unreadCount && unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#F15A24] text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </Button>
+            </Link>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className="bg-[#F15A24] text-white">
@@ -120,7 +137,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                 Terminar Sessão
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
