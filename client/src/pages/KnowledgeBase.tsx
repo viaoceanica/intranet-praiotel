@@ -11,10 +11,87 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 
+// Componente separado para cada artigo (resolve problema de hooks em loops)
+function ArticleCard({ 
+  article, 
+  isNew, 
+  isUnread, 
+  onToggleFavorite 
+}: { 
+  article: any; 
+  isNew: boolean; 
+  isUnread: boolean; 
+  onToggleFavorite: (articleId: number, isFavorite: boolean) => void;
+}) {
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
+  const { data: favoriteCheck } = trpc.favorites.check.useQuery(
+    { itemType: "article", itemId: article.id },
+    { enabled: !!user }
+  );
+  const isFavorite = favoriteCheck?.isFavorite || false;
+
+  return (
+    <Card 
+      className={`p-6 hover:shadow-lg transition-shadow cursor-pointer ${
+        isUnread ? 'border-l-4 border-l-[#F15A24]' : ''
+      }`}
+      onClick={() => setLocation(`/knowledge-base/${article.id}`)}
+    >
+      <div className="flex items-start gap-4">
+        <BookOpen className="h-8 w-8 text-[#F15A24] flex-shrink-0 mt-1" />
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-2">
+            <h3 className={`text-xl font-semibold ${
+              isUnread ? 'text-gray-900 font-bold' : 'text-gray-900'
+            }`}>{article.title}</h3>
+            <Badge variant="outline">{article.categoryName}</Badge>
+            {isNew && (
+              <Badge className="bg-[#F15A24] text-white hover:bg-[#D14A1E]">
+                Novo
+              </Badge>
+            )}
+            {isUnread && (
+              <span className="w-2 h-2 bg-[#F15A24] rounded-full" title="Não lido" />
+            )}
+          </div>
+          <p className="text-gray-700 mb-4 line-clamp-2">
+            {article.content.substring(0, 200)}...
+          </p>
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <span className="flex items-center gap-1">
+              <User className="h-4 w-4" />
+              {article.authorName}
+            </span>
+            <span className="flex items-center gap-1">
+              <Calendar className="h-4 w-4" />
+              {new Date(article.publishedAt).toLocaleDateString("pt-PT")}
+            </span>
+            <span className="flex items-center gap-1">
+              <Eye className="h-4 w-4" />
+              {article.viewCount} visualizações
+            </span>
+          </div>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavorite(article.id, isFavorite);
+          }}
+          className="flex-shrink-0"
+        >
+          <Star className={`h-5 w-5 ${isFavorite ? 'fill-[#F15A24] text-[#F15A24]' : 'text-gray-400'}`} />
+        </Button>
+      </div>
+    </Card>
+  );
+}
 
 export function KnowledgeBase() {
   const { user } = useAuth();
-  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [selectedTags, setSelectedTags] = useState("");
@@ -223,71 +300,17 @@ export function KnowledgeBase() {
             </Card>
           ) : (
             displayArticles.map((article: any) => {
-              const { data: favoriteCheck } = trpc.favorites.check.useQuery(
-                { itemType: "article", itemId: article.id },
-                { enabled: !!user }
-              );
-              const isFavorite = favoriteCheck?.isFavorite || false;
-              
               const isNew = isNewArticle(article.publishedAt);
               const isUnread = !readArticleIds.includes(article.id);
 
               return (
-              <Card 
-                key={article.id} 
-                className={`p-6 hover:shadow-lg transition-shadow cursor-pointer ${
-                  isUnread ? 'border-l-4 border-l-[#F15A24]' : ''
-                }`}
-                onClick={() => setLocation(`/knowledge-base/${article.id}`)}
-              >
-                <div className="flex items-start gap-4">
-                  <BookOpen className="h-8 w-8 text-[#F15A24] flex-shrink-0 mt-1" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className={`text-xl font-semibold ${
-                        isUnread ? 'text-gray-900 font-bold' : 'text-gray-900'
-                      }`}>{article.title}</h3>
-                      <Badge variant="outline">{article.categoryName}</Badge>
-                      {isNew && (
-                        <Badge className="bg-[#F15A24] text-white hover:bg-[#D14A1E]">
-                          Novo
-                        </Badge>
-                      )}
-                      {isUnread && (
-                        <span className="w-2 h-2 bg-[#F15A24] rounded-full" title="Não lido" />
-                      )}
-                    </div>
-                    <p className="text-gray-700 mb-4 line-clamp-2">
-                      {article.content.substring(0, 200)}...
-                    </p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <User className="h-4 w-4" />
-                        {article.authorName}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(article.publishedAt).toLocaleDateString("pt-PT")}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        {article.viewCount} visualizações
-                      </span>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleFavorite(article.id, isFavorite);
-                    }}
-                    className="flex-shrink-0"
-                  >
-                    <Star className={`h-5 w-5 ${isFavorite ? 'fill-[#F15A24] text-[#F15A24]' : 'text-gray-400'}`} />
-                  </Button>
-                </div>
-              </Card>
+                <ArticleCard
+                  key={article.id}
+                  article={article}
+                  isNew={isNew}
+                  isUnread={isUnread}
+                  onToggleFavorite={handleToggleFavorite}
+                />
               );
             })
           )}

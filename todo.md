@@ -453,3 +453,5 @@
 - [x] Investigar e implementar monitorização de erros (Sentry ou similar)
 - [x] Configurar captura automática de erros em produção
 - [x] Documentar processo de monitorização
+
+- [x] Corrigir erro React #310 (hooks condicionais) na página /knowledge-base em produção
