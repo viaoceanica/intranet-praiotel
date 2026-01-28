@@ -18,6 +18,8 @@ import * as technicianStatsDb from "./technicianStatsDb";
 import * as notificationHelpers from "./notificationHelpers";
 import * as customRolesDb from "./customRolesDb";
 import * as internalManagementDb from "./internalManagementDb";
+import * as favoritesDb from "./favoritesDb";
+import * as internalManagementAnalyticsDb from "./internalManagementAnalyticsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1340,6 +1342,72 @@ export const appRouter = router({
       await seedInternalManagement(ctx.user.id);
       return { success: true };
     }),
+  }),
+
+  favorites: router({
+    add: isAuthenticated
+      .input(z.object({
+        itemType: z.enum(["article", "document"]),
+        itemId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await favoritesDb.addFavorite(ctx.user.id, input.itemType, input.itemId);
+        return { id };
+      }),
+
+    remove: isAuthenticated
+      .input(z.object({
+        itemType: z.enum(["article", "document"]),
+        itemId: z.number(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await favoritesDb.removeFavorite(ctx.user.id, input.itemType, input.itemId);
+        return { success: true };
+      }),
+
+    check: isAuthenticated
+      .input(z.object({
+        itemType: z.enum(["article", "document"]),
+        itemId: z.number(),
+      }))
+      .query(async ({ input, ctx }) => {
+        const isFav = await favoritesDb.isFavorite(ctx.user.id, input.itemType, input.itemId);
+        return { isFavorite: isFav };
+      }),
+
+    list: isAuthenticated.query(async ({ ctx }) => {
+      return await favoritesDb.getUserFavorites(ctx.user.id);
+    }),
+  }),
+
+  internalManagementAnalytics: router({
+    topArticles: isAdmin
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementAnalyticsDb.getTopViewedArticles(input.limit);
+      }),
+
+    topDocuments: isAdmin
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementAnalyticsDb.getTopDownloadedDocuments(input.limit);
+      }),
+
+    stats: isAdmin.query(async () => {
+      return await internalManagementAnalyticsDb.getInternalManagementStats();
+    }),
+
+    recentArticles: isAdmin
+      .input(z.object({ days: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementAnalyticsDb.getRecentArticles(input.days);
+      }),
+
+    recentDocuments: isAdmin
+      .input(z.object({ days: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await internalManagementAnalyticsDb.getRecentDocuments(input.days);
+      }),
   }),
 });
 

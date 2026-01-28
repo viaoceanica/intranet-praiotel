@@ -403,3 +403,16 @@
 - [x] Implementar notificações push automáticas para anúncios urgentes
 - [x] Testar upload de documentos com diferentes tipos de ficheiros
 - [x] Verificar envio de notificações ao criar anúncio urgente
+
+## Melhorias Avançadas de Gestão Interna
+- [x] Instalar e configurar TipTap (editor rich-text)
+- [x] Integrar TipTap na criação/edição de artigos de conhecimento
+- [x] Criar schema de favoritos (userId, itemType, itemId)
+- [x] Implementar backend de favoritos (adicionar, remover, listar)
+- [x] Adicionar botão de favoritos em artigos e documentos
+- [x] Criar página "Os Meus Favoritos"
+- [x] Criar dashboard de analytics de Gestão Interna
+- [x] Mostrar artigos mais vistos
+- [x] Mostrar documentos mais descarregados
+- [x] Calcular taxa de leitura de anúncios
+- [x] Testar todas as funcionalidades

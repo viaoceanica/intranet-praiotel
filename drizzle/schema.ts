@@ -377,3 +377,17 @@ export const knowledgeArticles = mysqlTable("knowledge_articles", {
 
 export type KnowledgeArticle = typeof knowledgeArticles.$inferSelect;
 export type InsertKnowledgeArticle = typeof knowledgeArticles.$inferInsert;
+
+/**
+ * Favoritos dos utilizadores (artigos e documentos)
+ */
+export const favorites = mysqlTable("favorites", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  itemType: mysqlEnum("itemType", ["article", "document"]).notNull(),
+  itemId: int("itemId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = typeof favorites.$inferInsert;

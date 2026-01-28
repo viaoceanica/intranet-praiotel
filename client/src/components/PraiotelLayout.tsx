@@ -32,7 +32,8 @@ import {
   Megaphone,
   MessageSquare,
   FolderOpen,
-  BookOpen
+  BookOpen,
+  Star
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { useState } from "react";
@@ -104,6 +105,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Mural de Mensagens", href: "/bulletin-board", icon: MessageSquare, roles: ["admin", "gestor", "tecnico", "visualizador"] },
         { name: "Gestão de Documentos", href: "/documents", icon: FolderOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
         { name: "Base de Conhecimento", href: "/knowledge-base", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Os Meus Favoritos", href: "/favorites", icon: Star, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Analytics", href: "/internal-management-analytics", icon: BarChart3, roles: ["admin", "gestor"] },
       ]
     },
   ];
