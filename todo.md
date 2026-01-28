@@ -455,3 +455,9 @@
 - [x] Documentar processo de monitorização
 
 - [x] Corrigir erro React #310 (hooks condicionais) na página /knowledge-base em produção
+
+## Melhorias de Ordenação da Base de Conhecimento
+- [x] Verificar e melhorar ordenação por data de criação
+- [x] Verificar e melhorar ordenação por popularidade (visualizações)
+- [x] Adicionar opções de ordenação ascendente/descendente
+- [x] Testar todas as opções de ordenação

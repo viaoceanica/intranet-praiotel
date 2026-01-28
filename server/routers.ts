@@ -1307,7 +1307,7 @@ export const appRouter = router({
         tags: z.string().optional(),
         dateFrom: z.string().optional(),
         dateTo: z.string().optional(),
-        sortBy: z.enum(["recent", "views", "comments"]).optional(),
+        sortBy: z.enum(["recent", "oldest", "views", "comments"]).optional(),
       }))
       .query(async ({ input }) => {
         return await internalManagementDb.advancedSearchKnowledgeArticles(input);

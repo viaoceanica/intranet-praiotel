@@ -97,7 +97,7 @@ export function KnowledgeBase() {
   const [selectedTags, setSelectedTags] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
-  const [sortBy, setSortBy] = useState<"recent" | "views" | "comments">("recent");
+  const [sortBy, setSortBy] = useState<"recent" | "oldest" | "views" | "comments">("recent");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const { data: categories = [] } = trpc.knowledgeCategories.list.useQuery();
@@ -167,6 +167,7 @@ export function KnowledgeBase() {
 
   const sortLabels = {
     recent: "Mais Recentes",
+    oldest: "Mais Antigos",
     views: "Mais Vistos",
     comments: "Mais Comentados",
   };
@@ -276,7 +277,7 @@ export function KnowledgeBase() {
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-gray-700">Ordenar por:</span>
               <div className="flex gap-2">
-                {(["recent", "views", "comments"] as const).map((option) => (
+                {(["recent", "oldest", "views", "comments"] as const).map((option) => (
                   <Button
                     key={option}
                     variant={sortBy === option ? "default" : "outline"}

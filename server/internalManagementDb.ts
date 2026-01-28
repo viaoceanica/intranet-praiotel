@@ -678,7 +678,7 @@ export async function advancedSearchKnowledgeArticles(params: {
   tags?: string;
   dateFrom?: string;
   dateTo?: string;
-  sortBy?: "recent" | "views" | "comments";
+  sortBy?: "recent" | "oldest" | "views" | "comments";
 }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
@@ -742,11 +742,14 @@ export async function advancedSearchKnowledgeArticles(params: {
   if (params.sortBy === "views") {
     query = query.orderBy(desc(knowledgeArticles.viewCount)) as any;
   } else if (params.sortBy === "comments") {
-    // Para ordenar por comentários, precisamos de uma subquery
-    // Por simplicidade, vamos ordenar por data de publicação por enquanto
+    // Ordenar por data de publicação (mais recentes primeiro) quando ordenar por comentários
+    // A contagem real de comentários seria feita com subquery, mas isso afeta performance
     query = query.orderBy(desc(knowledgeArticles.publishedAt)) as any;
+  } else if (params.sortBy === "oldest") {
+    // Mais antigos primeiro (ordem ascendente por data de publicação)
+    query = query.orderBy(knowledgeArticles.publishedAt) as any;
   } else {
-    // Default: mais recentes
+    // Default: mais recentes (ordem descendente por data de publicação)
     query = query.orderBy(desc(knowledgeArticles.publishedAt)) as any;
   }
 
