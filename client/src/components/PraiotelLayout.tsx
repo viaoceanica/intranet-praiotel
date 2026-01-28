@@ -21,7 +21,9 @@ import {
   X,
   Bell,
   Building2,
-  Settings
+  Settings,
+  Wrench,
+  Zap
 } from "lucide-react";
 import { useState } from "react";
 
@@ -53,8 +55,10 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
     { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Tickets", href: "/tickets", icon: Ticket, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Clientes", href: "/clients", icon: Building2, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+    { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { name: "Utilizadores", href: "/users", icon: Users, roles: ["admin"] },
     { name: "Configuração SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
+    { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
   ];
 
   const filteredNavigation = navigation.filter(item => 

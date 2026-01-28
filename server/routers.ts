@@ -11,6 +11,8 @@ import * as notificationsDb from "./notificationsDb";
 import * as clientsDb from "./clientsDb";
 import * as slaDb from "./slaDb";
 import * as slaNotifications from "./slaNotifications";
+import * as equipmentDb from "./equipmentDb";
+import * as prioritizationDb from "./prioritizationDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -335,18 +337,64 @@ export const appRouter = router({
       .mutation(async ({ input, ctx }) => {
         const ticketNumber = await ticketsDb.generateTicketNumber();
         
-        await ticketsDb.createTicket({
+        // Aplicar priorização automática
+        let finalPriority = input.priority;
+        const autoPriority = await prioritizationDb.applyAutoPrioritization({
+          clientId: input.clientId,
+          equipment: input.equipment,
+          description: input.description,
+          problemType: input.problemType,
+          currentPriority: input.priority,
+        });
+
+        if (autoPriority && autoPriority.newPriority !== input.priority) {
+          finalPriority = autoPriority.newPriority as any;
+        }
+
+        const ticketData = {
           ticketNumber,
+          clientId: input.clientId,
           clientName: input.clientName,
           equipment: input.equipment,
           problemType: input.problemType,
-          priority: input.priority,
-          status: "aberto",
+          priority: finalPriority,
+          status: "aberto" as const,
           location: input.location,
           description: input.description,
           assignedToId: input.assignedToId,
           createdById: ctx.user.id,
-        });
+        };
+
+        await ticketsDb.createTicket(ticketData);
+
+        // Obter ID do ticket recém-criado
+        const createdTicket = await ticketsDb.getTicketByNumber(ticketNumber);
+        if (!createdTicket) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao criar ticket" });
+        }
+
+        // Registar alteração de prioridade se foi automática
+        if (autoPriority && autoPriority.newPriority !== input.priority) {
+          await prioritizationDb.logPriorityChange({
+            ticketId: createdTicket.id,
+            oldPriority: input.priority,
+            newPriority: autoPriority.newPriority as any,
+            changedBy: "auto",
+            reason: autoPriority.reason,
+            ruleId: autoPriority.ruleId,
+          });
+
+          // Notificar sobre ajuste automático
+          if (input.assignedToId) {
+            await notificationsDb.createNotification({
+              userId: input.assignedToId,
+              type: "ticket_assigned",
+              title: "Prioridade ajustada automaticamente",
+              message: `Ticket ${ticketNumber}: Prioridade alterada de ${input.priority} para ${autoPriority.newPriority}. Razão: ${autoPriority.reason}`,
+              ticketId: createdTicket.id,
+            });
+          }
+        }
 
         // Notificar técnico atribuído
         if (input.assignedToId) {
@@ -630,6 +678,132 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await clientsDb.deleteClientEmail(input.id);
         return { success: true };
+      }),
+  }),
+
+  equipment: router({
+    list: isAuthenticated.query(async () => {
+      return await equipmentDb.getAllEquipment();
+    }),
+
+    search: isAuthenticated
+      .input(z.object({ query: z.string() }))
+      .query(async ({ input }) => {
+        return await equipmentDb.searchEquipment(input.query);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await equipmentDb.getEquipmentById(input.id);
+      }),
+
+    getByClient: isAuthenticated
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ input }) => {
+        return await equipmentDb.getEquipmentByClientId(input.clientId);
+      }),
+
+    getHistory: isAuthenticated
+      .input(z.object({ equipmentId: z.number() }))
+      .query(async ({ input }) => {
+        return await equipmentDb.getEquipmentTicketHistory(input.equipmentId);
+      }),
+
+    getStats: isAuthenticated
+      .input(z.object({ equipmentId: z.number() }))
+      .query(async ({ input }) => {
+        return await equipmentDb.getEquipmentStats(input.equipmentId);
+      }),
+
+    getCritical: isAuthenticated.query(async () => {
+      return await equipmentDb.getCriticalEquipment();
+    }),
+
+    create: isAuthenticated
+      .input(z.object({
+        serialNumber: z.string().min(1),
+        brand: z.string().min(1),
+        model: z.string().min(1),
+        category: z.string().optional(),
+        location: z.string().optional(),
+        clientId: z.number().optional(),
+        isCritical: z.number().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await equipmentDb.createEquipment(input);
+        return { success: true };
+      }),
+
+    update: isAuthenticated
+      .input(z.object({
+        id: z.number(),
+        serialNumber: z.string().min(1).optional(),
+        brand: z.string().min(1).optional(),
+        model: z.string().min(1).optional(),
+        category: z.string().optional(),
+        location: z.string().optional(),
+        clientId: z.number().optional(),
+        isCritical: z.number().optional(),
+        notes: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await equipmentDb.updateEquipment(id, data);
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await equipmentDb.deleteEquipment(input.id);
+        return { success: true };
+      }),
+  }),
+
+  prioritization: router({
+    listRules: isAdmin.query(async () => {
+      return await prioritizationDb.getAllRules();
+    }),
+
+    createRule: isAdmin
+      .input(z.object({
+        name: z.string().min(1),
+        ruleType: z.enum(["vip_client", "critical_equipment", "keyword", "time_elapsed"]),
+        condition: z.string(), // JSON
+        targetPriority: z.enum(["baixa", "media", "alta", "urgente"]),
+      }))
+      .mutation(async ({ input }) => {
+        await prioritizationDb.createRule({ ...input, active: 1 });
+        return { success: true };
+      }),
+
+    updateRule: isAdmin
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        condition: z.string().optional(),
+        targetPriority: z.enum(["baixa", "media", "alta", "urgente"]).optional(),
+        active: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await prioritizationDb.updateRule(id, data);
+        return { success: true };
+      }),
+
+    deleteRule: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await prioritizationDb.deleteRule(input.id);
+        return { success: true };
+      }),
+
+    getPriorityChanges: isAuthenticated
+      .input(z.object({ ticketId: z.number() }))
+      .query(async ({ input }) => {
+        return await prioritizationDb.getPriorityChangesByTicket(input.ticketId);
       }),
   }),
 });

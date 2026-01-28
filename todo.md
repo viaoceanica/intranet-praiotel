@@ -141,3 +141,25 @@
 - [x] Enviar notificação quando SLA é violado
 - [x] Notificar técnico atribuído
 - [x] Adicionar tipo de notificação específico para SLA (sla_warning, sla_breached)
+
+## Gestão de Equipamentos
+- [x] Criar schema de equipamentos (marca, modelo, número de série, localização, cliente)
+- [x] Criar interface de listagem de equipamentos
+- [x] Implementar criação de novos equipamentos
+- [x] Implementar edição de equipamentos
+- [x] Adicionar pesquisa por número de série, marca, modelo
+- [x] Criar histórico de intervenções por equipamento
+- [x] Campo de equipamento crítico com priorização automática
+- [x] Adicionar menu "Equipamentos" na sidebar
+- [x] Mostrar estatísticas de equipamento (total tickets, última intervenção)
+
+## Sistema de Priorização Automática
+- [x] Criar tabela de regras de priorização
+- [x] Implementar deteção de clientes VIP
+- [x] Criar lista de equipamentos críticos
+- [x] Implementar análise de palavras-chave na descrição
+- [x] Criar algoritmo de ajuste automático de prioridade
+- [x] Adicionar histórico de alterações de prioridade
+- [x] Criar interface de configuração de regras (Admin)
+- [x] Notificar quando prioridade é ajustada automaticamente
+- [x] Integrar priorização automática na criação de tickets

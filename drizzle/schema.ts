@@ -141,3 +141,57 @@ export const slaConfig = mysqlTable("slaConfig", {
 
 export type SlaConfig = typeof slaConfig.$inferSelect;
 export type InsertSlaConfig = typeof slaConfig.$inferInsert;
+
+/**
+ * Equipamentos
+ */
+export const equipment = mysqlTable("equipment", {
+  id: int("id").autoincrement().primaryKey(),
+  serialNumber: varchar("serialNumber", { length: 100 }).notNull().unique(),
+  brand: varchar("brand", { length: 100 }).notNull(),
+  model: varchar("model", { length: 100 }).notNull(),
+  category: varchar("category", { length: 100 }),
+  location: varchar("location", { length: 100 }),
+  clientId: int("clientId"),
+  isCritical: int("isCritical").default(0).notNull(), // 1 = crítico, 0 = normal
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Equipment = typeof equipment.$inferSelect;
+export type InsertEquipment = typeof equipment.$inferInsert;
+
+/**
+ * Regras de priorização automática
+ */
+export const prioritizationRules = mysqlTable("prioritizationRules", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  ruleType: mysqlEnum("ruleType", ["vip_client", "critical_equipment", "keyword", "time_elapsed"]).notNull(),
+  condition: text("condition").notNull(), // JSON com condições específicas
+  targetPriority: mysqlEnum("targetPriority", ["baixa", "media", "alta", "urgente"]).notNull(),
+  active: int("active").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PrioritizationRule = typeof prioritizationRules.$inferSelect;
+export type InsertPrioritizationRule = typeof prioritizationRules.$inferInsert;
+
+/**
+ * Histórico de alterações de prioridade
+ */
+export const priorityChangeLog = mysqlTable("priorityChangeLog", {
+  id: int("id").autoincrement().primaryKey(),
+  ticketId: int("ticketId").notNull(),
+  oldPriority: mysqlEnum("oldPriority", ["baixa", "media", "alta", "urgente"]).notNull(),
+  newPriority: mysqlEnum("newPriority", ["baixa", "media", "alta", "urgente"]).notNull(),
+  changedBy: varchar("changedBy", { length: 50 }).notNull(), // "user" ou "auto"
+  reason: text("reason"),
+  ruleId: int("ruleId"), // Se foi automático, qual regra aplicou
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PriorityChangeLog = typeof priorityChangeLog.$inferSelect;
+export type InsertPriorityChangeLog = typeof priorityChangeLog.$inferInsert;

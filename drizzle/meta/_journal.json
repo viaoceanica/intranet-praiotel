@@ -50,6 +50,13 @@
       "when": 1769623223090,
       "tag": "0006_white_rawhide_kid",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1769624193422,
+      "tag": "0007_volatile_wind_dancer",
+      "breakpoints": true
     }
   ]
 }

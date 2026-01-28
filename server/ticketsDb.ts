@@ -18,6 +18,14 @@ export async function getTicketById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getTicketByNumber(ticketNumber: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(tickets).where(eq(tickets.ticketNumber, ticketNumber)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function getAllTickets() {
   const db = await getDb();
   if (!db) return [];
