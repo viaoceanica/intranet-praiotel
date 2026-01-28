@@ -197,3 +197,9 @@
 
 ## Reorganização do Menu (Continuação)
 - [x] Mover "Priorização Automática" para sub-menu de Tickets
+
+## Correções de Rotas
+- [ ] Verificar e corrigir erro 404 na rota /admin
+
+## Correções de Layout
+- [x] Corrigir falta de sidebar na página de priorização
