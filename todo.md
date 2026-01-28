@@ -461,3 +461,13 @@
 - [x] Verificar e melhorar ordenação por popularidade (visualizações)
 - [x] Adicionar opções de ordenação ascendente/descendente
 - [x] Testar todas as opções de ordenação
+
+## Interface de Gestão de Categorias de Documentos
+- [x] Criar página de gestão de categorias de documentos
+- [x] Adicionar botão "Gerir Categorias" na página de Gestão de Documentos (apenas para admin)
+- [x] Implementar formulário de criação de categoria (nome, descrição, ícone)
+- [x] Implementar listagem de categorias existentes
+- [x] Adicionar funcionalidade de edição de categoria
+- [x] Adicionar funcionalidade de eliminação de categoria (com validação se tem documentos)
+- [x] Adicionar endpoints CRUD no backend para categorias
+- [x] Testar criação, edição e eliminação de categorias

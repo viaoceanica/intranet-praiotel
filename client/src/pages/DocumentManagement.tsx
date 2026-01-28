@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { FileText, Download, Search, Calendar, User, Upload, Loader2, Star } from "lucide-react";
+import { FileText, Download, Search, Calendar, User, Upload, Loader2, Star, Settings } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -185,6 +185,13 @@ export function DocumentManagement() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Gestão de Documentos</h1>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button variant="outline" onClick={() => window.location.href = '/manage-document-categories'}>
+                <Settings className="h-4 w-4 mr-2" />
+                Gerir Categorias
+              </Button>
+            )}
           {isAdmin && (
             <Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
               <DialogTrigger asChild>
@@ -259,6 +266,7 @@ export function DocumentManagement() {
               </DialogContent>
             </Dialog>
           )}
+          </div>
         </div>
 
         {/* Filtros */}

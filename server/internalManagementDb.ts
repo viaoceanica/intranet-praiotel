@@ -368,6 +368,48 @@ export async function createDocumentCategory(data: {
 }
 
 /**
+ * Atualizar categoria de documentos
+ */
+export async function updateDocumentCategory(data: {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(documentCategories)
+    .set({
+      name: data.name,
+      description: data.description,
+      icon: data.icon,
+    })
+    .where(eq(documentCategories.id, data.id));
+}
+
+/**
+ * Eliminar categoria de documentos
+ */
+export async function deleteDocumentCategory(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Verificar se há documentos nesta categoria
+  const docsInCategory = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(documents)
+    .where(eq(documents.categoryId, id));
+
+  if (docsInCategory[0]?.count > 0) {
+    throw new Error("Não é possível eliminar categoria com documentos associados");
+  }
+
+  await db.delete(documentCategories).where(eq(documentCategories.id, id));
+}
+
+/**
  * Obter todos os documentos (com filtro opcional por categoria)
  */
 export async function getAllDocuments(categoryId?: number) {

@@ -30,6 +30,7 @@ import { KnowledgeBase } from "./pages/KnowledgeBase";
 import { Favorites } from "./pages/Favorites";
 import { InternalManagementAnalytics } from "./pages/InternalManagementAnalytics";
 import { ArticleDetail } from "./pages/ArticleDetail";
+import { ManageDocumentCategories } from "./pages/ManageDocumentCategories";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -78,6 +79,7 @@ function Router() {
       <Route path="/announcements" component={() => <ProtectedRoute component={Announcements} />} />
       <Route path="/bulletin-board" component={() => <ProtectedRoute component={BulletinBoard} />} />
       <Route path="/documents" component={() => <ProtectedRoute component={DocumentManagement} />} />
+      <Route path="/manage-document-categories" component={() => <ProtectedRoute component={ManageDocumentCategories} />} />
       <Route path="/knowledge-base" component={() => <ProtectedRoute component={KnowledgeBase} />} />
       <Route path="/knowledge-base/:id" component={() => <ProtectedRoute component={ArticleDetail} />} />
       <Route path="/favorites" component={() => <ProtectedRoute component={Favorites} />} />
