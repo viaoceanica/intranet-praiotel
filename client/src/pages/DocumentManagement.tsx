@@ -12,6 +12,66 @@ import { FileText, Download, Search, Calendar, User, Upload, Loader2, Star } fro
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 
+// Componente separado para cada documento (para evitar hooks condicionais)
+function DocumentCard({ 
+  doc, 
+  onDownload, 
+  onToggleFavorite,
+  formatFileSize 
+}: { 
+  doc: any; 
+  onDownload: (doc: any) => void;
+  onToggleFavorite: (docId: number, isFavorite: boolean) => void;
+  formatFileSize: (bytes: number) => string;
+}) {
+  const { user } = useAuth();
+  
+  const { data: favoriteCheck } = trpc.favorites.check.useQuery(
+    { itemType: "document", itemId: doc.id },
+    { enabled: !!user }
+  );
+  const isFavorite = favoriteCheck?.isFavorite || false;
+
+  return (
+    <Card className="p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4 flex-1">
+          <FileText className="h-8 w-8 text-[#F15A24]" />
+          <div className="flex-1">
+            <h3 className="font-semibold text-gray-900">{doc.name}</h3>
+            <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+              <Badge variant="outline">{doc.categoryName}</Badge>
+              <span>{formatFileSize(doc.fileSize)}</span>
+              <span className="flex items-center gap-1">
+                <User className="h-3 w-3" />
+                {doc.uploaderName}
+              </span>
+              <span className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                {new Date(doc.createdAt).toLocaleDateString("pt-PT")}
+              </span>
+              <span>{doc.downloadCount} downloads</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onToggleFavorite(doc.id, isFavorite)}
+          >
+            <Star className={`h-5 w-5 ${isFavorite ? 'fill-[#F15A24] text-[#F15A24]' : 'text-gray-400'}`} />
+          </Button>
+          <Button onClick={() => onDownload(doc)}>
+            <Download className="h-4 w-4 mr-2" />
+            Download
+          </Button>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export function DocumentManagement() {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
@@ -45,6 +105,7 @@ export function DocumentManagement() {
       addFavoriteMutation.mutate({ itemType: "document", itemId: documentId });
     }
   };
+  
   const uploadDocumentMutation = trpc.documents.upload.useMutation({
     onSuccess: () => {
       toast.success("Documento carregado com sucesso");
@@ -239,52 +300,15 @@ export function DocumentManagement() {
               Nenhum documento encontrado
             </Card>
           ) : (
-            filteredDocuments.map((doc: any) => {
-              const { data: favoriteCheck } = trpc.favorites.check.useQuery(
-                { itemType: "document", itemId: doc.id },
-                { enabled: !!user }
-              );
-              const isFavorite = favoriteCheck?.isFavorite || false;
-
-              return (
-              <Card key={doc.id} className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4 flex-1">
-                    <FileText className="h-8 w-8 text-[#F15A24]" />
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">{doc.name}</h3>
-                      <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                        <Badge variant="outline">{doc.categoryName}</Badge>
-                        <span>{formatFileSize(doc.fileSize)}</span>
-                        <span className="flex items-center gap-1">
-                          <User className="h-3 w-3" />
-                          {doc.uploaderName}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(doc.createdAt).toLocaleDateString("pt-PT")}
-                        </span>
-                        <span>{doc.downloadCount} downloads</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleToggleFavorite(doc.id, isFavorite)}
-                    >
-                      <Star className={`h-5 w-5 ${isFavorite ? 'fill-[#F15A24] text-[#F15A24]' : 'text-gray-400'}`} />
-                    </Button>
-                    <Button onClick={() => handleDownload(doc)}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-              );
-            })
+            filteredDocuments.map((doc: any) => (
+              <DocumentCard
+                key={doc.id}
+                doc={doc}
+                onDownload={handleDownload}
+                onToggleFavorite={handleToggleFavorite}
+                formatFileSize={formatFileSize}
+              />
+            ))
           )}
         </div>
       </div>

@@ -443,3 +443,6 @@
 - [x] Marcar automaticamente artigo como lido ao visualizar página de detalhes
 - [x] Mostrar indicador visual de artigos não lidos na listagem
 - [x] Testar sistema de marcação de leitura
+
+## Bugs Reportados
+- [x] Corrigir erro de hooks do React na página de DocumentManagement (/documents)
