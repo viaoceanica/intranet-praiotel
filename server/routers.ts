@@ -1724,10 +1724,21 @@ export const appRouter = router({
       }),
 
     convertToClient: isAuthenticated
-      .input(z.object({ leadId: z.number(), clientId: z.number() }))
+      .input(
+        z.object({
+          leadId: z.number(),
+          clientData: z.object({
+            designation: z.string(),
+            address: z.string().optional(),
+            primaryEmail: z.string().email(),
+            nif: z.string(),
+            responsiblePerson: z.string().optional(),
+          }),
+        })
+      )
       .mutation(async ({ input }) => {
-        await crmLeadsDb.convertLeadToClient(input.leadId, input.clientId);
-        return { success: true };
+        const clientId = await crmLeadsDb.convertLeadToClient(input.leadId, input.clientData);
+        return { success: true, clientId };
       }),
   }),
 
@@ -1834,10 +1845,24 @@ export const appRouter = router({
     }),
 
     convertToClient: isAuthenticated
-      .input(z.object({ opportunityId: z.number(), clientId: z.number() }))
+      .input(
+        z.object({
+          opportunityId: z.number(),
+          clientData: z.object({
+            designation: z.string(),
+            address: z.string().optional(),
+            primaryEmail: z.string().email(),
+            nif: z.string(),
+            responsiblePerson: z.string().optional(),
+          }),
+        })
+      )
       .mutation(async ({ input }) => {
-        await crmOpportunitiesDb.convertOpportunityToClient(input.opportunityId, input.clientId);
-        return { success: true };
+        const clientId = await crmOpportunitiesDb.convertOpportunityToClient(
+          input.opportunityId,
+          input.clientData
+        );
+        return { success: true, clientId };
       }),
 
     markAsLost: isAuthenticated

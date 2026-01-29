@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { crmOpportunities, crmOpportunityHistory, type InsertCrmOpportunity } from "../drizzle/schema";
+import { crmOpportunities, crmOpportunityHistory, clients, type InsertCrmOpportunity } from "../drizzle/schema";
 import { eq, desc, and, or, like, sql, gte, lte } from "drizzle-orm";
 
 /**
@@ -141,21 +141,52 @@ export async function moveOpportunityStage(id: number, newStage: string, notes?:
 
 /**
  * Converter oportunidade em cliente
+ * Cria um novo registo na tabela clients e atualiza a oportunidade
  */
-export async function convertOpportunityToClient(opportunityId: number, clientId: number) {
+export async function convertOpportunityToClient(
+  opportunityId: number,
+  clientData: {
+    designation: string;
+    address?: string;
+    primaryEmail: string;
+    nif: string;
+    responsiblePerson?: string;
+  }
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  // Obter oportunidade para referência ao lead
+  const [opportunity] = await db
+    .select()
+    .from(crmOpportunities)
+    .where(eq(crmOpportunities.id, opportunityId));
+
+  if (!opportunity) throw new Error("Opportunity not found");
+
+  // Criar cliente
+  const [newClient] = await db
+    .insert(clients)
+    .values({
+      ...clientData,
+      source: opportunity.leadId ? "lead" : "direto",
+      leadId: opportunity.leadId,
+    });
+
+  // Atualizar oportunidade
   await db
     .update(crmOpportunities)
     .set({
       status: "ganha",
+      clientId: newClient.insertId,
       actualCloseDate: new Date(),
       updatedAt: new Date(),
     })
     .where(eq(crmOpportunities.id, opportunityId));
 
   await addOpportunityHistory(opportunityId, "fechamento", "Oportunidade convertida em cliente");
+
+  return newClient.insertId;
 }
 
 /**

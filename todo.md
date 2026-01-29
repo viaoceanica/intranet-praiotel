@@ -606,3 +606,22 @@
 - [x] Atualizar Reports.tsx para usar PraiotelLayout
 - [x] Atualizar Settings.tsx para usar PraiotelLayout
 - [x] Testar navegação em todas as páginas CRM
+
+## Interface Kanban para Oportunidades
+- [x] Instalar biblioteca @dnd-kit (core, sortable, utilities)
+- [x] Criar componente KanbanBoard base
+- [x] Implementar colunas do pipeline (5 fases)
+- [x] Criar cards de oportunidade com valor/probabilidade
+- [x] Implementar drag-and-drop entre colunas
+- [x] Integrar com trpc.crmOpportunities.moveStage
+- [x] Adicionar formulário de criação/edição de oportunidade
+- [x] Testar drag-and-drop no browser (visual confirmado)
+
+## Integração Clientes-CRM
+- [x] Estender schema da tabela clients com campos CRM (source, leadId)
+- [x] Executar db:push para aplicar alterações
+- [x] Atualizar crmLeadsDb.convertLeadToClient para criar registo em clients
+- [x] Atualizar crmOpportunitiesDb.convertOpportunityToClient
+- [ ] Adicionar query para listar clientes com origem CRM (opcional)
+- [ ] Testar conversão lead → cliente (requer dados de teste)
+- [ ] Testar conversão oportunidade → cliente (requer dados de teste)

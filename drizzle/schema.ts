@@ -108,6 +108,11 @@ export const clients = mysqlTable("clients", {
   primaryEmail: varchar("primaryEmail", { length: 320 }).notNull(),
   nif: varchar("nif", { length: 20 }).notNull().unique(),
   responsiblePerson: varchar("responsiblePerson", { length: 255 }),
+  
+  // Campos CRM
+  source: mysqlEnum("source", ["lead", "direto", "outro"]).default("direto"),
+  leadId: int("leadId"), // Referência ao lead original (se convertido)
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

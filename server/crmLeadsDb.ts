@@ -1,5 +1,5 @@
 import { getDb } from "./db";
-import { crmLeads, type InsertCrmLead } from "../drizzle/schema";
+import { crmLeads, clients, type InsertCrmLead } from "../drizzle/schema";
 import { eq, desc, and, or, like, sql } from "drizzle-orm";
 
 /**
@@ -119,20 +119,42 @@ export async function convertLeadToOpportunity(
 
 /**
  * Converter lead em cliente
+ * Cria um novo registo na tabela clients e atualiza o lead
  */
-export async function convertLeadToClient(leadId: number, clientId: number) {
+export async function convertLeadToClient(
+  leadId: number,
+  clientData: {
+    designation: string;
+    address?: string;
+    primaryEmail: string;
+    nif: string;
+    responsiblePerson?: string;
+  }
+) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  // Criar cliente
+  const [newClient] = await db
+    .insert(clients)
+    .values({
+      ...clientData,
+      source: "lead",
+      leadId: leadId,
+    });
+
+  // Atualizar lead
   await db
     .update(crmLeads)
     .set({
       status: "convertido",
-      convertedToClientId: clientId,
+      convertedToClientId: newClient.insertId,
       convertedAt: new Date(),
       updatedAt: new Date(),
     })
     .where(eq(crmLeads.id, leadId));
+
+  return newClient.insertId;
 }
 
 /**
