@@ -732,3 +732,16 @@
 - [x] Adicionar atualização automática de estado ao soltar tarefa
 - [x] Adicionar feedback visual durante o arrasto
 - [x] Testar funcionalidade no browser
+
+## Página de Campanhas CRM
+- [x] Criar schema de campanhas no banco de dados (crm_campaigns, crm_campaign_contacts)
+- [x] Adicionar campos: name, type, status, startDate, endDate, targetAudience, message, subject
+- [x] Criar backend de campanhas (crmCampaignsDb.ts com queries)
+- [x] Adicionar procedures tRPC para campanhas (create, list, update, delete, send)
+- [x] Criar interface de listagem de campanhas com filtros
+- [x] Implementar formulário de criação/edição de campanhas
+- [x] Adicionar segmentação de público-alvo (por status de lead, tags, região)
+- [x] Implementar envio de emails em massa
+- [x] Adicionar dashboard de métricas (enviados, abertos, cliques, conversões)
+- [x] Implementar tracking de abertura e cliques
+- [x] Testar funcionalidades no browser

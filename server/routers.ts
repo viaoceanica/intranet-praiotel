@@ -29,6 +29,7 @@ import * as crmActivitiesDb from "./crmActivitiesDb";
 import * as crmTasksDb from "./crmTasksDb";
 import * as crmTasksReports from "./crmTasksReports";
 import * as crmTasksPersonal from "./crmTasksPersonal";
+import * as crmCampaignsDb from "./crmCampaignsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -2236,6 +2237,115 @@ export const appRouter = router({
     getHighPriorityTasks: isAuthenticated.query(async ({ ctx }) => {
       return await crmTasksPersonal.getHighPriorityTasks(ctx.user.id);
     }),
+  }),
+
+  // CRM Campaigns
+  crmCampaigns: router({
+    list: isAuthenticated
+      .input(
+        z.object({
+          type: z.string().optional(),
+          status: z.string().optional(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmCampaignsDb.listCampaigns(input);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmCampaignsDb.getCampaignById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(
+        z.object({
+          name: z.string(),
+          description: z.string().optional(),
+          type: z.enum(["email", "newsletter", "evento", "webinar", "outro"]),
+          subject: z.string().optional(),
+          emailContent: z.string().optional(),
+          scheduledAt: z.string().optional(),
+        })
+      )
+      .mutation(async ({ ctx, input }) => {
+        const campaignId = await crmCampaignsDb.createCampaign({
+          ...input,
+          scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : undefined,
+          createdById: ctx.user.id,
+        });
+        return { id: campaignId };
+      }),
+
+    update: isAuthenticated
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          description: z.string().optional(),
+          type: z.enum(["email", "newsletter", "evento", "webinar", "outro"]).optional(),
+          status: z.enum(["rascunho", "agendada", "em_envio", "enviada", "cancelada"]).optional(),
+          subject: z.string().optional(),
+          emailContent: z.string().optional(),
+          scheduledAt: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await crmCampaignsDb.updateCampaign(id, {
+          ...data,
+          scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
+        });
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmCampaignsDb.deleteCampaign(input.id);
+        return { success: true };
+      }),
+
+    addContacts: isAuthenticated
+      .input(
+        z.object({
+          campaignId: z.number(),
+          contacts: z.array(
+            z.object({
+              leadId: z.number().optional(),
+              clientId: z.number().optional(),
+            })
+          ),
+        })
+      )
+      .mutation(async ({ input }) => {
+        await crmCampaignsDb.addContactsToCampaign(input.campaignId, input.contacts);
+        return { success: true };
+      }),
+
+    getContacts: isAuthenticated
+      .input(z.object({ campaignId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmCampaignsDb.getCampaignContacts(input.campaignId);
+      }),
+
+    getStats: isAuthenticated.query(async () => {
+      return await crmCampaignsDb.getCampaignStats();
+    }),
+
+    getRecent: isAuthenticated
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await crmCampaignsDb.getRecentCampaigns(input.limit);
+      }),
+
+    markAsSent: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmCampaignsDb.markCampaignAsSent(input.id);
+        return { success: true };
+      }),
   }),
 });
 
