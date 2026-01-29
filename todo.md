@@ -724,3 +724,11 @@
 - [x] Adicionar feedback visual (toasts) para todas as ações
 - [x] Implementar atualização otimista das listas após ações
 - [x] Testar ações rápidas no browser
+
+## Drag-and-Drop de Tarefas entre Estados
+- [x] Instalar biblioteca @dnd-kit para drag-and-drop
+- [x] Criar layout de colunas Kanban (Pendente, Em Progresso, Concluída)
+- [x] Implementar drag-and-drop entre colunas
+- [x] Adicionar atualização automática de estado ao soltar tarefa
+- [x] Adicionar feedback visual durante o arrasto
+- [x] Testar funcionalidade no browser

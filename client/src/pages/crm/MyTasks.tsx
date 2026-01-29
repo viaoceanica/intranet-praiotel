@@ -9,8 +9,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, Clock, AlertCircle, TrendingUp, Calendar, ListTodo, Check, Edit2, Trash2, X } from "lucide-react";
+import { CheckCircle2, Clock, AlertCircle, TrendingUp, Calendar, ListTodo, Check, Edit2, Trash2, X, GripVertical } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const PRIORITY_COLORS = {
   urgente: "#ef4444",
@@ -27,16 +45,129 @@ const TYPE_COLORS = {
   outro: "#6b7280",
 };
 
+const STATUS_CONFIG = {
+  pendente: { label: "Pendente", color: "bg-yellow-100 text-yellow-800", icon: Clock },
+  em_progresso: { label: "Em Progresso", color: "bg-blue-100 text-blue-800", icon: TrendingUp },
+  concluida: { label: "Concluída", color: "bg-green-100 text-green-800", icon: CheckCircle2 },
+};
+
+interface Task {
+  id: number;
+  title: string;
+  description: string | null;
+  type: string;
+  priority: string;
+  status: "pendente" | "em_progresso" | "concluida";
+  dueDate: Date;
+  assignedToId: number;
+  reminderMinutes: number | null;
+}
+
+function SortableTaskCard({ task, onComplete, onEdit, onDelete }: { 
+  task: Task; 
+  onComplete: (id: number) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (id: number) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const priorityColor = PRIORITY_COLORS[task.priority as keyof typeof PRIORITY_COLORS] || "#6b7280";
+  const dueDate = new Date(task.dueDate);
+  const isOverdue = dueDate < new Date() && task.status !== "concluida";
+
+  return (
+    <div ref={setNodeRef} style={style} className="mb-2">
+      <Card className={`p-3 ${isDragging ? 'shadow-lg' : 'hover:shadow-md'} transition-shadow`}>
+        <div className="flex items-start gap-2">
+          <button
+            {...attributes}
+            {...listeners}
+            className="mt-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          >
+            <GripVertical className="h-4 w-4" />
+          </button>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h4 className="font-medium text-sm line-clamp-2">{task.title}</h4>
+              <div
+                className="w-3 h-3 rounded-full flex-shrink-0 mt-1"
+                style={{ backgroundColor: priorityColor }}
+                title={task.priority}
+              />
+            </div>
+            
+            {task.description && (
+              <p className="text-xs text-gray-600 mb-2 line-clamp-2">{task.description}</p>
+            )}
+            
+            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+              <Calendar className="h-3 w-3" />
+              <span className={isOverdue ? "text-red-600 font-medium" : ""}>
+                {dueDate.toLocaleDateString('pt-PT')}
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-1">
+              {task.status !== "concluida" && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-7 px-2 text-green-600 hover:text-green-700 hover:bg-green-50"
+                  onClick={() => onComplete(task.id)}
+                >
+                  <Check className="h-3 w-3 mr-1" />
+                  Concluir
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                onClick={() => onEdit(task)}
+              >
+                <Edit2 className="h-3 w-3 mr-1" />
+                Editar
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => onDelete(task.id)}
+              >
+                <Trash2 className="h-3 w-3 mr-1" />
+                Eliminar
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export default function MyTasks() {
   const [timeFilter, setTimeFilter] = useState<"today" | "week" | "month">("week");
-  const [editingTask, setEditingTask] = useState<any>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
+  const [activeId, setActiveId] = useState<number | null>(null);
 
   // Queries
   const { data: stats } = trpc.crmTasksPersonal.getStats.useQuery();
-  const { data: todayTasks } = trpc.crmTasksPersonal.getTodayTasks.useQuery();
-  const { data: upcomingTasks } = trpc.crmTasksPersonal.getUpcomingTasks.useQuery({ days: 7 });
-  const { data: highPriorityTasks } = trpc.crmTasksPersonal.getHighPriorityTasks.useQuery();
+  const { data: allTasks } = trpc.crmTasks.list.useQuery({});
   const { data: productivityTimeline } = trpc.crmTasksPersonal.getProductivityTimeline.useQuery();
   const { data: tasksByPriority } = trpc.crmTasksPersonal.getTasksByPriority.useQuery();
   const { data: tasksByType } = trpc.crmTasksPersonal.getTasksByType.useQuery();
@@ -46,6 +177,7 @@ export default function MyTasks() {
   const completeMutation = trpc.crmTasks.complete.useMutation({
     onSuccess: () => {
       utils.crmTasksPersonal.invalidate();
+      utils.crmTasks.list.invalidate();
       toast.success("Tarefa marcada como concluída!");
     },
     onError: () => toast.error("Erro ao concluir tarefa"),
@@ -54,6 +186,7 @@ export default function MyTasks() {
   const updateMutation = trpc.crmTasks.update.useMutation({
     onSuccess: () => {
       utils.crmTasksPersonal.invalidate();
+      utils.crmTasks.list.invalidate();
       setEditingTask(null);
       toast.success("Tarefa atualizada com sucesso!");
     },
@@ -63,11 +196,60 @@ export default function MyTasks() {
   const deleteMutation = trpc.crmTasks.delete.useMutation({
     onSuccess: () => {
       utils.crmTasksPersonal.invalidate();
+      utils.crmTasks.list.invalidate();
       setDeletingTaskId(null);
       toast.success("Tarefa eliminada com sucesso!");
     },
     onError: () => toast.error("Erro ao eliminar tarefa"),
   });
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Group tasks by status
+  const tasksByStatus = {
+    pendente: allTasks?.filter((t: Task) => t.status === "pendente") || [],
+    em_progresso: allTasks?.filter((t: Task) => t.status === "em_progresso") || [],
+    concluida: allTasks?.filter((t: Task) => t.status === "concluida") || [],
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as number);
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveId(null);
+
+    if (!over) return;
+
+    const taskId = active.id as number;
+    const newStatus = over.id as "pendente" | "em_progresso" | "concluida";
+
+    // Find the task
+    const task = allTasks?.find((t: Task) => t.id === taskId);
+    if (!task || task.status === newStatus) return;
+
+    // Update task status
+    updateMutation.mutate({
+      id: taskId,
+      title: task.title,
+      description: task.description || "",
+      type: task.type,
+      priority: task.priority,
+      status: newStatus,
+      assignedToId: task.assignedToId,
+      dueDate: new Date(task.dueDate),
+      reminderMinutes: task.reminderMinutes || 30,
+    });
+
+    toast.success(`Tarefa movida para ${STATUS_CONFIG[newStatus].label}`);
+  };
 
   // Prepare chart data
   const priorityChartData = tasksByPriority?.map((item) => ({
@@ -81,551 +263,330 @@ export default function MyTasks() {
     value: item.count,
   })) || [];
 
-  const timelineChartData = productivityTimeline?.map((item) => ({
-    date: new Date(item.date).toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" }),
-    tasks: item.count,
+  const timelineData = productivityTimeline?.map((item) => ({
+    date: new Date(item.date).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' }),
+    concluídas: item.completed,
   })) || [];
 
-  // Calculate completion rate
-  const completionRate = stats?.total ? Math.round((stats.completed / stats.total) * 100) : 0;
-  const weeklyProgress = stats?.completedThisWeek || 0;
-  const monthlyProgress = stats?.completedThisMonth || 0;
-
-  const formatDate = (date: Date | null) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString("pt-PT", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const getPriorityIcon = (priority: string) => {
-    switch (priority) {
-      case "urgente":
-        return "🔴";
-      case "alta":
-        return "🟠";
-      case "media":
-        return "🟡";
-      case "baixa":
-        return "🟢";
-      default:
-        return "⚪";
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "follow_up":
-        return "🔄";
-      case "ligacao":
-        return "📞";
-      case "reuniao":
-        return "📅";
-      case "email":
-        return "📧";
-      default:
-        return "📝";
-    }
-  };
+  const activeTask = activeId ? allTasks?.find((t: Task) => t.id === activeId) : null;
 
   return (
     <PraiotelLayout>
-      <div className="container py-8 space-y-8">
-        {/* Header */}
+      <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">As Minhas Tarefas</h1>
-          <p className="text-muted-foreground mt-1">
-            Dashboard pessoal de produtividade e gestão de tarefas
-          </p>
+          <p className="text-gray-600">Dashboard pessoal de produtividade e gestão de tarefas</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <ListTodo className="h-6 w-6 text-blue-600" />
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <ListTodo className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-sm text-gray-600">Total</p>
                 <p className="text-2xl font-bold">{stats?.total || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">Todas as tarefas</p>
+                <p className="text-xs text-gray-500">Todas as tarefas</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-100 rounded-lg">
-                <CheckCircle2 className="h-6 w-6 text-green-600" />
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckCircle2 className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Concluídas</p>
+                <p className="text-sm text-gray-600">Concluídas</p>
                 <p className="text-2xl font-bold">{stats?.completed || 0}</p>
-                <p className="text-xs text-green-600 mt-1">{completionRate}% taxa de conclusão</p>
+                <p className="text-xs text-gray-500">0% taxa de conclusão</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Clock className="h-6 w-6 text-blue-600" />
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <TrendingUp className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Em Progresso</p>
+                <p className="text-sm text-gray-600">Em Progresso</p>
                 <p className="text-2xl font-bold">{stats?.inProgress || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">Tarefas ativas</p>
+                <p className="text-xs text-gray-500">Tarefas ativas</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-yellow-100 rounded-lg">
-                <Calendar className="h-6 w-6 text-yellow-600" />
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Clock className="h-5 w-5 text-yellow-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Pendentes</p>
+                <p className="text-sm text-gray-600">Pendentes</p>
                 <p className="text-2xl font-bold">{stats?.pending || 0}</p>
-                <p className="text-xs text-muted-foreground mt-1">Aguardando início</p>
+                <p className="text-xs text-gray-500">Aguardando início</p>
               </div>
             </div>
           </Card>
 
-          <Card className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-red-100 rounded-lg">
-                <AlertCircle className="h-6 w-6 text-red-600" />
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-red-100 rounded-lg">
+                <AlertCircle className="h-5 w-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Atrasadas</p>
+                <p className="text-sm text-gray-600">Atrasadas</p>
                 <p className="text-2xl font-bold text-red-600">{stats?.overdue || 0}</p>
-                <p className="text-xs text-red-600 mt-1">Vencidas</p>
+                <p className="text-xs text-gray-500">Vencidas</p>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Progress Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
-              <h3 className="font-semibold">Progresso Semanal</h3>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Tarefas concluídas esta semana</span>
-                <span className="font-semibold">{weeklyProgress}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-600 h-2 rounded-full transition-all"
-                  style={{ width: `${Math.min((weeklyProgress / 10) * 100, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">Meta: 10 tarefas/semana</p>
-            </div>
-          </Card>
+        {/* Kanban Board */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Quadro de Tarefas</h2>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {(Object.keys(STATUS_CONFIG) as Array<keyof typeof STATUS_CONFIG>).map((status) => {
+                const config = STATUS_CONFIG[status];
+                const tasks = tasksByStatus[status];
+                const Icon = config.icon;
 
-          <Card className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <h3 className="font-semibold">Progresso Mensal</h3>
+                return (
+                  <SortableContext
+                    key={status}
+                    id={status}
+                    items={tasks.map((t: Task) => t.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <Card className="p-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Icon className="h-5 w-5" />
+                        <h3 className="font-semibold">{config.label}</h3>
+                        <span className="ml-auto bg-gray-100 px-2 py-1 rounded-full text-sm">
+                          {tasks.length}
+                        </span>
+                      </div>
+                      
+                      <div
+                        className="min-h-[400px] space-y-2"
+                        data-status={status}
+                      >
+                        {tasks.length === 0 ? (
+                          <div className="text-center text-gray-400 py-8">
+                            <p className="text-sm">Nenhuma tarefa</p>
+                          </div>
+                        ) : (
+                          tasks.map((task: Task) => (
+                            <SortableTaskCard
+                              key={task.id}
+                              task={task}
+                              onComplete={(id) => completeMutation.mutate({ id })}
+                              onEdit={setEditingTask}
+                              onDelete={setDeletingTaskId}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </Card>
+                  </SortableContext>
+                );
+              })}
             </div>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Tarefas concluídas este mês</span>
-                <span className="font-semibold">{monthlyProgress}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-green-600 h-2 rounded-full transition-all"
-                  style={{ width: `${Math.min((monthlyProgress / 40) * 100, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">Meta: 40 tarefas/mês</p>
-            </div>
-          </Card>
+
+            <DragOverlay>
+              {activeTask ? (
+                <Card className="p-3 shadow-lg opacity-90">
+                  <div className="flex items-start gap-2">
+                    <GripVertical className="h-4 w-4 mt-1 text-gray-400" />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-sm">{(activeTask as any).task?.title || activeTask.title}</h4>
+                      {((activeTask as any).task?.description || activeTask.description) && (
+                        <p className="text-xs text-gray-600 mt-1">{(activeTask as any).task?.description || activeTask.description}</p>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
         </div>
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Priority Distribution */}
+        {/* Charts */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">Distribuição por Prioridade</h3>
+            <h3 className="text-lg font-semibold mb-4">Distribuição por Prioridade</h3>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={priorityChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#3b82f6" name="Total" />
+                <Bar dataKey="completed" fill="#22c55e" name="Concluídas" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Distribuição por Tipo</h3>
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
                 <Pie
-                  data={priorityChartData}
+                  data={typeChartData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
+                  label={(entry) => entry.name}
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {priorityChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={PRIORITY_COLORS[entry.name.toLowerCase() as keyof typeof PRIORITY_COLORS] || "#6b7280"} />
+                  {typeChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={Object.values(TYPE_COLORS)[index % Object.values(TYPE_COLORS).length]} />
                   ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </Card>
-
-          {/* Type Distribution */}
-          <Card className="p-6">
-            <h3 className="font-semibold mb-4">Distribuição por Tipo</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={typeChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="value" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
         </div>
 
-        {/* Productivity Timeline */}
         <Card className="p-6">
-          <h3 className="font-semibold mb-4">Evolução de Produtividade (Últimos 30 dias)</h3>
+          <h3 className="text-lg font-semibold mb-4">Evolução de Produtividade (Últimos 30 dias)</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={timelineChartData}>
+            <LineChart data={timelineData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="tasks" stroke="#10b981" strokeWidth={2} name="Tarefas Concluídas" />
+              <Line type="monotone" dataKey="concluídas" stroke="#22c55e" strokeWidth={2} name="Tarefas Concluídas" />
             </LineChart>
           </ResponsiveContainer>
         </Card>
-
-        {/* Tasks Lists */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Today's Tasks */}
-          <Card className="p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Tarefas de Hoje
-            </h3>
-            <div className="space-y-3">
-              {todayTasks && todayTasks.length > 0 ? (
-                todayTasks.map((task) => (
-                  <div key={task.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span>{getTypeIcon(task.type)}</span>
-                          <span className="font-medium">{task.title}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{getPriorityIcon(task.priority)}</span>
-                        <div className="flex gap-1">
-                          {task.status !== "concluida" && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                              onClick={() => completeMutation.mutate({ id: task.id })}
-                              title="Marcar como concluída"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => setEditingTask(task)}
-                            title="Editar tarefa"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => setDeletingTaskId(task.id)}
-                            title="Eliminar tarefa"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>⏰ {formatDate(task.dueDate)}</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded">{task.status}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-8">Nenhuma tarefa para hoje</p>
-              )}
-            </div>
-          </Card>
-
-          {/* High Priority Tasks */}
-          <Card className="p-6">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-600" />
-              Tarefas Prioritárias
-            </h3>
-            <div className="space-y-3">
-              {highPriorityTasks && highPriorityTasks.length > 0 ? (
-                highPriorityTasks.slice(0, 5).map((task) => (
-                  <div key={task.id} className="p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span>{getTypeIcon(task.type)}</span>
-                          <span className="font-medium">{task.title}</span>
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{getPriorityIcon(task.priority)}</span>
-                        <div className="flex gap-1">
-                          {task.status !== "concluida" && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                              onClick={() => completeMutation.mutate({ id: task.id })}
-                              title="Marcar como concluída"
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => setEditingTask(task)}
-                            title="Editar tarefa"
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => setDeletingTaskId(task.id)}
-                            title="Eliminar tarefa"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                      <span>⏰ {formatDate(task.dueDate)}</span>
-                      <span className="px-2 py-1 bg-gray-100 rounded">{task.status}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-8">Nenhuma tarefa prioritária</p>
-              )}
-            </div>
-          </Card>
-        </div>
-
-        {/* Upcoming Tasks */}
-        <Card className="p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Próximas Tarefas (7 dias)
-          </h3>
-          <div className="space-y-3">
-            {upcomingTasks && upcomingTasks.length > 0 ? (
-              upcomingTasks.map((task) => (
-                <div key={task.id} className="p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span>{getTypeIcon(task.type)}</span>
-                        <span className="font-medium">{task.title}</span>
-                        <span className="text-lg">{getPriorityIcon(task.priority)}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span>⏰ {formatDate(task.dueDate)}</span>
-                        <span className="px-2 py-1 bg-gray-100 rounded">{task.status}</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      {task.status !== "concluida" && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => completeMutation.mutate({ id: task.id })}
-                          title="Marcar como concluída"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        onClick={() => setEditingTask(task)}
-                        title="Editar tarefa"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                        onClick={() => setDeletingTaskId(task.id)}
-                        title="Eliminar tarefa"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-8">Nenhuma tarefa próxima</p>
-            )}
-          </div>
-        </Card>
       </div>
 
-      {/* Edit Task Dialog */}
-      <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Editar Tarefa</DialogTitle>
-          </DialogHeader>
-          {editingTask && (
+      {/* Edit Dialog */}
+      {editingTask && (
+        <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Editar Tarefa</DialogTitle>
+            </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="edit-title">Título *</Label>
+                <Label htmlFor="edit-title">Título</Label>
                 <Input
                   id="edit-title"
                   value={editingTask.title}
                   onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
-                  placeholder="Título da tarefa"
                 />
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-type">Tipo</Label>
-                  <Select
-                    value={editingTask.type}
-                    onValueChange={(value) => setEditingTask({ ...editingTask, type: value })}
-                  >
-                    <SelectTrigger id="edit-type">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="follow_up">🔄 Follow-up</SelectItem>
-                      <SelectItem value="ligacao">📞 Ligação</SelectItem>
-                      <SelectItem value="reuniao">📅 Reunião</SelectItem>
-                      <SelectItem value="email">📧 Email</SelectItem>
-                      <SelectItem value="outro">📝 Outro</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label htmlFor="edit-priority">Prioridade</Label>
-                  <Select
-                    value={editingTask.priority}
-                    onValueChange={(value) => setEditingTask({ ...editingTask, priority: value })}
-                  >
-                    <SelectTrigger id="edit-priority">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="urgente">🔴 Urgente</SelectItem>
-                      <SelectItem value="alta">🟠 Alta</SelectItem>
-                      <SelectItem value="media">🟡 Média</SelectItem>
-                      <SelectItem value="baixa">🟢 Baixa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
               <div>
                 <Label htmlFor="edit-description">Descrição</Label>
                 <Textarea
                   id="edit-description"
                   value={editingTask.description || ""}
                   onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
-                  placeholder="Descrição da tarefa"
-                  rows={4}
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Prioridade</Label>
+                  <Select
+                    value={editingTask.priority}
+                    onValueChange={(value) => setEditingTask({ ...editingTask, priority: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="baixa">Baixa</SelectItem>
+                      <SelectItem value="media">Média</SelectItem>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="urgente">Urgente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Estado</Label>
+                  <Select
+                    value={editingTask.status}
+                    onValueChange={(value) => setEditingTask({ ...editingTask, status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pendente">Pendente</SelectItem>
+                      <SelectItem value="em_progresso">Em Progresso</SelectItem>
+                      <SelectItem value="concluida">Concluída</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditingTask(null)}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                if (editingTask) {
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditingTask(null)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => {
                   updateMutation.mutate({
                     id: editingTask.id,
                     title: editingTask.title,
-                    type: editingTask.type,
-                    priority: editingTask.priority,
-                    description: editingTask.description,
+                    description: editingTask.description || "",
+                             type: editingTask.type as any,
+                    priority: editingTask.priority as any,
+                    status: editingTask.status as any,
+                    assignedToId: editingTask.assignedToId,
+                    dueDate: editingTask.dueDate.toString(),
+                    reminderMinutes: editingTask.reminderMinutes || 30,
                   });
-                }
-              }}
-              disabled={!editingTask?.title}
-            >
-              Guardar Alterações
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+                }}
+              >
+                Guardar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={!!deletingTaskId} onOpenChange={() => setDeletingTaskId(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar Eliminação</DialogTitle>
-            <DialogDescription>
-              Tem a certeza que deseja eliminar esta tarefa? Esta ação não pode ser revertida.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeletingTaskId(null)}>
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                if (deletingTaskId) {
-                  deleteMutation.mutate({ id: deletingTaskId });
-                }
-              }}
-            >
-              Eliminar Tarefa
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {deletingTaskId && (
+        <Dialog open={!!deletingTaskId} onOpenChange={() => setDeletingTaskId(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirmar Eliminação</DialogTitle>
+              <DialogDescription>
+                Tem a certeza que deseja eliminar esta tarefa? Esta ação não pode ser revertida.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDeletingTaskId(null)}>
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => deleteMutation.mutate({ id: deletingTaskId })}
+              >
+                Eliminar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </PraiotelLayout>
   );
 }
