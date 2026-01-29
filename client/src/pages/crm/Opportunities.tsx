@@ -6,10 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Target, Plus, DollarSign, Calendar, User, Building, TrendingUp, Edit, Trash2, UserPlus } from "lucide-react";
+import { Target, Plus, DollarSign, Calendar, User, Building, TrendingUp, Edit, Trash2, UserPlus, ClipboardList } from "lucide-react";
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { NewActivityDialog } from "@/components/NewActivityDialog";
 import {
   DndContext,
   DragEndEvent,
@@ -38,9 +39,10 @@ interface OpportunityCardProps {
   onEdit: (opp: any) => void;
   onDelete: (id: number) => void;
   onConvert?: (opp: any) => void;
+  onActivity?: (oppId: number) => void;
 }
 
-function OpportunityCard({ opportunity, onEdit, onDelete, onConvert }: OpportunityCardProps) {
+function OpportunityCard({ opportunity, onEdit, onDelete, onConvert, onActivity }: OpportunityCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: opportunity.id,
   });
@@ -58,6 +60,20 @@ function OpportunityCard({ opportunity, onEdit, onDelete, onConvert }: Opportuni
           <div className="flex items-start justify-between mb-2">
             <h4 className="font-semibold text-sm">{opportunity.title}</h4>
             <div className="flex gap-1">
+              {onActivity && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onActivity(opportunity.id);
+                  }}
+                  title="Registar Atividade"
+                >
+                  <ClipboardList className="h-3 w-3" />
+                </Button>
+              )}
               {opportunity.stage === "fechamento" && onConvert && (
                 <Button
                   variant="ghost"
@@ -133,9 +149,10 @@ interface KanbanColumnProps {
   onEdit: (opp: any) => void;
   onDelete: (id: number) => void;
   onConvert?: (opp: any) => void;
+  onActivity?: (oppId: number) => void;
 }
 
-function KanbanColumn({ stage, opportunities, onEdit, onDelete, onConvert }: KanbanColumnProps) {
+function KanbanColumn({ stage, opportunities, onEdit, onDelete, onConvert, onActivity }: KanbanColumnProps) {
   const config = stageConfig[stage];
   const totalValue = opportunities.reduce((sum, opp) => sum + parseFloat(opp.value || "0"), 0);
 
@@ -156,7 +173,7 @@ function KanbanColumn({ stage, opportunities, onEdit, onDelete, onConvert }: Kan
       <div className="space-y-2 min-h-[200px]">
         <SortableContext items={opportunities.map((o) => o.id)} strategy={verticalListSortingStrategy}>
           {opportunities.map((opp) => (
-            <OpportunityCard key={opp.id} opportunity={opp} onEdit={onEdit} onDelete={onDelete} onConvert={onConvert} />
+            <OpportunityCard key={opp.id} opportunity={opp} onEdit={onEdit} onDelete={onDelete} onConvert={onConvert} onActivity={onActivity} />
           ))}
         </SortableContext>
         {opportunities.length === 0 && (
@@ -175,6 +192,8 @@ export default function Opportunities() {
   const [activeId, setActiveId] = useState<number | null>(null);
   const [convertingOpportunity, setConvertingOpportunity] = useState<any>(null);
   const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false);
+  const [selectedOpportunityForActivity, setSelectedOpportunityForActivity] = useState<number | null>(null);
+  const [isActivityDialogOpen, setIsActivityDialogOpen] = useState(false);
   const [clientData, setClientData] = useState({
     designation: "",
     primaryEmail: "",
@@ -306,6 +325,11 @@ export default function Opportunities() {
       stage: opportunity.stage,
     });
     setIsDialogOpen(true);
+  };
+
+  const handleActivity = (oppId: number) => {
+    setSelectedOpportunityForActivity(oppId);
+    setIsActivityDialogOpen(true);
   };
 
   const handleDelete = (id: number) => {
@@ -496,6 +520,7 @@ export default function Opportunities() {
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                   onConvert={handleConvert}
+                  onActivity={handleActivity}
                 />
               </div>
             ))}
@@ -596,6 +621,16 @@ export default function Opportunities() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Dialog de Nova Atividade */}
+        <NewActivityDialog
+          open={isActivityDialogOpen}
+          onOpenChange={setIsActivityDialogOpen}
+          opportunityId={selectedOpportunityForActivity || undefined}
+          onSuccess={() => {
+            // Refresh activities if needed
+          }}
+        />
       </div>
     </PraiotelLayout>
   );

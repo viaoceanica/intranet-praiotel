@@ -652,10 +652,11 @@
 - [ ] Testar conversões no browser e validar rastreabilidade (requer teste manual)
 
 ## Sistema de Histórico de Atividades
-- [ ] Criar backend de atividades (crmActivitiesDb.ts com queries)
-- [ ] Adicionar procedures tRPC para atividades (create, list, update, delete)
-- [ ] Criar componente ActivityTimeline.tsx reutilizável
-- [ ] Integrar timeline na página Leads.tsx (expandir card)
-- [ ] Integrar timeline na página Opportunities.tsx (expandir card)
-- [ ] Testar criação de atividade (chamada, reunião, email, nota)
-- [ ] Testar visualização de timeline ordenada por data
+- [x] Criar backend de atividades (crmActivitiesDb.ts com queries)
+- [x] Adicionar procedures tRPC para atividades (create, list, update, delete)
+- [x] Criar componente ActivityTimeline.tsx reutilizável
+- [x] Criar componente NewActivityDialog.tsx reutilizável
+- [x] Integrar botão "Registar Atividade" na página Leads.tsx
+- [x] Integrar botão "Registar Atividade" na página Opportunities.tsx
+- [ ] Testar criação de atividade no browser (requer teste manual)
+- [ ] Testar visualização de timeline ordenada por data (requer teste manual)

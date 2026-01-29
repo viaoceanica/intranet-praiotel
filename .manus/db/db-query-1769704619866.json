@@ -1,0 +1,23 @@
+{
+  "query": "SELECT id, type, subject, description, activityDate, duration, outcome, leadId, opportunityId, userId, createdAt FROM crm_activities ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, type, subject, description, activityDate, duration, outcome, leadId, opportunityId, userId, createdAt FROM crm_activities ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "type": "reuniao",
+      "subject": "Reunião de apresentação de serviços",
+      "description": "Apresentar portfólio de soluções e discutir necessidades do cliente. Identificar oportunidades de negócio.",
+      "activityDate": "2026-01-29 21:34:00",
+      "duration": "60",
+      "outcome": "Cliente demonstrou interesse em consultoria. Agendar proposta para próxima semana.",
+      "leadId": "1",
+      "opportunityId": "NULL",
+      "userId": "3",
+      "createdAt": "2026-01-29 16:35:43"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttype\tsubject\tdescription\tactivityDate\tduration\toutcome\tleadId\topportunityId\tuserId\tcreatedAt\n1\treuniao\tReunião de apresentação de serviços\tApresentar portfólio de soluções e discutir necessidades do cliente. Identificar oportunidades de negócio.\t2026-01-29 21:34:00\t60\tCliente demonstrou interesse em consultoria. Agendar proposta para próxima semana.\t1\tNULL\t3\t2026-01-29 16:35:43\n",
+  "stderr": "",
+  "execution_time_ms": 112
+}
