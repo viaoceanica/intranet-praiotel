@@ -638,9 +638,9 @@
 - [x] Criar oportunidades de teste (5 oportunidades inseridas)
 - [x] Testar listagem de leads no browser (todos visíveis com badges)
 - [x] Testar pipeline Kanban no browser (5 colunas com oportunidades)
-- [ ] Testar conversão lead → oportunidade (requer UI de conversão)
-- [ ] Testar conversão oportunidade → cliente (requer UI de conversão)
-- [ ] Validar rastreabilidade (source, leadId) na tabela clients
+- [ ] Testar conversão lead → oportunidade (com UI implementada)
+- [ ] Testar conversão oportunidade → cliente (com UI implementada)
+- [ ] Validar rastreabilidade (source, leadId) na tabela clients via SQL
 
 ## Botões de Conversão CRM
 - [x] Adicionar botão "Converter em Oportunidade" nos cards de leads qualificados
@@ -652,9 +652,10 @@
 - [ ] Testar conversões no browser e validar rastreabilidade (requer teste manual)
 
 ## Sistema de Histórico de Atividades
-- [ ] Criar backend de atividades (crmActivitiesDb.ts)
-- [ ] Adicionar procedures tRPC para atividades (CRUD)
-- [ ] Criar componente ActivityTimeline.tsx
-- [ ] Adicionar timeline à página de detalhe de lead
-- [ ] Adicionar timeline à página de detalhe de oportunidade
-- [ ] Testar criação e visualização de atividades
+- [ ] Criar backend de atividades (crmActivitiesDb.ts com queries)
+- [ ] Adicionar procedures tRPC para atividades (create, list, update, delete)
+- [ ] Criar componente ActivityTimeline.tsx reutilizável
+- [ ] Integrar timeline na página Leads.tsx (expandir card)
+- [ ] Integrar timeline na página Opportunities.tsx (expandir card)
+- [ ] Testar criação de atividade (chamada, reunião, email, nota)
+- [ ] Testar visualização de timeline ordenada por data

@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, designation, primaryEmail, nif, source, leadId, createdAt FROM clients ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, designation, primaryEmail, nif, source, leadId, createdAt FROM clients ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "30001",
+      "designation": "Consultoria Digital - Startup Inovadora",
+      "primaryEmail": "contato@startupinov.pt",
+      "nif": "501234567",
+      "source": "direto",
+      "leadId": "NULL",
+      "createdAt": "2026-01-29 16:08:26"
+    },
+    {
+      "id": "1",
+      "designation": "Praiotel Lda",
+      "primaryEmail": "geral@praiotel.pt",
+      "nif": "123456789",
+      "source": "direto",
+      "leadId": "NULL",
+      "createdAt": "2026-01-28 20:15:27"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdesignation\tprimaryEmail\tnif\tsource\tleadId\tcreatedAt\n30001\tConsultoria Digital - Startup Inovadora\tcontato@startupinov.pt\t501234567\tdireto\tNULL\t2026-01-29 16:08:26\n1\tPraiotel Lda\tgeral@praiotel.pt\t123456789\tdireto\tNULL\t2026-01-28 20:15:27\n",
+  "stderr": "",
+  "execution_time_ms": 118
+}

@@ -24,7 +24,8 @@ import * as articleCommentsDb from "./articleCommentsDb";
 import * as articleReadsDb from "./articleReadsDb";
 import * as tagsDb from "./tagsDb";
 import * as crmLeadsDb from "./crmLeadsDb";
-import * as crmOpportunitiesDb from "./crmOpportunitiesDb";
+import * as crmOpportunitiesDb from "./crmOpportunitiesDb.js";
+import * as crmActivitiesDb from "./crmActivitiesDb.js";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1895,6 +1896,95 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         await crmOpportunitiesDb.markOpportunityAsLost(input.id, input.lostReason);
         return { success: true };
+      }),
+  }),
+
+  // CRM Activities Router
+  crmActivities: router({
+    listByLead: isAuthenticated
+      .input(z.object({ leadId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmActivitiesDb.getActivitiesByLead(input.leadId);
+      }),
+
+    listByOpportunity: isAuthenticated
+      .input(z.object({ opportunityId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmActivitiesDb.getActivitiesByOpportunity(input.opportunityId);
+      }),
+
+    listByClient: isAuthenticated
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmActivitiesDb.getActivitiesByClient(input.clientId);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmActivitiesDb.getActivityById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(
+        z.object({
+          type: z.enum(["chamada", "email", "reuniao", "nota", "tarefa_concluida"]),
+          leadId: z.number().optional(),
+          opportunityId: z.number().optional(),
+          clientId: z.number().optional(),
+          subject: z.string(),
+          description: z.string().optional(),
+          activityDate: z.string(),
+          duration: z.number().optional(),
+          outcome: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const id = await crmActivitiesDb.createActivity({
+          ...input,
+          activityDate: new Date(input.activityDate),
+          userId: ctx.user.id,
+        });
+        return { success: true, id };
+      }),
+
+    update: isAuthenticated
+      .input(
+        z.object({
+          id: z.number(),
+          subject: z.string().optional(),
+          description: z.string().optional(),
+          activityDate: z.string().optional(),
+          duration: z.number().optional(),
+          outcome: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const updated = await crmActivitiesDb.updateActivity(id, {
+          ...data,
+          activityDate: data.activityDate ? new Date(data.activityDate) : undefined,
+        });
+        return { success: true, activity: updated };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmActivitiesDb.deleteActivity(input.id);
+        return { success: true };
+      }),
+
+    getRecent: isAuthenticated
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await crmActivitiesDb.getRecentActivities(input.limit);
+      }),
+
+    listByUser: isAuthenticated
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmActivitiesDb.getActivitiesByUser(input.userId);
       }),
   }),
 });
