@@ -660,3 +660,13 @@
 - [x] Integrar botão "Registar Atividade" na página Opportunities.tsx
 - [ ] Testar criação de atividade no browser (requer teste manual)
 - [ ] Testar visualização de timeline ordenada por data (requer teste manual)
+
+## Página de Tarefas CRM
+- [x] Criar backend de tarefas (crmTasksDb.ts com queries)
+- [x] Adicionar procedures tRPC para tarefas (create, list, update, delete, complete)
+- [x] Criar interface de listagem de tarefas com filtros
+- [x] Implementar formulário de criação/edição de tarefas
+- [x] Adicionar filtros por status, prioridade, tipo, data de vencimento
+- [x] Implementar marcação de tarefas como concluídas
+- [ ] Adicionar vista de tarefas por calendário/agenda
+- [x] Testar funcionalidades no browser

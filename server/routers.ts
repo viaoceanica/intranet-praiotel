@@ -26,6 +26,7 @@ import * as tagsDb from "./tagsDb";
 import * as crmLeadsDb from "./crmLeadsDb";
 import * as crmOpportunitiesDb from "./crmOpportunitiesDb";
 import * as crmActivitiesDb from "./crmActivitiesDb";
+import * as crmTasksDb from "./crmTasksDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1985,6 +1986,133 @@ export const appRouter = router({
       .input(z.object({ userId: z.number() }))
       .query(async ({ input }) => {
         return await crmActivitiesDb.getActivitiesByUser(input.userId);
+      }),
+  }),
+
+  // CRM Tasks Router
+  crmTasks: router({
+    list: isAuthenticated
+      .input(
+        z.object({
+          status: z.string().optional(),
+          priority: z.string().optional(),
+          type: z.string().optional(),
+          assignedToId: z.number().optional(),
+          leadId: z.number().optional(),
+          opportunityId: z.number().optional(),
+          clientId: z.number().optional(),
+          dueDateFrom: z.string().optional(),
+          dueDateTo: z.string().optional(),
+          overdue: z.boolean().optional(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmTasksDb.getAllTasks({
+          ...input,
+          dueDateFrom: input.dueDateFrom ? new Date(input.dueDateFrom) : undefined,
+          dueDateTo: input.dueDateTo ? new Date(input.dueDateTo) : undefined,
+        });
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmTasksDb.getTaskById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(
+        z.object({
+          title: z.string(),
+          description: z.string().optional(),
+          type: z.enum(["chamada", "email", "reuniao", "follow_up", "outro"]),
+          leadId: z.number().optional(),
+          opportunityId: z.number().optional(),
+          clientId: z.number().optional(),
+          assignedToId: z.number(),
+          status: z.enum(["pendente", "em_progresso", "concluida", "cancelada"]).optional(),
+          priority: z.enum(["baixa", "media", "alta", "urgente"]).optional(),
+          dueDate: z.string(),
+          reminderMinutes: z.number().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const id = await crmTasksDb.createTask({
+          ...input,
+          dueDate: new Date(input.dueDate),
+        });
+        return { success: true, id };
+      }),
+
+    update: isAuthenticated
+      .input(
+        z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          description: z.string().optional(),
+          type: z.enum(["chamada", "email", "reuniao", "follow_up", "outro"]).optional(),
+          assignedToId: z.number().optional(),
+          status: z.enum(["pendente", "em_progresso", "concluida", "cancelada"]).optional(),
+          priority: z.enum(["baixa", "media", "alta", "urgente"]).optional(),
+          dueDate: z.string().optional(),
+          reminderMinutes: z.number().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        const updated = await crmTasksDb.updateTask(id, {
+          ...data,
+          dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
+        });
+        return { success: true, task: updated };
+      }),
+
+    complete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        const updated = await crmTasksDb.completeTask(input.id);
+        return { success: true, task: updated };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmTasksDb.deleteTask(input.id);
+        return { success: true };
+      }),
+
+    listByLead: isAuthenticated
+      .input(z.object({ leadId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmTasksDb.getTasksByLead(input.leadId);
+      }),
+
+    listByOpportunity: isAuthenticated
+      .input(z.object({ opportunityId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmTasksDb.getTasksByOpportunity(input.opportunityId);
+      }),
+
+    listByClient: isAuthenticated
+      .input(z.object({ clientId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmTasksDb.getTasksByClient(input.clientId);
+      }),
+
+    listByUser: isAuthenticated
+      .input(z.object({ userId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmTasksDb.getTasksByUser(input.userId);
+      }),
+
+    getOverdue: isAuthenticated
+      .query(async () => {
+        return await crmTasksDb.getOverdueTasks();
+      }),
+
+    getStats: isAuthenticated
+      .query(async () => {
+        return await crmTasksDb.getTaskStats();
       }),
   }),
 });
