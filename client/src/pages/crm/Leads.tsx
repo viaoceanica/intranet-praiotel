@@ -7,12 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Plus, Search, Filter, Mail, Phone, Building, TrendingUp, Edit, Trash2, ArrowRight, ClipboardList } from "lucide-react";
+import { Users, Plus, Search, Filter, Mail, Phone, Building, TrendingUp, Edit, Trash2, ArrowRight, ClipboardList, Calendar } from "lucide-react";
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { NewActivityDialog } from "@/components/NewActivityDialog";
+import { NewTaskDialog } from "@/components/NewTaskDialog";
 
 const statusColors = {
   novo: "bg-blue-100 text-blue-800",
@@ -50,6 +51,8 @@ export default function Leads() {
   const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false);
   const [selectedLeadForActivity, setSelectedLeadForActivity] = useState<number | null>(null);
   const [isActivityDialogOpen, setIsActivityDialogOpen] = useState(false);
+  const [selectedLeadForTask, setSelectedLeadForTask] = useState<number | null>(null);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [expandedLeadId, setExpandedLeadId] = useState<number | null>(null);
   const [opportunityData, setOpportunityData] = useState({
     title: "",
@@ -522,6 +525,17 @@ export default function Leads() {
                       >
                         <ClipboardList className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedLeadForTask(lead.id);
+                          setIsTaskDialogOpen(true);
+                        }}
+                        title="Criar Tarefa"
+                      >
+                        <Calendar className="h-4 w-4" />
+                      </Button>
                       {lead.status === "qualificado" && (
                         <Button
                           variant="default"
@@ -644,6 +658,16 @@ export default function Leads() {
         leadId={selectedLeadForActivity || undefined}
         onSuccess={() => {
           // Refresh activities if needed
+        }}
+      />
+      
+      {/* Dialog de Nova Tarefa */}
+      <NewTaskDialog
+        open={isTaskDialogOpen}
+        onOpenChange={setIsTaskDialogOpen}
+        leadId={selectedLeadForTask || undefined}
+        onSuccess={() => {
+          // Refresh tasks if needed
         }}
       />
       </div>

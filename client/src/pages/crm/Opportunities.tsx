@@ -11,6 +11,7 @@ import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { NewActivityDialog } from "@/components/NewActivityDialog";
+import { NewTaskDialog } from "@/components/NewTaskDialog";
 import {
   DndContext,
   DragEndEvent,
@@ -40,9 +41,10 @@ interface OpportunityCardProps {
   onDelete: (id: number) => void;
   onConvert?: (opp: any) => void;
   onActivity?: (oppId: number) => void;
+  onTask?: (oppId: number) => void;
 }
 
-function OpportunityCard({ opportunity, onEdit, onDelete, onConvert, onActivity }: OpportunityCardProps) {
+function OpportunityCard({ opportunity, onEdit, onDelete, onConvert, onActivity, onTask }: OpportunityCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: opportunity.id,
   });
@@ -72,6 +74,20 @@ function OpportunityCard({ opportunity, onEdit, onDelete, onConvert, onActivity 
                   title="Registar Atividade"
                 >
                   <ClipboardList className="h-3 w-3" />
+                </Button>
+              )}
+              {onTask && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 w-6 p-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTask(opportunity.id);
+                  }}
+                  title="Criar Tarefa"
+                >
+                  <Calendar className="h-3 w-3" />
                 </Button>
               )}
               {opportunity.stage === "fechamento" && onConvert && (
@@ -150,9 +166,10 @@ interface KanbanColumnProps {
   onDelete: (id: number) => void;
   onConvert?: (opp: any) => void;
   onActivity?: (oppId: number) => void;
+  onTask?: (oppId: number) => void;
 }
 
-function KanbanColumn({ stage, opportunities, onEdit, onDelete, onConvert, onActivity }: KanbanColumnProps) {
+function KanbanColumn({ stage, opportunities, onEdit, onDelete, onConvert, onActivity, onTask }: KanbanColumnProps) {
   const config = stageConfig[stage];
   const totalValue = opportunities.reduce((sum, opp) => sum + parseFloat(opp.value || "0"), 0);
 
@@ -173,7 +190,7 @@ function KanbanColumn({ stage, opportunities, onEdit, onDelete, onConvert, onAct
       <div className="space-y-2 min-h-[200px]">
         <SortableContext items={opportunities.map((o) => o.id)} strategy={verticalListSortingStrategy}>
           {opportunities.map((opp) => (
-            <OpportunityCard key={opp.id} opportunity={opp} onEdit={onEdit} onDelete={onDelete} onConvert={onConvert} onActivity={onActivity} />
+            <OpportunityCard key={opp.id} opportunity={opp} onEdit={onEdit} onDelete={onDelete} onConvert={onConvert} onActivity={onActivity} onTask={onTask} />
           ))}
         </SortableContext>
         {opportunities.length === 0 && (
@@ -194,6 +211,8 @@ export default function Opportunities() {
   const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false);
   const [selectedOpportunityForActivity, setSelectedOpportunityForActivity] = useState<number | null>(null);
   const [isActivityDialogOpen, setIsActivityDialogOpen] = useState(false);
+  const [selectedOpportunityForTask, setSelectedOpportunityForTask] = useState<number | null>(null);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   const [clientData, setClientData] = useState({
     designation: "",
     primaryEmail: "",
@@ -330,6 +349,11 @@ export default function Opportunities() {
   const handleActivity = (oppId: number) => {
     setSelectedOpportunityForActivity(oppId);
     setIsActivityDialogOpen(true);
+  };
+  
+  const handleTask = (oppId: number) => {
+    setSelectedOpportunityForTask(oppId);
+    setIsTaskDialogOpen(true);
   };
 
   const handleDelete = (id: number) => {
@@ -521,6 +545,7 @@ export default function Opportunities() {
                   onDelete={handleDelete}
                   onConvert={handleConvert}
                   onActivity={handleActivity}
+                  onTask={handleTask}
                 />
               </div>
             ))}
@@ -629,6 +654,16 @@ export default function Opportunities() {
           opportunityId={selectedOpportunityForActivity || undefined}
           onSuccess={() => {
             // Refresh activities if needed
+          }}
+        />
+        
+        {/* Dialog de Nova Tarefa */}
+        <NewTaskDialog
+          open={isTaskDialogOpen}
+          onOpenChange={setIsTaskDialogOpen}
+          opportunityId={selectedOpportunityForTask || undefined}
+          onSuccess={() => {
+            // Refresh tasks if needed
           }}
         />
       </div>

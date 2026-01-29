@@ -9,12 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Calendar, User, AlertCircle, CheckCircle2, Clock, Trash2, Edit, Filter } from "lucide-react";
+import { Plus, Calendar, User, AlertCircle, CheckCircle2, Clock, Trash2, Edit, Filter, List, CalendarDays } from "lucide-react";
 import { toast } from "sonner";
+import { TaskCalendar } from "@/components/TaskCalendar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Tasks() {
 
   const utils = trpc.useUtils();
+  
+  // View tab
+  const [activeTab, setActiveTab] = useState("list");
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -398,8 +403,22 @@ export default function Tasks() {
           </div>
         )}
         
-        {/* Filters */}
-        <Card className="mb-6">
+        {/* Tabs: List and Calendar */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+            <TabsTrigger value="list" className="flex items-center gap-2">
+              <List className="h-4 w-4" />
+              Lista
+            </TabsTrigger>
+            <TabsTrigger value="calendar" className="flex items-center gap-2">
+              <CalendarDays className="h-4 w-4" />
+              Calendário
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="list" className="space-y-6">
+            {/* Filters */}
+            <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
@@ -561,6 +580,12 @@ export default function Tasks() {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+          
+          <TabsContent value="calendar">
+            <TaskCalendar />
+          </TabsContent>
+        </Tabs>
       </div>
     </PraiotelLayout>
   );

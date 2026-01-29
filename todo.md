@@ -670,3 +670,16 @@
 - [x] Implementar marcação de tarefas como concluídas
 - [ ] Adicionar vista de tarefas por calendário/agenda
 - [x] Testar funcionalidades no browser
+
+## Melhorias Sistema de Tarefas CRM
+- [x] Implementar vista de calendário mensal para tarefas
+- [x] Adicionar funcionalidade drag-and-drop para reagendar tarefas no calendário
+- [x] Criar sistema de notificações automáticas de lembretes
+- [x] Implementar job/worker para verificar tarefas com lembretes pendentes
+- [x] Adicionar botão "Criar Tarefa" nos cards de Leads
+- [x] Adicionar botão "Criar Tarefa" nos cards de Oportunidades
+- [x] Pré-preencher leadId/opportunityId ao criar tarefa a partir de Lead/Oportunidade
+- [x] Testar vista de calendário no browser
+- [x] Testar drag-and-drop de tarefas
+- [x] Testar criação rápida de tarefas a partir de Leads/Oportunidades
+- [x] Testar sistema de notificações de lembretes
