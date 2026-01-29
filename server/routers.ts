@@ -1717,10 +1717,35 @@ export const appRouter = router({
     }),
 
     convertToOpportunity: isAuthenticated
-      .input(z.object({ leadId: z.number(), opportunityId: z.number() }))
-      .mutation(async ({ input }) => {
-        await crmLeadsDb.convertLeadToOpportunity(input.leadId, input.opportunityId);
-        return { success: true };
+      .input(z.object({ 
+        leadId: z.number(), 
+        opportunityData: z.object({
+          title: z.string(),
+          description: z.string().optional(),
+          value: z.number(),
+          probability: z.number().min(0).max(100),
+        })
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Create opportunity from lead data
+        const lead = await crmLeadsDb.getLeadById(input.leadId);
+        if (!lead) throw new Error("Lead not found");
+        
+        const opportunityId = await crmOpportunitiesDb.createOpportunity({
+          title: input.opportunityData.title,
+          description: input.opportunityData.description || "",
+          value: input.opportunityData.value.toString(),
+          probability: input.opportunityData.probability,
+          stage: "prospeccao",
+          status: "aberta",
+          leadId: lead.id,
+          assignedToId: ctx.user.id,
+          expectedCloseDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        });
+        
+        // Mark lead as converted
+        await crmLeadsDb.convertLeadToOpportunity(input.leadId, opportunityId);
+        return { success: true, opportunityId };
       }),
 
     convertToClient: isAuthenticated

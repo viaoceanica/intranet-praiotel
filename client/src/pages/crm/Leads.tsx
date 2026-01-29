@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Plus, Search, Filter, Mail, Phone, Building, TrendingUp, Edit, Trash2 } from "lucide-react";
+import { Users, Plus, Search, Filter, Mail, Phone, Building, TrendingUp, Edit, Trash2, ArrowRight } from "lucide-react";
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -44,6 +44,14 @@ export default function Leads() {
   const [sourceFilter, setSourceFilter] = useState<string>("");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<any>(null);
+  const [convertingLead, setConvertingLead] = useState<any>(null);
+  const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false);
+  const [opportunityData, setOpportunityData] = useState({
+    title: "",
+    description: "",
+    value: "",
+    probability: 50,
+  });
 
   // Form state
   const [formData, setFormData] = useState({
@@ -102,6 +110,19 @@ export default function Leads() {
     },
   });
 
+  const convertMutation = trpc.crmLeads.convertToOpportunity.useMutation({
+    onSuccess: () => {
+      toast.success("Lead convertido em oportunidade com sucesso!");
+      refetch();
+      setIsConvertDialogOpen(false);
+      setConvertingLead(null);
+      setOpportunityData({ title: "", description: "", value: "", probability: 50 });
+    },
+    onError: (error) => {
+      toast.error("Erro ao converter lead", { description: error.message });
+    },
+  });
+
   const resetForm = () => {
     setFormData({
       name: "",
@@ -145,6 +166,30 @@ export default function Leads() {
     if (confirm("Tem a certeza que deseja eliminar este lead?")) {
       deleteMutation.mutate({ id });
     }
+  };
+
+  const handleConvert = (lead: any) => {
+    setConvertingLead(lead);
+    setOpportunityData({
+      title: `Oportunidade - ${lead.company || lead.name}`,
+      description: lead.notes || "",
+      value: "",
+      probability: 50,
+    });
+    setIsConvertDialogOpen(true);
+  };
+
+  const handleConvertSubmit = () => {
+    if (!convertingLead) return;
+    convertMutation.mutate({
+      leadId: convertingLead.id,
+      opportunityData: {
+        title: opportunityData.title,
+        description: opportunityData.description,
+        value: parseFloat(opportunityData.value) || 0,
+        probability: opportunityData.probability,
+      },
+    });
   };
 
   return (
@@ -461,6 +506,17 @@ export default function Leads() {
                       )}
                     </div>
                     <div className="flex items-center gap-2">
+                      {lead.status === "qualificado" && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleConvert(lead)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <ArrowRight className="h-4 w-4 mr-1" />
+                          Converter
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -483,6 +539,87 @@ export default function Leads() {
           )}
         </CardContent>
       </Card>
+
+      {/* Dialog de Conversão Lead → Oportunidade */}
+      <Dialog open={isConvertDialogOpen} onOpenChange={setIsConvertDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Converter Lead em Oportunidade</DialogTitle>
+            <DialogDescription>
+              Criar uma oportunidade de venda a partir do lead {convertingLead?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="opp-title">Título da Oportunidade *</Label>
+              <Input
+                id="opp-title"
+                value={opportunityData.title}
+                onChange={(e) => setOpportunityData({ ...opportunityData, title: e.target.value })}
+                placeholder="Ex: Projeto de Consultoria - Silva & Associados"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="opp-description">Descrição</Label>
+              <Textarea
+                id="opp-description"
+                rows={3}
+                value={opportunityData.description}
+                onChange={(e) => setOpportunityData({ ...opportunityData, description: e.target.value })}
+                placeholder="Detalhes sobre a oportunidade..."
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="opp-value">Valor Estimado (€) *</Label>
+                <Input
+                  id="opp-value"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={opportunityData.value}
+                  onChange={(e) => setOpportunityData({ ...opportunityData, value: e.target.value })}
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="opp-probability">Probabilidade (%) *</Label>
+                <Input
+                  id="opp-probability"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={opportunityData.probability}
+                  onChange={(e) => setOpportunityData({ ...opportunityData, probability: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>Nota:</strong> A oportunidade será criada na fase "Prospecção" do pipeline.
+                O lead será marcado como "Convertido" automaticamente.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsConvertDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleConvertSubmit}
+              disabled={!opportunityData.title || !opportunityData.value || convertMutation.isPending}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {convertMutation.isPending ? "A converter..." : "Converter em Oportunidade"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       </div>
     </PraiotelLayout>
   );

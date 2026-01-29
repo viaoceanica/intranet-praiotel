@@ -641,3 +641,20 @@
 - [ ] Testar conversão lead → oportunidade (requer UI de conversão)
 - [ ] Testar conversão oportunidade → cliente (requer UI de conversão)
 - [ ] Validar rastreabilidade (source, leadId) na tabela clients
+
+## Botões de Conversão CRM
+- [x] Adicionar botão "Converter em Oportunidade" nos cards de leads qualificados
+- [x] Criar dialog de conversão lead → oportunidade com formulário pré-preenchido
+- [x] Integrar com trpc.crmLeads.convertToOpportunity
+- [x] Adicionar botão "Converter em Cliente" nos cards de oportunidades (fase Fechamento)
+- [x] Criar dialog de conversão oportunidade → cliente com formulário
+- [x] Integrar com trpc.crmOpportunities.convertToClient
+- [ ] Testar conversões no browser e validar rastreabilidade (requer teste manual)
+
+## Sistema de Histórico de Atividades
+- [ ] Criar backend de atividades (crmActivitiesDb.ts)
+- [ ] Adicionar procedures tRPC para atividades (CRUD)
+- [ ] Criar componente ActivityTimeline.tsx
+- [ ] Adicionar timeline à página de detalhe de lead
+- [ ] Adicionar timeline à página de detalhe de oportunidade
+- [ ] Testar criação e visualização de atividades
