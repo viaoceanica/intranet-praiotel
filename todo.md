@@ -497,3 +497,8 @@
 - [x] Testar sistema completo de tags
 
 - [ ] Corrigir comportamento dos sub-menus da sidebar (devem permanecer abertos ao navegar nas páginas correspondentes)
+
+## Bug: Menus da Sidebar Não Respondem a Cliques
+- [x] Menu Gestão Interna não fecha quando clicado
+- [x] Outros menus (Tickets, Clientes) não abrem quando clicados
+- [x] Corrigir lógica de expansão para permitir toggle manual e expansão automática

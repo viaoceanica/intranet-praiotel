@@ -36,7 +36,7 @@ import {
   Star
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface PraiotelLayoutProps {
   children: React.ReactNode;
@@ -47,11 +47,24 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
-  // Determinar qual menu deve estar expandido com base na rota atual
-  const ticketsExpanded = location.startsWith('/sla-config') || location.startsWith('/prioritization') || location.startsWith('/technician-stats') || location.startsWith('/response-templates');
-  const clientsExpanded = location.startsWith('/equipment');
-  const usersExpanded = location.startsWith('/roles');
-  const internalManagementExpanded = location.startsWith('/internal-dashboard') || location.startsWith('/announcements') || location.startsWith('/bulletin-board') || location.startsWith('/documents') || location.startsWith('/knowledge-base') || location.startsWith('/favorites') || location.startsWith('/internal-management-analytics') || location.startsWith('/manage-document-categories') || location.startsWith('/manage-knowledge-categories') || location.startsWith('/manage-tags') || location.startsWith('/article/');
+  // Estados para controlar expansão dos menus (permitindo toggle manual)
+  const [ticketsExpanded, setTicketsExpanded] = useState(false);
+  const [clientsExpanded, setClientsExpanded] = useState(false);
+  const [usersExpanded, setUsersExpanded] = useState(false);
+  const [internalManagementExpanded, setInternalManagementExpanded] = useState(false);
+  
+  // Expandir automaticamente o menu correto baseado na rota atual (apenas na montagem e mudança de rota)
+  useEffect(() => {
+    if (location.startsWith('/sla-config') || location.startsWith('/prioritization') || location.startsWith('/technician-stats') || location.startsWith('/response-templates')) {
+      setTicketsExpanded(true);
+    } else if (location.startsWith('/equipment')) {
+      setClientsExpanded(true);
+    } else if (location.startsWith('/roles')) {
+      setUsersExpanded(true);
+    } else if (location.startsWith('/internal-dashboard') || location.startsWith('/announcements') || location.startsWith('/bulletin-board') || location.startsWith('/documents') || location.startsWith('/knowledge-base') || location.startsWith('/favorites') || location.startsWith('/internal-management-analytics') || location.startsWith('/manage-document-categories') || location.startsWith('/manage-knowledge-categories') || location.startsWith('/manage-tags') || location.startsWith('/article/')) {
+      setInternalManagementExpanded(true);
+    }
+  }, [location]);
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -216,7 +229,16 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                     <div>
                       <button
                         onClick={() => {
-                          setLocation(item.href);
+                          // Toggle do estado de expansão
+                          if (item.name === "Tickets") {
+                            setTicketsExpanded(!ticketsExpanded);
+                          } else if (item.name === "Clientes") {
+                            setClientsExpanded(!clientsExpanded);
+                          } else if (item.name === "Utilizadores") {
+                            setUsersExpanded(!usersExpanded);
+                          } else if (item.name === "Gestão Interna") {
+                            setInternalManagementExpanded(!internalManagementExpanded);
+                          }
                         }}
                         className={`
                           w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium
