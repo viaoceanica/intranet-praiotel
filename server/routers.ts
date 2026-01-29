@@ -24,6 +24,7 @@ import * as articleCommentsDb from "./articleCommentsDb";
 import * as articleReadsDb from "./articleReadsDb";
 import * as tagsDb from "./tagsDb";
 import * as crmLeadsDb from "./crmLeadsDb";
+import * as crmOpportunitiesDb from "./crmOpportunitiesDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1726,6 +1727,119 @@ export const appRouter = router({
       .input(z.object({ leadId: z.number(), clientId: z.number() }))
       .mutation(async ({ input }) => {
         await crmLeadsDb.convertLeadToClient(input.leadId, input.clientId);
+        return { success: true };
+      }),
+  }),
+
+  // CRM - Gestão de Oportunidades
+  crmOpportunities: router({
+    list: isAuthenticated
+      .input(
+        z.object({
+          stage: z.string().optional(),
+          assignedToId: z.number().optional(),
+          clientId: z.number().optional(),
+          search: z.string().optional(),
+          minValue: z.number().optional(),
+          maxValue: z.number().optional(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmOpportunitiesDb.getAllOpportunities(input);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmOpportunitiesDb.getOpportunityById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(
+        z.object({
+          title: z.string(),
+          description: z.string().optional(),
+          leadId: z.number().optional(),
+          clientId: z.number().optional(),
+          value: z.number(),
+          probability: z.number().min(0).max(100).optional(),
+          stage: z.enum(["prospeccao", "qualificacao", "proposta", "negociacao", "fechamento"]).optional(),
+          assignedToId: z.number(),
+          expectedCloseDate: z.string().optional(),
+          notes: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const opportunityId = await crmOpportunitiesDb.createOpportunity(input as any);
+        return { id: opportunityId };
+      }),
+
+    update: isAuthenticated
+      .input(
+        z.object({
+          id: z.number(),
+          title: z.string().optional(),
+          description: z.string().optional(),
+          value: z.number().optional(),
+          probability: z.number().min(0).max(100).optional(),
+          stage: z.enum(["prospeccao", "qualificacao", "proposta", "negociacao", "fechamento"]).optional(),
+          assignedToId: z.number().optional(),
+          expectedCloseDate: z.string().optional(),
+          notes: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await crmOpportunitiesDb.updateOpportunity(id, data);
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmOpportunitiesDb.deleteOpportunity(input.id);
+        return { success: true };
+      }),
+
+    moveStage: isAuthenticated
+      .input(z.object({ id: z.number(), newStage: z.string(), notes: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        await crmOpportunitiesDb.moveOpportunityStage(input.id, input.newStage, input.notes);
+        return { success: true };
+      }),
+
+    assign: isAuthenticated
+      .input(z.object({ id: z.number(), assignedToId: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmOpportunitiesDb.assignOpportunity(input.id, input.assignedToId);
+        return { success: true };
+      }),
+
+    getHistory: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmOpportunitiesDb.getOpportunityHistory(input.id);
+      }),
+
+    getStats: isAuthenticated.query(async () => {
+      return await crmOpportunitiesDb.getOpportunitiesStats();
+    }),
+
+    getConversionRate: isAuthenticated.query(async () => {
+      return await crmOpportunitiesDb.getConversionRate();
+    }),
+
+    convertToClient: isAuthenticated
+      .input(z.object({ opportunityId: z.number(), clientId: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmOpportunitiesDb.convertOpportunityToClient(input.opportunityId, input.clientId);
+        return { success: true };
+      }),
+
+    markAsLost: isAuthenticated
+      .input(z.object({ id: z.number(), lostReason: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        await crmOpportunitiesDb.markOpportunityAsLost(input.id, input.lostReason);
         return { success: true };
       }),
   }),
