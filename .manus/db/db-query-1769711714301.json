@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO crm_tasks (title, description, type, priority, status, assignedToId, dueDate, reminderMinutes, createdAt) VALUES ('Tarefa de Teste para Ações Rápidas', 'Esta é uma tarefa de teste para validar as ações rápidas do dashboard', 'follow_up', 'media', 'pendente', 1, '2026-01-30 14:00:00', 30, NOW());",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute INSERT INTO crm_tasks (title, description, type, priority, status, assignedToId, dueDate, reminderMinutes, createdAt) VALUES ('Tarefa de Teste para Ações Rápidas', 'Esta é uma tarefa de teste para validar as ações rápidas do dashboard', 'follow_up', 'media', 'pendente', 1, '2026-01-30 14:00:00', 30, NOW());",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 82
+}

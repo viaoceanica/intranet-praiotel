@@ -715,3 +715,12 @@
 - [x] Adicionar filtros rápidos (hoje, esta semana, este mês)
 - [x] Adicionar link de navegação no menu CRM
 - [x] Testar dashboard no browser
+
+## Ações Rápidas no Dashboard "As Minhas Tarefas"
+- [x] Adicionar botões de ação inline nas listas de tarefas (concluir, editar, eliminar)
+- [x] Implementar ação de marcar tarefa como concluída com um clique
+- [x] Adicionar dialog de edição rápida de tarefa
+- [x] Implementar confirmação de eliminação de tarefa
+- [x] Adicionar feedback visual (toasts) para todas as ações
+- [x] Implementar atualização otimista das listas após ações
+- [x] Testar ações rápidas no browser

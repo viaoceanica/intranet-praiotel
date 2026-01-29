@@ -1,9 +1,15 @@
 import { useState } from "react";
+import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Clock, AlertCircle, TrendingUp, Calendar, ListTodo } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle2, Clock, AlertCircle, TrendingUp, Calendar, ListTodo, Check, Edit2, Trash2, X } from "lucide-react";
 import { BarChart, Bar, PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
 
 const PRIORITY_COLORS = {
@@ -23,6 +29,8 @@ const TYPE_COLORS = {
 
 export default function MyTasks() {
   const [timeFilter, setTimeFilter] = useState<"today" | "week" | "month">("week");
+  const [editingTask, setEditingTask] = useState<any>(null);
+  const [deletingTaskId, setDeletingTaskId] = useState<number | null>(null);
 
   // Queries
   const { data: stats } = trpc.crmTasksPersonal.getStats.useQuery();
@@ -32,6 +40,34 @@ export default function MyTasks() {
   const { data: productivityTimeline } = trpc.crmTasksPersonal.getProductivityTimeline.useQuery();
   const { data: tasksByPriority } = trpc.crmTasksPersonal.getTasksByPriority.useQuery();
   const { data: tasksByType } = trpc.crmTasksPersonal.getTasksByType.useQuery();
+
+  // Mutations
+  const utils = trpc.useUtils();
+  const completeMutation = trpc.crmTasks.complete.useMutation({
+    onSuccess: () => {
+      utils.crmTasksPersonal.invalidate();
+      toast.success("Tarefa marcada como concluída!");
+    },
+    onError: () => toast.error("Erro ao concluir tarefa"),
+  });
+
+  const updateMutation = trpc.crmTasks.update.useMutation({
+    onSuccess: () => {
+      utils.crmTasksPersonal.invalidate();
+      setEditingTask(null);
+      toast.success("Tarefa atualizada com sucesso!");
+    },
+    onError: () => toast.error("Erro ao atualizar tarefa"),
+  });
+
+  const deleteMutation = trpc.crmTasks.delete.useMutation({
+    onSuccess: () => {
+      utils.crmTasksPersonal.invalidate();
+      setDeletingTaskId(null);
+      toast.success("Tarefa eliminada com sucesso!");
+    },
+    onError: () => toast.error("Erro ao eliminar tarefa"),
+  });
 
   // Prepare chart data
   const priorityChartData = tasksByPriority?.map((item) => ({
@@ -294,7 +330,40 @@ export default function MyTasks() {
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
                       </div>
-                      <span className="text-lg">{getPriorityIcon(task.priority)}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{getPriorityIcon(task.priority)}</span>
+                        <div className="flex gap-1">
+                          {task.status !== "concluida" && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => completeMutation.mutate({ id: task.id })}
+                              title="Marcar como concluída"
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            onClick={() => setEditingTask(task)}
+                            title="Editar tarefa"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => setDeletingTaskId(task.id)}
+                            title="Eliminar tarefa"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                       <span>⏰ {formatDate(task.dueDate)}</span>
@@ -326,7 +395,40 @@ export default function MyTasks() {
                         </div>
                         <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
                       </div>
-                      <span className="text-lg">{getPriorityIcon(task.priority)}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{getPriorityIcon(task.priority)}</span>
+                        <div className="flex gap-1">
+                          {task.status !== "concluida" && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                              onClick={() => completeMutation.mutate({ id: task.id })}
+                              title="Marcar como concluída"
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            onClick={() => setEditingTask(task)}
+                            title="Editar tarefa"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => setDeletingTaskId(task.id)}
+                            title="Eliminar tarefa"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                     <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                       <span>⏰ {formatDate(task.dueDate)}</span>
@@ -364,6 +466,37 @@ export default function MyTasks() {
                         <span className="px-2 py-1 bg-gray-100 rounded">{task.status}</span>
                       </div>
                     </div>
+                    <div className="flex gap-1">
+                      {task.status !== "concluida" && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          onClick={() => completeMutation.mutate({ id: task.id })}
+                          title="Marcar como concluída"
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        onClick={() => setEditingTask(task)}
+                        title="Editar tarefa"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={() => setDeletingTaskId(task.id)}
+                        title="Eliminar tarefa"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))
@@ -373,6 +506,126 @@ export default function MyTasks() {
           </div>
         </Card>
       </div>
+
+      {/* Edit Task Dialog */}
+      <Dialog open={!!editingTask} onOpenChange={() => setEditingTask(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Editar Tarefa</DialogTitle>
+          </DialogHeader>
+          {editingTask && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-title">Título *</Label>
+                <Input
+                  id="edit-title"
+                  value={editingTask.title}
+                  onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
+                  placeholder="Título da tarefa"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-type">Tipo</Label>
+                  <Select
+                    value={editingTask.type}
+                    onValueChange={(value) => setEditingTask({ ...editingTask, type: value })}
+                  >
+                    <SelectTrigger id="edit-type">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="follow_up">🔄 Follow-up</SelectItem>
+                      <SelectItem value="ligacao">📞 Ligação</SelectItem>
+                      <SelectItem value="reuniao">📅 Reunião</SelectItem>
+                      <SelectItem value="email">📧 Email</SelectItem>
+                      <SelectItem value="outro">📝 Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-priority">Prioridade</Label>
+                  <Select
+                    value={editingTask.priority}
+                    onValueChange={(value) => setEditingTask({ ...editingTask, priority: value })}
+                  >
+                    <SelectTrigger id="edit-priority">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="urgente">🔴 Urgente</SelectItem>
+                      <SelectItem value="alta">🟠 Alta</SelectItem>
+                      <SelectItem value="media">🟡 Média</SelectItem>
+                      <SelectItem value="baixa">🟢 Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-description">Descrição</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingTask.description || ""}
+                  onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
+                  placeholder="Descrição da tarefa"
+                  rows={4}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingTask(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingTask) {
+                  updateMutation.mutate({
+                    id: editingTask.id,
+                    title: editingTask.title,
+                    type: editingTask.type,
+                    priority: editingTask.priority,
+                    description: editingTask.description,
+                  });
+                }
+              }}
+              disabled={!editingTask?.title}
+            >
+              Guardar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deletingTaskId} onOpenChange={() => setDeletingTaskId(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Eliminação</DialogTitle>
+            <DialogDescription>
+              Tem a certeza que deseja eliminar esta tarefa? Esta ação não pode ser revertida.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingTaskId(null)}>
+              Cancelar
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (deletingTaskId) {
+                  deleteMutation.mutate({ id: deletingTaskId });
+                }
+              }}
+            >
+              Eliminar Tarefa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PraiotelLayout>
   );
 }
