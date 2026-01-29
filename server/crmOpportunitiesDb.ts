@@ -255,22 +255,50 @@ export async function getOpportunitiesStats() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  // Estatísticas gerais
   const [stats] = await db
     .select({
       total: sql<number>`COUNT(*)`,
-      prospeccao: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'prospeccao' THEN 1 ELSE 0 END)`,
-      qualificacao: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'qualificacao' THEN 1 ELSE 0 END)`,
-      proposta: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'proposta' THEN 1 ELSE 0 END)`,
-      negociacao: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'negociacao' THEN 1 ELSE 0 END)`,
-      fechamento: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'fechamento' THEN 1 ELSE 0 END)`,
-      ganha: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'ganha' THEN 1 ELSE 0 END)`,
-      perdida: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'perdida' THEN 1 ELSE 0 END)`,
-      totalValue: sql<number>`SUM(CASE WHEN ${crmOpportunities.status} = 'aberta' THEN CAST(${crmOpportunities.value} AS DECIMAL(10,2)) ELSE 0 END)`,
-      wonValue: sql<number>`SUM(CASE WHEN ${crmOpportunities.stage} = 'ganha' THEN CAST(${crmOpportunities.value} AS DECIMAL(10,2)) ELSE 0 END)`,
+      aberta: sql<number>`SUM(CASE WHEN ${crmOpportunities.status} = 'aberta' THEN 1 ELSE 0 END)`,
+      ganha: sql<number>`SUM(CASE WHEN ${crmOpportunities.status} = 'ganha' THEN 1 ELSE 0 END)`,
+      perdida: sql<number>`SUM(CASE WHEN ${crmOpportunities.status} = 'perdida' THEN 1 ELSE 0 END)`,
+      totalValue: sql<string>`SUM(CASE WHEN ${crmOpportunities.status} = 'aberta' THEN CAST(${crmOpportunities.value} AS DECIMAL(10,2)) ELSE 0 END)`,
+      wonValue: sql<string>`SUM(CASE WHEN ${crmOpportunities.status} = 'ganha' THEN CAST(${crmOpportunities.value} AS DECIMAL(10,2)) ELSE 0 END)`,
     })
     .from(crmOpportunities);
 
-  return stats;
+  // Oportunidades por fase (stage)
+  const byStageResults = await db
+    .select({
+      stage: crmOpportunities.stage,
+      count: sql<number>`COUNT(*)`,
+      totalValue: sql<string>`SUM(CAST(${crmOpportunities.value} AS DECIMAL(10,2)))`,
+    })
+    .from(crmOpportunities)
+    .where(eq(crmOpportunities.status, "aberta"))
+    .groupBy(crmOpportunities.stage);
+
+  const byStage: Record<string, { count: number; totalValue: string }> = {};
+  byStageResults.forEach((row) => {
+    if (row.stage) {
+      byStage[row.stage] = {
+        count: row.count,
+        totalValue: row.totalValue || "0",
+      };
+    }
+  });
+
+  return {
+    total: stats.total,
+    byStatus: {
+      aberta: stats.aberta,
+      ganha: stats.ganha,
+      perdida: stats.perdida,
+    },
+    byStage,
+    totalValue: stats.totalValue || "0",
+    wonValue: stats.wonValue || "0",
+  };
 }
 
 /**

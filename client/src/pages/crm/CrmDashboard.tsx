@@ -1,48 +1,74 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Users, Target, CheckSquare, DollarSign, TrendingDown } from "lucide-react";
 import PraiotelLayout from "@/components/PraiotelLayout";
+import { trpc } from "@/lib/trpc";
 
 export default function CrmDashboard() {
-  // TODO: Implementar queries tRPC para buscar métricas reais
+  // Buscar estatísticas de leads
+  const { data: leadsStats, isLoading: leadsLoading } = trpc.crmLeads.getStats.useQuery();
+  
+  // Buscar estatísticas de oportunidades
+  const { data: opportunitiesStats, isLoading: opportunitiesLoading } = trpc.crmOpportunities.getStats.useQuery();
+  
+  // Buscar taxa de conversão
+  const { data: conversionRate, isLoading: conversionLoading } = trpc.crmOpportunities.getConversionRate.useQuery();
+
+  const isLoading = leadsLoading || opportunitiesLoading || conversionLoading;
+
+  // Calcular valor total em pipeline
+  const totalPipelineValue = opportunitiesStats?.totalValue 
+    ? parseFloat(opportunitiesStats.totalValue)
+    : 0;
 
   const metrics = [
     {
       title: "Total de Leads",
-      value: "0",
-      change: "+0%",
-      trend: "up",
+      value: isLoading ? "..." : (leadsStats?.total || 0).toString(),
+      subtitle: leadsStats ? `${leadsStats.byStatus.novo || 0} novos, ${leadsStats.byStatus.qualificado || 0} qualificados` : "",
       icon: Users,
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
       title: "Oportunidades Abertas",
-      value: "0",
-      change: "+0%",
-      trend: "up",
+      value: isLoading ? "..." : (opportunitiesStats?.total || 0).toString(),
+      subtitle: opportunitiesStats ? `${opportunitiesStats.byStatus.aberta || 0} abertas, ${opportunitiesStats.byStatus.ganha || 0} ganhas` : "",
       icon: Target,
       color: "text-green-600",
       bgColor: "bg-green-50",
     },
     {
       title: "Valor em Pipeline",
-      value: "€0",
-      change: "+0%",
-      trend: "up",
+      value: isLoading ? "..." : `€${totalPipelineValue.toLocaleString("pt-PT", { minimumFractionDigits: 2 })}`,
+      subtitle: opportunitiesStats?.byStage ? `${Object.keys(opportunitiesStats.byStage).length} fases ativas` : "",
       icon: DollarSign,
       color: "text-purple-600",
       bgColor: "bg-purple-50",
     },
     {
       title: "Taxa de Conversão",
-      value: "0%",
-      change: "+0%",
-      trend: "up",
+      value: isLoading ? "..." : `${conversionRate?.rate || 0}%`,
+      subtitle: conversionRate ? `${conversionRate.won} ganhas de ${conversionRate.total} totais` : "",
       icon: TrendingUp,
       color: "text-orange-600",
       bgColor: "bg-orange-50",
     },
   ];
+
+  // Preparar dados do pipeline para visualização
+  const pipelineStages = opportunitiesStats?.byStage ? [
+    { name: "Prospecção", count: opportunitiesStats.byStage.prospeccao?.count || 0, value: parseFloat(opportunitiesStats.byStage.prospeccao?.totalValue || "0") },
+    { name: "Qualificação", count: opportunitiesStats.byStage.qualificacao?.count || 0, value: parseFloat(opportunitiesStats.byStage.qualificacao?.totalValue || "0") },
+    { name: "Proposta", count: opportunitiesStats.byStage.proposta?.count || 0, value: parseFloat(opportunitiesStats.byStage.proposta?.totalValue || "0") },
+    { name: "Negociação", count: opportunitiesStats.byStage.negociacao?.count || 0, value: parseFloat(opportunitiesStats.byStage.negociacao?.totalValue || "0") },
+    { name: "Fechamento", count: opportunitiesStats.byStage.fechamento?.count || 0, value: parseFloat(opportunitiesStats.byStage.fechamento?.totalValue || "0") },
+  ] : [];
+
+  // Preparar dados de leads por origem
+  const leadsBySource = leadsStats?.bySource ? Object.entries(leadsStats.bySource).map(([source, count]) => ({
+    source: source.charAt(0).toUpperCase() + source.slice(1),
+    count,
+  })) : [];
 
   return (
     <PraiotelLayout>
@@ -68,21 +94,9 @@ export default function CrmDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-gray-900">{metric.value}</div>
-              <div className="flex items-center gap-1 mt-1">
-                {metric.trend === "up" ? (
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                ) : (
-                  <TrendingDown className="h-4 w-4 text-red-600" />
-                )}
-                <span
-                  className={`text-sm font-medium ${
-                    metric.trend === "up" ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {metric.change}
-                </span>
-                <span className="text-sm text-gray-500">vs. mês anterior</span>
-              </div>
+              {metric.subtitle && (
+                <p className="text-sm text-gray-500 mt-1">{metric.subtitle}</p>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -98,9 +112,32 @@ export default function CrmDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center text-gray-400">
-              Gráfico de pipeline será implementado na Fase 3
-            </div>
+            {pipelineStages.length > 0 ? (
+              <div className="space-y-4">
+                {pipelineStages.map((stage) => (
+                  <div key={stage.name} className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium text-gray-700">{stage.name}</span>
+                      <span className="text-gray-500">
+                        {stage.count} ({stage.value.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}€)
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all"
+                        style={{
+                          width: `${totalPipelineValue > 0 ? Math.min(100, (stage.value / totalPipelineValue) * 100) : 0}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-gray-400">
+                Nenhuma oportunidade no pipeline
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -112,9 +149,20 @@ export default function CrmDashboard() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center text-gray-400">
-              Gráfico de leads será implementado na Fase 2
-            </div>
+            {leadsBySource.length > 0 ? (
+              <div className="space-y-4">
+                {leadsBySource.map((item) => (
+                  <div key={item.source} className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">{item.source}</span>
+                    <span className="text-sm text-gray-500">{item.count} leads</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-gray-400">
+                Nenhum lead registado
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -132,7 +180,7 @@ export default function CrmDashboard() {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-gray-400">
-            Nenhuma tarefa pendente
+            Sistema de tarefas será implementado na Fase 4
           </div>
         </CardContent>
       </Card>

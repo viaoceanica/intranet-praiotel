@@ -190,6 +190,7 @@ export async function getLeadsStats() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
+  // Estatísticas gerais
   const [stats] = await db
     .select({
       total: sql<number>`COUNT(*)`,
@@ -201,7 +202,31 @@ export async function getLeadsStats() {
     })
     .from(crmLeads);
 
-  return stats;
+  // Leads por origem
+  const bySourceResults = await db
+    .select({
+      source: crmLeads.source,
+      count: sql<number>`COUNT(*)`,
+    })
+    .from(crmLeads)
+    .groupBy(crmLeads.source);
+
+  const bySource: Record<string, number> = {};
+  bySourceResults.forEach((row) => {
+    if (row.source) bySource[row.source] = row.count;
+  });
+
+  return {
+    ...stats,
+    byStatus: {
+      novo: stats.novo,
+      contactado: stats.contactado,
+      qualificado: stats.qualificado,
+      nao_qualificado: stats.nao_qualificado,
+      convertido: stats.convertido,
+    },
+    bySource,
+  };
 }
 
 /**

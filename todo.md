@@ -625,3 +625,19 @@
 - [ ] Adicionar query para listar clientes com origem CRM (opcional)
 - [ ] Testar conversão lead → cliente (requer dados de teste)
 - [ ] Testar conversão oportunidade → cliente (requer dados de teste)
+
+## Dashboard CRM com Dados Reais
+- [x] Atualizar CrmDashboard.tsx para consumir trpc.crmLeads.getStats
+- [x] Adicionar consumo de trpc.crmOpportunities.getStats
+- [x] Substituir valores hardcoded por dados reais
+- [x] Adicionar gráficos de pipeline com dados reais
+- [x] Testar dashboard com dados vazios e com dados
+
+## Teste de Fluxo Completo CRM
+- [x] Criar script de seed com leads de teste (5 leads inseridos)
+- [x] Criar oportunidades de teste (5 oportunidades inseridas)
+- [x] Testar listagem de leads no browser (todos visíveis com badges)
+- [x] Testar pipeline Kanban no browser (5 colunas com oportunidades)
+- [ ] Testar conversão lead → oportunidade (requer UI de conversão)
+- [ ] Testar conversão oportunidade → cliente (requer UI de conversão)
+- [ ] Validar rastreabilidade (source, leadId) na tabela clients
