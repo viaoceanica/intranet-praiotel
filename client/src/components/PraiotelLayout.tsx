@@ -33,7 +33,11 @@ import {
   MessageSquare,
   FolderOpen,
   BookOpen,
-  Star
+  Star,
+  TrendingUp,
+  Target,
+  CheckSquare,
+  Mail
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { useState, useEffect } from "react";
@@ -51,6 +55,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [ticketsExpanded, setTicketsExpanded] = useState(false);
   const [clientsExpanded, setClientsExpanded] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(false);
+  const [crmExpanded, setCrmExpanded] = useState(false);
   const [internalManagementExpanded, setInternalManagementExpanded] = useState(false);
   
   // Expandir automaticamente o menu correto baseado na rota atual (apenas na montagem e mudança de rota)
@@ -61,6 +66,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       setClientsExpanded(true);
     } else if (location.startsWith('/roles')) {
       setUsersExpanded(true);
+    } else if (location.startsWith('/crm/')) {
+      setCrmExpanded(true);
     } else if (location.startsWith('/internal-dashboard') || location.startsWith('/announcements') || location.startsWith('/bulletin-board') || location.startsWith('/documents') || location.startsWith('/knowledge-base') || location.startsWith('/favorites') || location.startsWith('/internal-management-analytics') || location.startsWith('/manage-document-categories') || location.startsWith('/manage-knowledge-categories') || location.startsWith('/manage-tags') || location.startsWith('/article/')) {
       setInternalManagementExpanded(true);
     }
@@ -107,6 +114,21 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       roles: ["admin"],
       subItems: [
         { name: "Roles", href: "/roles", icon: Settings, roles: ["admin"] },
+      ]
+    },
+    { 
+      name: "CRM", 
+      href: "/crm/dashboard", 
+      icon: TrendingUp, 
+      roles: ["admin"],
+      subItems: [
+        { name: "Dashboard CRM", href: "/crm/dashboard", icon: LayoutDashboard, roles: ["admin"] },
+        { name: "Leads", href: "/crm/leads", icon: Users, roles: ["admin"] },
+        { name: "Oportunidades", href: "/crm/opportunities", icon: Target, roles: ["admin"] },
+        { name: "Tarefas", href: "/crm/tasks", icon: CheckSquare, roles: ["admin"] },
+        { name: "Campanhas", href: "/crm/campaigns", icon: Mail, roles: ["admin"] },
+        { name: "Relatórios", href: "/crm/reports", icon: BarChart3, roles: ["admin"] },
+        { name: "Configurações", href: "/crm/settings", icon: Settings, roles: ["admin"] },
       ]
     },
     { 
@@ -238,6 +260,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                             setClientsExpanded(!clientsExpanded);
                           } else if (item.name === "Utilizadores") {
                             setUsersExpanded(!usersExpanded);
+                          } else if (item.name === "CRM") {
+                            setCrmExpanded(!crmExpanded);
                           } else if (item.name === "Gestão Interna") {
                             setInternalManagementExpanded(!internalManagementExpanded);
                           }
@@ -255,9 +279,9 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                           <item.icon className="h-5 w-5" />
                           {item.name}
                         </div>
-                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </button>
-                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) && (
+                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) && (
                         <div className="ml-8 mt-1 space-y-1">
                           {filteredSubItems.map((subItem) => {
                             const isSubActive = location === subItem.href;

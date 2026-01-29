@@ -510,16 +510,16 @@
 ## Módulo CRM - Desenvolvimento Completo
 
 ### Fase 1: Fundação - Schema e Estrutura Base
-- [ ] Criar schema de base de dados para leads
-- [ ] Criar schema de base de dados para oportunidades
-- [ ] Criar schema de base de dados para campanhas de marketing
-- [ ] Criar schema de base de dados para tarefas CRM
-- [ ] Criar schema de base de dados para interações/atividades
-- [ ] Criar schema de base de dados para documentos CRM
-- [ ] Criar schema de base de dados para configurações CRM (SMTP, lead scoring)
-- [ ] Adicionar menu "CRM" na sidebar com sub-itens
-- [ ] Criar estrutura de rotas para módulo CRM
-- [ ] Criar páginas base (layouts) para CRM
+- [x] Criar schema de base de dados para leads
+- [x] Criar schema de base de dados para oportunidades
+- [x] Criar schema de base de dados para campanhas de marketing
+- [x] Criar schema de base de dados para tarefas CRM
+- [x] Criar schema de base de dados para interações/atividades
+- [x] Criar schema de base de dados para documentos CRM
+- [x] Criar schema de base de dados para configurações CRM (SMTP, lead scoring)
+- [x] Adicionar menu "CRM" na sidebar com sub-itens
+- [x] Criar estrutura de rotas para módulo CRM
+- [x] Criar páginas base (layouts) para CRM
 
 ### Fase 2: Gestão de Leads
 - [ ] Criar página de listagem de leads com filtros

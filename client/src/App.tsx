@@ -33,6 +33,13 @@ import { ArticleDetail } from "./pages/ArticleDetail";
 import { ManageDocumentCategories } from "./pages/ManageDocumentCategories";
 import { ManageKnowledgeCategories } from "./pages/ManageKnowledgeCategories";
 import ManageTags from "./pages/ManageTags";
+import CrmDashboard from "./pages/crm/CrmDashboard";
+import Leads from "./pages/crm/Leads";
+import Opportunities from "./pages/crm/Opportunities";
+import Tasks from "./pages/crm/Tasks";
+import Campaigns from "./pages/crm/Campaigns";
+import Reports from "./pages/crm/Reports";
+import Settings from "./pages/crm/Settings";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -88,6 +95,16 @@ function Router() {
       <Route path="/knowledge-base/:id" component={() => <ProtectedRoute component={ArticleDetail} />} />
       <Route path="/favorites" component={() => <ProtectedRoute component={Favorites} />} />
       <Route path="/internal-management-analytics" component={() => <ProtectedRoute component={InternalManagementAnalytics} />} />
+      
+      {/* Rotas CRM */}
+      <Route path="/crm/dashboard" component={() => <ProtectedRoute component={CrmDashboard} />} />
+      <Route path="/crm/leads" component={() => <ProtectedRoute component={Leads} />} />
+      <Route path="/crm/opportunities" component={() => <ProtectedRoute component={Opportunities} />} />
+      <Route path="/crm/tasks" component={() => <ProtectedRoute component={Tasks} />} />
+      <Route path="/crm/campaigns" component={() => <ProtectedRoute component={Campaigns} />} />
+      <Route path="/crm/reports" component={() => <ProtectedRoute component={Reports} />} />
+      <Route path="/crm/settings" component={() => <ProtectedRoute component={Settings} />} />
+      
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

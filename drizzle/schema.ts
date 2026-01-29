@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { date, decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Utilizadores do sistema com autenticação autónoma
@@ -445,3 +445,331 @@ export const articleTags = mysqlTable("article_tags", {
 
 export type ArticleTag = typeof articleTags.$inferSelect;
 export type InsertArticleTag = typeof articleTags.$inferInsert;
+
+// ============================================================================
+// MÓDULO CRM - Customer Relationship Management
+// ============================================================================
+
+/**
+ * Leads do CRM - Potenciais clientes
+ * Extensão da tabela clients para incluir leads que ainda não são clientes
+ */
+export const crmLeads = mysqlTable("crm_leads", {
+  id: int("id").autoincrement().primaryKey(),
+  // Informação básica
+  name: varchar("name", { length: 255 }).notNull(),
+  company: varchar("company", { length: 255 }),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 50 }),
+  jobTitle: varchar("jobTitle", { length: 100 }),
+  
+  // Origem e classificação
+  source: varchar("source", { length: 100 }).notNull(), // formulário, evento, anúncio, referência, importação
+  status: mysqlEnum("status", ["novo", "contactado", "qualificado", "nao_qualificado", "convertido"]).default("novo").notNull(),
+  score: int("score").default(0).notNull(), // Lead scoring 0-100
+  
+  // Qualificação
+  budget: decimal("budget", { precision: 10, scale: 2 }),
+  timeline: varchar("timeline", { length: 100 }), // Prazo para decisão
+  needs: text("needs"), // Necessidades identificadas
+  
+  // Atribuição
+  assignedToId: int("assignedToId"), // Vendedor responsável
+  
+  // Conversão
+  convertedToClientId: int("convertedToClientId"), // Referência ao cliente criado
+  convertedToOpportunityId: int("convertedToOpportunityId"), // Referência à oportunidade criada
+  convertedAt: timestamp("convertedAt"),
+  
+  // Notas e observações
+  notes: text("notes"),
+  
+  // Timestamps
+  lastContactedAt: timestamp("lastContactedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmLead = typeof crmLeads.$inferSelect;
+export type InsertCrmLead = typeof crmLeads.$inferInsert;
+
+/**
+ * Oportunidades de venda no CRM
+ */
+export const crmOpportunities = mysqlTable("crm_opportunities", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Informação básica
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Relacionamentos
+  leadId: int("leadId"), // Lead de origem (se aplicável)
+  clientId: int("clientId"), // Cliente associado (se já for cliente)
+  
+  // Valores e probabilidade
+  value: decimal("value", { precision: 10, scale: 2 }).notNull(), // Valor estimado
+  probability: int("probability").default(50).notNull(), // Probabilidade de fecho (0-100%)
+  
+  // Pipeline
+  stage: mysqlEnum("stage", ["prospeccao", "qualificacao", "proposta", "negociacao", "fechamento"]).default("prospeccao").notNull(),
+  status: mysqlEnum("status", ["aberta", "ganha", "perdida", "cancelada"]).default("aberta").notNull(),
+  
+  // Atribuição
+  assignedToId: int("assignedToId").notNull(), // Vendedor responsável
+  
+  // Datas importantes
+  expectedCloseDate: date("expectedCloseDate"), // Data prevista de fecho
+  actualCloseDate: date("actualCloseDate"), // Data real de fecho
+  
+  // Motivo (se perdida ou cancelada)
+  lostReason: text("lostReason"),
+  
+  // Notas
+  notes: text("notes"),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmOpportunity = typeof crmOpportunities.$inferSelect;
+export type InsertCrmOpportunity = typeof crmOpportunities.$inferInsert;
+
+/**
+ * Atividades/Interações do CRM
+ * Registo de todas as interações com leads/oportunidades/clientes
+ */
+export const crmActivities = mysqlTable("crm_activities", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Tipo de atividade
+  type: mysqlEnum("type", ["chamada", "email", "reuniao", "nota", "tarefa_concluida"]).notNull(),
+  
+  // Relacionamentos (pelo menos um deve estar preenchido)
+  leadId: int("leadId"),
+  opportunityId: int("opportunityId"),
+  clientId: int("clientId"),
+  
+  // Conteúdo
+  subject: varchar("subject", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Resultado (para chamadas e reuniões)
+  outcome: varchar("outcome", { length: 100 }), // sucesso, sem_resposta, reagendar, etc.
+  
+  // Duração (para chamadas e reuniões, em minutos)
+  duration: int("duration"),
+  
+  // Utilizador que registou
+  userId: int("userId").notNull(),
+  
+  // Timestamps
+  activityDate: timestamp("activityDate").defaultNow().notNull(), // Data/hora da atividade
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CrmActivity = typeof crmActivities.$inferSelect;
+export type InsertCrmActivity = typeof crmActivities.$inferInsert;
+
+/**
+ * Tarefas do CRM
+ * Tarefas agendadas relacionadas com leads/oportunidades
+ */
+export const crmTasks = mysqlTable("crm_tasks", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Informação da tarefa
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  type: mysqlEnum("type", ["chamada", "email", "reuniao", "follow_up", "outro"]).notNull(),
+  
+  // Relacionamentos
+  leadId: int("leadId"),
+  opportunityId: int("opportunityId"),
+  clientId: int("clientId"),
+  
+  // Atribuição
+  assignedToId: int("assignedToId").notNull(),
+  
+  // Estado e prioridade
+  status: mysqlEnum("status", ["pendente", "em_progresso", "concluida", "cancelada"]).default("pendente").notNull(),
+  priority: mysqlEnum("priority", ["baixa", "media", "alta", "urgente"]).default("media").notNull(),
+  
+  // Datas
+  dueDate: timestamp("dueDate").notNull(), // Data/hora de vencimento
+  completedAt: timestamp("completedAt"),
+  
+  // Lembrete
+  reminderMinutes: int("reminderMinutes").default(30), // Minutos antes para lembrete
+  reminderSent: int("reminderSent").default(0).notNull(), // 0 = não enviado, 1 = enviado
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmTask = typeof crmTasks.$inferSelect;
+export type InsertCrmTask = typeof crmTasks.$inferInsert;
+
+/**
+ * Campanhas de Marketing
+ */
+export const crmCampaigns = mysqlTable("crm_campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Informação da campanha
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  type: mysqlEnum("type", ["email", "newsletter", "evento", "webinar", "outro"]).notNull(),
+  
+  // Estado
+  status: mysqlEnum("status", ["rascunho", "agendada", "em_envio", "enviada", "cancelada"]).default("rascunho").notNull(),
+  
+  // Conteúdo (para campanhas de email)
+  subject: varchar("subject", { length: 255 }),
+  emailContent: text("emailContent"), // HTML do email
+  
+  // Agendamento
+  scheduledAt: timestamp("scheduledAt"),
+  sentAt: timestamp("sentAt"),
+  
+  // Métricas
+  totalRecipients: int("totalRecipients").default(0).notNull(),
+  sentCount: int("sentCount").default(0).notNull(),
+  openedCount: int("openedCount").default(0).notNull(),
+  clickedCount: int("clickedCount").default(0).notNull(),
+  bouncedCount: int("bouncedCount").default(0).notNull(),
+  
+  // Criador
+  createdById: int("createdById").notNull(),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmCampaign = typeof crmCampaigns.$inferSelect;
+export type InsertCrmCampaign = typeof crmCampaigns.$inferInsert;
+
+/**
+ * Contactos incluídos em campanhas
+ * Relacionamento muitos-para-muitos entre campanhas e leads/clientes
+ */
+export const crmCampaignContacts = mysqlTable("crm_campaign_contacts", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Relacionamentos
+  campaignId: int("campaignId").notNull(),
+  leadId: int("leadId"),
+  clientId: int("clientId"),
+  
+  // Estado do envio
+  status: mysqlEnum("status", ["pendente", "enviado", "aberto", "clicado", "bounce", "erro"]).default("pendente").notNull(),
+  
+  // Métricas individuais
+  sentAt: timestamp("sentAt"),
+  openedAt: timestamp("openedAt"),
+  clickedAt: timestamp("clickedAt"),
+  bouncedAt: timestamp("bouncedAt"),
+  
+  // Erro (se aplicável)
+  errorMessage: text("errorMessage"),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CrmCampaignContact = typeof crmCampaignContacts.$inferSelect;
+export type InsertCrmCampaignContact = typeof crmCampaignContacts.$inferInsert;
+
+/**
+ * Documentos do CRM
+ * Propostas, contratos, apresentações associadas a oportunidades
+ */
+export const crmDocuments = mysqlTable("crm_documents", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Informação do documento
+  name: varchar("name", { length: 255 }).notNull(),
+  type: mysqlEnum("type", ["proposta", "contrato", "apresentacao", "outro"]).notNull(),
+  
+  // Relacionamentos
+  leadId: int("leadId"),
+  opportunityId: int("opportunityId"),
+  clientId: int("clientId"),
+  
+  // Ficheiro
+  fileKey: varchar("fileKey", { length: 500 }).notNull(),
+  fileUrl: varchar("fileUrl", { length: 1000 }).notNull(),
+  fileSize: int("fileSize").notNull(),
+  mimeType: varchar("mimeType", { length: 100 }).notNull(),
+  
+  // Versão (para controlo de versões)
+  version: int("version").default(1).notNull(),
+  previousVersionId: int("previousVersionId"), // Referência à versão anterior
+  
+  // Upload
+  uploadedById: int("uploadedById").notNull(),
+  
+  // Notas
+  notes: text("notes"),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmDocument = typeof crmDocuments.$inferSelect;
+export type InsertCrmDocument = typeof crmDocuments.$inferInsert;
+
+/**
+ * Configurações do CRM
+ * Armazena configurações como SMTP, lead scoring, etc.
+ */
+export const crmSettings = mysqlTable("crm_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Chave única para cada configuração
+  settingKey: varchar("settingKey", { length: 100 }).notNull().unique(),
+  
+  // Valor (JSON para configurações complexas)
+  settingValue: text("settingValue").notNull(),
+  
+  // Descrição
+  description: text("description"),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmSetting = typeof crmSettings.$inferSelect;
+export type InsertCrmSetting = typeof crmSettings.$inferInsert;
+
+/**
+ * Histórico de alterações de fases de oportunidades
+ * Para tracking do pipeline
+ */
+export const crmOpportunityHistory = mysqlTable("crm_opportunity_history", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Oportunidade
+  opportunityId: int("opportunityId").notNull(),
+  
+  // Alteração
+  fromStage: mysqlEnum("fromStage", ["prospeccao", "qualificacao", "proposta", "negociacao", "fechamento"]),
+  toStage: mysqlEnum("toStage", ["prospeccao", "qualificacao", "proposta", "negociacao", "fechamento"]).notNull(),
+  
+  // Utilizador que fez a alteração
+  changedById: int("changedById").notNull(),
+  
+  // Notas sobre a alteração
+  notes: text("notes"),
+  
+  // Timestamp
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type CrmOpportunityHistory = typeof crmOpportunityHistory.$inferSelect;
+export type InsertCrmOpportunityHistory = typeof crmOpportunityHistory.$inferInsert;
