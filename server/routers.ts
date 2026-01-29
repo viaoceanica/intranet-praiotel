@@ -1292,6 +1292,26 @@ export const appRouter = router({
         const id = await internalManagementDb.createKnowledgeCategory(input);
         return { id };
       }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1),
+        description: z.string().optional(),
+        icon: z.string().optional(),
+        displayOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.updateKnowledgeCategory(input);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await internalManagementDb.deleteKnowledgeCategory(input.id);
+        return { success: true };
+      }),
   }),
 
   knowledgeArticles: router({

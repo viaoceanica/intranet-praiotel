@@ -92,6 +92,7 @@ function ArticleCard({
 
 export function KnowledgeBase() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [selectedTags, setSelectedTags] = useState("");
@@ -175,11 +176,18 @@ export function KnowledgeBase() {
   return (
     <PraiotelLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Base de Conhecimento</h1>
-          <p className="text-gray-600">
-            Tutoriais, guias e documentação técnica da Praiotel
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Base de Conhecimento</h1>
+            <p className="text-gray-600">
+              Tutoriais, guias e documentação técnica da Praiotel
+            </p>
+          </div>
+          {user?.role === "admin" && (
+            <Button onClick={() => setLocation("/manage-knowledge-categories")} variant="outline">
+              Gerir Categorias
+            </Button>
+          )}
         </div>
 
         {/* Barra de Pesquisa e Filtros */}

@@ -546,6 +546,44 @@ export async function createKnowledgeCategory(data: {
 }
 
 /**
+ * Atualizar categoria de conhecimento
+ */
+export async function updateKnowledgeCategory(data: {
+  id: number;
+  name: string;
+  description?: string;
+  icon?: string;
+  displayOrder?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const { id, ...updateData } = data;
+  await db.update(knowledgeCategories).set(updateData).where(eq(knowledgeCategories.id, id));
+}
+
+/**
+ * Eliminar categoria de conhecimento
+ */
+export async function deleteKnowledgeCategory(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Verificar se existem artigos associados
+  const articles = await db
+    .select({ id: knowledgeArticles.id })
+    .from(knowledgeArticles)
+    .where(eq(knowledgeArticles.categoryId, id))
+    .limit(1);
+
+  if (articles.length > 0) {
+    throw new Error("Não é possível eliminar categoria com artigos associados");
+  }
+
+  await db.delete(knowledgeCategories).where(eq(knowledgeCategories.id, id));
+}
+
+/**
  * Obter todos os artigos (com filtro opcional por categoria)
  */
 export async function getAllKnowledgeArticles(categoryId?: number) {
