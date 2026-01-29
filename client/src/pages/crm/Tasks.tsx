@@ -41,6 +41,9 @@ export default function Tasks() {
     dueDate: string;
     assignedToId?: number;
     reminderMinutes: number;
+    isRecurring: boolean;
+    recurrencePattern?: "diaria" | "semanal" | "mensal";
+    recurrenceInterval: number;
   }>({
     title: "",
     description: "",
@@ -50,6 +53,9 @@ export default function Tasks() {
     dueDate: "",
     assignedToId: undefined,
     reminderMinutes: 30,
+    isRecurring: false,
+    recurrencePattern: undefined,
+    recurrenceInterval: 1,
   });
   
   // Queries
@@ -116,6 +122,9 @@ export default function Tasks() {
       dueDate: "",
       assignedToId: undefined,
       reminderMinutes: 30,
+      isRecurring: false,
+      recurrencePattern: undefined,
+      recurrenceInterval: 1,
     });
   };
   
@@ -151,6 +160,9 @@ export default function Tasks() {
       dueDate: new Date(task.task.dueDate).toISOString().slice(0, 16),
       assignedToId: task.task.assignedToId,
       reminderMinutes: task.task.reminderMinutes || 30,
+      isRecurring: task.task.isRecurring === 1,
+      recurrencePattern: task.task.recurrencePattern,
+      recurrenceInterval: task.task.recurrenceInterval || 1,
     });
   };
   
@@ -318,6 +330,55 @@ export default function Tasks() {
                         onChange={(e) => setFormData({ ...formData, reminderMinutes: parseInt(e.target.value) })}
                       />
                     </div>
+                  </div>
+                  
+                  {/* Recorrência */}
+                  <div className="space-y-4 border-t pt-4">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="isRecurring"
+                        checked={formData.isRecurring}
+                        onChange={(e) => setFormData({ ...formData, isRecurring: e.target.checked })}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <Label htmlFor="isRecurring" className="font-medium">
+                        🔁 Tarefa Recorrente
+                      </Label>
+                    </div>
+                    
+                    {formData.isRecurring && (
+                      <div className="grid grid-cols-2 gap-4 pl-6">
+                        <div className="grid gap-2">
+                          <Label htmlFor="recurrencePattern">Padrão</Label>
+                          <Select
+                            value={formData.recurrencePattern || ""}
+                            onValueChange={(value) => setFormData({ ...formData, recurrencePattern: value as any })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Selecionar padrão" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="diaria">📅 Diária</SelectItem>
+                              <SelectItem value="semanal">📆 Semanal</SelectItem>
+                              <SelectItem value="mensal">🗓️ Mensal</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          <Label htmlFor="recurrenceInterval">Intervalo</Label>
+                          <Input
+                            id="recurrenceInterval"
+                            type="number"
+                            min="1"
+                            value={formData.recurrenceInterval}
+                            onChange={(e) => setFormData({ ...formData, recurrenceInterval: parseInt(e.target.value) || 1 })}
+                            placeholder="Ex: 2 (a cada 2 semanas)"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="grid gap-2">

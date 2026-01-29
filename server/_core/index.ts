@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startTaskReminderWorker } from "../workers/taskReminders";
+import { startRecurringTasksWorker } from "../workers/recurringTasks";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -63,6 +64,7 @@ async function startServer() {
     
     // Start background workers
     startTaskReminderWorker();
+    startRecurringTasksWorker();
   });
 }
 

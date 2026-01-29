@@ -609,6 +609,12 @@ export const crmTasks = mysqlTable("crm_tasks", {
   reminderMinutes: int("reminderMinutes").default(30), // Minutos antes para lembrete
   reminderSent: int("reminderSent").default(0).notNull(), // 0 = não enviado, 1 = enviado
   
+  // Recorrência
+  isRecurring: int("isRecurring").default(0).notNull(), // 0 = não recorrente, 1 = recorrente
+  recurrencePattern: mysqlEnum("recurrencePattern", ["diaria", "semanal", "mensal"]), // Padrão de recorrência
+  recurrenceInterval: int("recurrenceInterval").default(1), // Intervalo (ex: a cada 2 semanas)
+  parentTaskId: int("parentTaskId"), // ID da tarefa pai (para tarefas geradas automaticamente)
+  
   // Timestamps
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),

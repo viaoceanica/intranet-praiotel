@@ -683,3 +683,22 @@
 - [x] Testar drag-and-drop de tarefas
 - [x] Testar criação rápida de tarefas a partir de Leads/Oportunidades
 - [x] Testar sistema de notificações de lembretes
+
+## Relatórios de Produtividade de Tarefas
+- [x] Criar queries de análise de tarefas (por utilizador, período, tipo, prioridade)
+- [x] Adicionar procedures tRPC para métricas de produtividade
+- [x] Criar página de Relatórios com dashboard de métricas
+- [x] Implementar gráficos de distribuição (por tipo, prioridade, estado)
+- [x] Adicionar gráfico de conclusão de tarefas ao longo do tempo
+- [x] Implementar ranking de utilizadores por produtividade
+- [x] Adicionar filtros de período (última semana, mês, trimestre, ano)
+- [x] Testar relatórios no browser
+
+## Sistema de Tarefas Recorrentes
+- [x] Adicionar campos de recorrência ao schema (isRecurring, recurrencePattern, recurrenceInterval)
+- [x] Criar worker para processar tarefas recorrentes
+- [x] Implementar lógica de criação automática de novas instâncias
+- [x] Adicionar UI de configuração de recorrência no formulário de tarefas
+- [x] Implementar opções de recorrência (diária, semanal, mensal)
+- [x] Adicionar indicador visual de tarefas recorrentes na listagem
+- [x] Testar criação e repetição automática de tarefas recorrentes

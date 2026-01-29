@@ -27,6 +27,7 @@ import * as crmLeadsDb from "./crmLeadsDb";
 import * as crmOpportunitiesDb from "./crmOpportunitiesDb";
 import * as crmActivitiesDb from "./crmActivitiesDb";
 import * as crmTasksDb from "./crmTasksDb";
+import * as crmTasksReports from "./crmTasksReports";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -2113,6 +2114,93 @@ export const appRouter = router({
     getStats: isAuthenticated
       .query(async () => {
         return await crmTasksDb.getTaskStats();
+      }),
+  }),
+
+  // CRM Tasks Reports Router
+  crmTasksReports: router({
+    getMetrics: isAuthenticated
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmTasksReports.getTaskMetrics(
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
+      }),
+
+    getByType: isAuthenticated
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmTasksReports.getTasksByType(
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
+      }),
+
+    getByPriority: isAuthenticated
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmTasksReports.getTasksByPriority(
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
+      }),
+
+    getUserProductivity: isAuthenticated
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmTasksReports.getUserProductivity(
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
+      }),
+
+    getCompletionTimeline: isAuthenticated
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmTasksReports.getCompletionTimeline(
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
+      }),
+
+    getAvgCompletionTime: isAuthenticated
+      .input(
+        z.object({
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmTasksReports.getAvgCompletionTime(
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
       }),
   }),
 });
