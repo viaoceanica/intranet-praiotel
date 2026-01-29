@@ -502,3 +502,7 @@
 - [x] Menu Gestão Interna não fecha quando clicado
 - [x] Outros menus (Tickets, Clientes) não abrem quando clicados
 - [x] Corrigir lógica de expansão para permitir toggle manual e expansão automática
+
+## Bug: Clicar no Menu Principal Não Navega
+- [x] Ao clicar em menu principal com sub-itens (ex: Tickets), apenas expande/colapsa mas não navega para a página
+- [x] Adicionar navegação ao clicar no menu principal mantendo funcionalidade de toggle

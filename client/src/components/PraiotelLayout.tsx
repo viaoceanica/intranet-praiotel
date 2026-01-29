@@ -229,6 +229,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                     <div>
                       <button
                         onClick={() => {
+                          // Navegar para a página principal
+                          setLocation(item.href);
                           // Toggle do estado de expansão
                           if (item.name === "Tickets") {
                             setTicketsExpanded(!ticketsExpanded);
