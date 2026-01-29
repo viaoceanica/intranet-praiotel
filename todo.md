@@ -522,14 +522,14 @@
 - [x] Criar páginas base (layouts) para CRM
 
 ### Fase 2: Gestão de Leads
-- [ ] Criar página de listagem de leads com filtros
-- [ ] Implementar CRUD completo de leads
-- [ ] Adicionar estados do lead (novo, contactado, qualificado, não_qualificado, convertido)
-- [ ] Implementar lead scoring manual
-- [ ] Criar formulário de qualificação de lead
-- [ ] Implementar conversão de lead para oportunidade
-- [ ] Adicionar histórico de interações ao perfil do lead
-- [ ] Implementar atribuição de leads a vendedores
+- [x] Criar página de listagem de leads com filtros
+- [x] Implementar CRUD completo de leads
+- [x] Adicionar estados do lead (novo, contactado, qualificado, não_qualificado, convertido)
+- [x] Implementar lead scoring manual
+- [x] Criar formulário de qualificação de lead
+- [x] Implementar conversão de lead para oportunidade
+- [ ] Adicionar histórico de interações ao perfil do lead (Fase 4)
+- [x] Implementar atribuição de leads a vendedores
 
 ### Fase 3: Gestão de Oportunidades
 - [ ] Criar página de listagem de oportunidades

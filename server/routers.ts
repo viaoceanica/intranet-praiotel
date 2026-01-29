@@ -23,6 +23,7 @@ import * as internalManagementAnalyticsDb from "./internalManagementAnalyticsDb"
 import * as articleCommentsDb from "./articleCommentsDb";
 import * as articleReadsDb from "./articleReadsDb";
 import * as tagsDb from "./tagsDb";
+import * as crmLeadsDb from "./crmLeadsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1616,6 +1617,116 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const articleIds = await tagsDb.getArticlesByTags(input.tagIds);
         return { articleIds };
+      }),
+  }),
+
+  // CRM - Gestão de Leads
+  crmLeads: router({  
+    list: isAuthenticated
+      .input(
+        z.object({
+          status: z.string().optional(),
+          assignedToId: z.number().optional(),
+          source: z.string().optional(),
+          search: z.string().optional(),
+        })
+      )
+      .query(async ({ input }) => {
+        return await crmLeadsDb.getAllLeads(input);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmLeadsDb.getLeadById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(
+        z.object({
+          name: z.string(),
+          email: z.string().email(),
+          phone: z.string().optional(),
+          company: z.string().optional(),
+          position: z.string().optional(),
+          source: z.string(),
+          status: z.enum(["novo", "contactado", "qualificado", "nao_qualificado", "convertido"]),
+          score: z.number().optional(),
+          assignedToId: z.number().optional(),
+          notes: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const leadId = await crmLeadsDb.createLead(input as any);
+        return { id: leadId };
+      }),
+
+    update: isAuthenticated
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().optional(),
+          email: z.string().email().optional(),
+          phone: z.string().optional(),
+          company: z.string().optional(),
+          position: z.string().optional(),
+          source: z.string().optional(),
+          status: z.enum(["novo", "contactado", "qualificado", "nao_qualificado", "convertido"]).optional(),
+          score: z.number().optional(),
+          assignedToId: z.number().optional(),
+          notes: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await crmLeadsDb.updateLead(id, data);
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmLeadsDb.deleteLead(input.id);
+        return { success: true };
+      }),
+
+    updateScore: isAuthenticated
+      .input(z.object({ id: z.number(), score: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmLeadsDb.updateLeadScore(input.id, input.score);
+        return { success: true };
+      }),
+
+    updateLastContacted: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmLeadsDb.updateLastContacted(input.id);
+        return { success: true };
+      }),
+
+    assign: isAuthenticated
+      .input(z.object({ id: z.number(), assignedToId: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmLeadsDb.assignLead(input.id, input.assignedToId);
+        return { success: true };
+      }),
+
+    getStats: isAuthenticated.query(async () => {
+      return await crmLeadsDb.getLeadsStats();
+    }),
+
+    convertToOpportunity: isAuthenticated
+      .input(z.object({ leadId: z.number(), opportunityId: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmLeadsDb.convertLeadToOpportunity(input.leadId, input.opportunityId);
+        return { success: true };
+      }),
+
+    convertToClient: isAuthenticated
+      .input(z.object({ leadId: z.number(), clientId: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmLeadsDb.convertLeadToClient(input.leadId, input.clientId);
+        return { success: true };
       }),
   }),
 });
