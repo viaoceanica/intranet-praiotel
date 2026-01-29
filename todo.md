@@ -533,13 +533,13 @@
 
 ### Fase 3: Gestão de Oportunidades
 - [ ] Criar página de listagem de oportunidades
-- [ ] Implementar CRUD completo de oportunidades
+- [x] Implementar CRUD completo de oportunidades (backend)
 - [ ] Criar pipeline visual (Kanban drag-and-drop)
-- [ ] Implementar fases personalizáveis do pipeline
-- [ ] Adicionar gestão de valores e probabilidades
+- [x] Implementar fases personalizáveis do pipeline (backend - moveStage)
+- [x] Adicionar gestão de valores e probabilidades (backend)
 - [ ] Criar página de detalhes da oportunidade (visão 360º)
-- [ ] Implementar conversão de oportunidade para cliente
-- [ ] Adicionar previsão de vendas (sales forecasting)
+- [x] Implementar conversão de oportunidade para cliente (backend)
+- [x] Adicionar previsão de vendas (sales forecasting - backend getStats)
 
 ### Fase 4: Tarefas e Calendário
 - [ ] Criar sistema de tarefas associadas a leads/oportunidades

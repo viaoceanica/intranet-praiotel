@@ -1789,8 +1789,12 @@ export const appRouter = router({
         })
       )
       .mutation(async ({ input }) => {
-        const { id, ...data } = input;
-        await crmOpportunitiesDb.updateOpportunity(id, data);
+        const { id, value, expectedCloseDate, ...data } = input;
+        await crmOpportunitiesDb.updateOpportunity(id, { 
+          ...data, 
+          value: value?.toString(), 
+          expectedCloseDate: expectedCloseDate ? new Date(expectedCloseDate) : undefined 
+        });
         return { success: true };
       }),
 
