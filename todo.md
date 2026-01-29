@@ -235,6 +235,7 @@
 - [x] Investigar erro de expansão de submenus
 - [x] Corrigir lógica de estado de expansão
 - [x] Testar navegação em todos os menus
+- [x] Implementar expansão automática baseada na rota atual (useEffect com pathname)
 
 ## Coluna de Equipamento na Listagem de Tickets
 - [x] Adicionar coluna "Equipamento" na tabela de tickets
@@ -494,3 +495,5 @@
 - [x] Implementar pesquisa de artigos por múltiplas tags (backend pronto)
 - [ ] Adicionar página de visualização de artigos por tag (funcionalidade futura)
 - [x] Testar sistema completo de tags
+
+- [ ] Corrigir comportamento dos sub-menus da sidebar (devem permanecer abertos ao navegar nas páginas correspondentes)

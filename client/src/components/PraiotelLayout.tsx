@@ -46,10 +46,12 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const { user } = useAuth();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [ticketsExpanded, setTicketsExpanded] = useState(false);
-  const [clientsExpanded, setClientsExpanded] = useState(false);
-  const [usersExpanded, setUsersExpanded] = useState(false);
-  const [internalManagementExpanded, setInternalManagementExpanded] = useState(false);
+  
+  // Determinar qual menu deve estar expandido com base na rota atual
+  const ticketsExpanded = location.startsWith('/sla-config') || location.startsWith('/prioritization') || location.startsWith('/technician-stats') || location.startsWith('/response-templates');
+  const clientsExpanded = location.startsWith('/equipment');
+  const usersExpanded = location.startsWith('/roles');
+  const internalManagementExpanded = location.startsWith('/internal-dashboard') || location.startsWith('/announcements') || location.startsWith('/bulletin-board') || location.startsWith('/documents') || location.startsWith('/knowledge-base') || location.startsWith('/favorites') || location.startsWith('/internal-management-analytics') || location.startsWith('/manage-document-categories') || location.startsWith('/manage-knowledge-categories') || location.startsWith('/manage-tags') || location.startsWith('/article/');
 
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
@@ -214,15 +216,6 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                     <div>
                       <button
                         onClick={() => {
-                          if (item.name === "Tickets") {
-                            setTicketsExpanded(!ticketsExpanded);
-                          } else if (item.name === "Clientes") {
-                            setClientsExpanded(!clientsExpanded);
-                          } else if (item.name === "Utilizadores") {
-                            setUsersExpanded(!usersExpanded);
-                          } else if (item.name === "Gestão Interna") {
-                            setInternalManagementExpanded(!internalManagementExpanded);
-                          }
                           setLocation(item.href);
                         }}
                         className={`
