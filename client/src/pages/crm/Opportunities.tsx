@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Target } from "lucide-react";
+import PraiotelLayout from "@/components/PraiotelLayout";
 
 export default function Opportunities() {
   return (
-    <div className="space-y-6">
+    <PraiotelLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Oportunidades</h1>
         <p className="text-gray-500 mt-1">
@@ -29,8 +31,9 @@ export default function Opportunities() {
               O pipeline visual e gestão de oportunidades serão implementados na Fase 3
             </p>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
+      </div>
+    </PraiotelLayout>
   );
 }

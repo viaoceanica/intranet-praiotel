@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Users, Plus, Search, Filter, Mail, Phone, Building, TrendingUp, Edit, Trash2 } from "lucide-react";
+import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -147,7 +148,8 @@ export default function Leads() {
   };
 
   return (
-    <div className="space-y-6">
+    <PraiotelLayout>
+      <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Gestão de Leads</h1>
@@ -481,6 +483,7 @@ export default function Leads() {
           )}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PraiotelLayout>
   );
 }

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, Users, Target, CheckSquare, DollarSign, TrendingDown } from "lucide-react";
+import PraiotelLayout from "@/components/PraiotelLayout";
 
 export default function CrmDashboard() {
   // TODO: Implementar queries tRPC para buscar métricas reais
@@ -44,7 +45,8 @@ export default function CrmDashboard() {
   ];
 
   return (
-    <div className="space-y-6">
+    <PraiotelLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Dashboard CRM</h1>
         <p className="text-gray-500 mt-1">
@@ -134,6 +136,7 @@ export default function CrmDashboard() {
           </div>
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </PraiotelLayout>
   );
 }

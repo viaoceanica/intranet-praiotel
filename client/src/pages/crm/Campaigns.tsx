@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail } from "lucide-react";
+import PraiotelLayout from "@/components/PraiotelLayout";
 
 export default function Campaigns() {
   return (
-    <div className="space-y-6">
+    <PraiotelLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Campanhas de Marketing</h1>
         <p className="text-gray-500 mt-1">
@@ -29,8 +31,9 @@ export default function Campaigns() {
               O sistema de campanhas de marketing será implementado na Fase 5
             </p>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
+      </div>
+    </PraiotelLayout>
   );
 }

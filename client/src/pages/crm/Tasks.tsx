@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckSquare } from "lucide-react";
+import PraiotelLayout from "@/components/PraiotelLayout";
 
 export default function Tasks() {
   return (
-    <div className="space-y-6">
+    <PraiotelLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Tarefas CRM</h1>
         <p className="text-gray-500 mt-1">
@@ -29,8 +31,9 @@ export default function Tasks() {
               O sistema de tarefas e calendário será implementado na Fase 4
             </p>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
+      </div>
+    </PraiotelLayout>
   );
 }

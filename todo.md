@@ -595,3 +595,14 @@
 - [ ] Validar automações e notificações
 - [ ] Testar envio de campanhas de email
 - [ ] Validar relatórios e dashboards
+
+## Bug: Sidebar Não Aparece nas Páginas CRM
+- [x] Páginas CRM não estão a usar PraiotelLayout
+- [x] Atualizar CrmDashboard.tsx para usar PraiotelLayout
+- [x] Atualizar Leads.tsx para usar PraiotelLayout
+- [x] Atualizar Opportunities.tsx para usar PraiotelLayout
+- [x] Atualizar Tasks.tsx para usar PraiotelLayout
+- [x] Atualizar Campaigns.tsx para usar PraiotelLayout
+- [x] Atualizar Reports.tsx para usar PraiotelLayout
+- [x] Atualizar Settings.tsx para usar PraiotelLayout
+- [x] Testar navegação em todas as páginas CRM

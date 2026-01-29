@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings as SettingsIcon, Mail, Sliders } from "lucide-react";
+import PraiotelLayout from "@/components/PraiotelLayout";
 
 export default function Settings() {
   return (
-    <div className="space-y-6">
+    <PraiotelLayout>
+      <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Configurações CRM</h1>
         <p className="text-gray-500 mt-1">
@@ -67,8 +69,9 @@ export default function Settings() {
               Configurações adicionais serão adicionadas progressivamente
             </p>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+      </CardContent>
+    </Card>
+      </div>
+    </PraiotelLayout>
   );
 }
