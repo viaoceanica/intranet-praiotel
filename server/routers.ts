@@ -28,6 +28,7 @@ import * as crmOpportunitiesDb from "./crmOpportunitiesDb";
 import * as crmActivitiesDb from "./crmActivitiesDb";
 import * as crmTasksDb from "./crmTasksDb";
 import * as crmTasksReports from "./crmTasksReports";
+import * as crmTasksPersonal from "./crmTasksPersonal";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -2202,6 +2203,39 @@ export const appRouter = router({
           new Date(input.endDate)
         );
       }),
+  }),
+
+  // Personal Tasks Dashboard
+  crmTasksPersonal: router({
+    getStats: isAuthenticated.query(async ({ ctx }) => {
+      return await crmTasksPersonal.getPersonalTaskStats(ctx.user.id);
+    }),
+
+    getTodayTasks: isAuthenticated.query(async ({ ctx }) => {
+      return await crmTasksPersonal.getTodayTasks(ctx.user.id);
+    }),
+
+    getUpcomingTasks: isAuthenticated
+      .input(z.object({ days: z.number().optional() }))
+      .query(async ({ ctx, input }) => {
+        return await crmTasksPersonal.getUpcomingTasks(ctx.user.id, input.days);
+      }),
+
+    getProductivityTimeline: isAuthenticated.query(async ({ ctx }) => {
+      return await crmTasksPersonal.getPersonalProductivityTimeline(ctx.user.id);
+    }),
+
+    getTasksByPriority: isAuthenticated.query(async ({ ctx }) => {
+      return await crmTasksPersonal.getPersonalTasksByPriority(ctx.user.id);
+    }),
+
+    getTasksByType: isAuthenticated.query(async ({ ctx }) => {
+      return await crmTasksPersonal.getPersonalTasksByType(ctx.user.id);
+    }),
+
+    getHighPriorityTasks: isAuthenticated.query(async ({ ctx }) => {
+      return await crmTasksPersonal.getHighPriorityTasks(ctx.user.id);
+    }),
   }),
 });
 

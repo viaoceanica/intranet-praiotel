@@ -702,3 +702,16 @@
 - [x] Implementar opções de recorrência (diária, semanal, mensal)
 - [x] Adicionar indicador visual de tarefas recorrentes na listagem
 - [x] Testar criação e repetição automática de tarefas recorrentes
+
+## Dashboard Pessoal "As Minhas Tarefas"
+- [x] Criar queries de tarefas pessoais filtradas por utilizador autenticado
+- [x] Adicionar procedures tRPC para estatísticas pessoais
+- [x] Criar página "As Minhas Tarefas" com layout de dashboard
+- [x] Implementar widget de estatísticas pessoais (total, concluídas, pendentes, atrasadas)
+- [x] Adicionar widget de progresso semanal/mensal
+- [x] Implementar lista de tarefas prioritárias do dia
+- [x] Adicionar widget de tarefas próximas do vencimento
+- [x] Implementar gráfico de produtividade pessoal
+- [x] Adicionar filtros rápidos (hoje, esta semana, este mês)
+- [x] Adicionar link de navegação no menu CRM
+- [x] Testar dashboard no browser

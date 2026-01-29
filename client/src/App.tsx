@@ -37,6 +37,7 @@ import CrmDashboard from "./pages/crm/CrmDashboard";
 import Leads from "./pages/crm/Leads";
 import Opportunities from "./pages/crm/Opportunities";
 import Tasks from "./pages/crm/Tasks";
+import MyTasks from "./pages/crm/MyTasks";
 import Campaigns from "./pages/crm/Campaigns";
 import Reports from "./pages/crm/Reports";
 import Settings from "./pages/crm/Settings";
@@ -101,6 +102,7 @@ function Router() {
       <Route path="/crm/leads" component={() => <ProtectedRoute component={Leads} />} />
       <Route path="/crm/opportunities" component={() => <ProtectedRoute component={Opportunities} />} />
       <Route path="/crm/tasks" component={() => <ProtectedRoute component={Tasks} />} />
+      <Route path="/crm/my-tasks" component={() => <ProtectedRoute component={MyTasks} />} />
       <Route path="/crm/campaigns" component={() => <ProtectedRoute component={Campaigns} />} />
       <Route path="/crm/reports" component={() => <ProtectedRoute component={Reports} />} />
       <Route path="/crm/settings" component={() => <ProtectedRoute component={Settings} />} />

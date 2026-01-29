@@ -126,6 +126,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Leads", href: "/crm/leads", icon: Users, roles: ["admin"] },
         { name: "Oportunidades", href: "/crm/opportunities", icon: Target, roles: ["admin"] },
         { name: "Tarefas", href: "/crm/tasks", icon: CheckSquare, roles: ["admin"] },
+        { name: "As Minhas Tarefas", href: "/crm/my-tasks", icon: CheckSquare, roles: ["admin"] },
         { name: "Campanhas", href: "/crm/campaigns", icon: Mail, roles: ["admin"] },
         { name: "Relatórios", href: "/crm/reports", icon: BarChart3, roles: ["admin"] },
         { name: "Configurações", href: "/crm/settings", icon: Settings, roles: ["admin"] },
