@@ -22,6 +22,7 @@ import * as favoritesDb from "./favoritesDb";
 import * as internalManagementAnalyticsDb from "./internalManagementAnalyticsDb";
 import * as articleCommentsDb from "./articleCommentsDb";
 import * as articleReadsDb from "./articleReadsDb";
+import * as tagsDb from "./tagsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1551,6 +1552,71 @@ export const appRouter = router({
       const articleIds = await articleReadsDb.getUserReadArticles(ctx.user.id);
       return { articleIds };
     }),
+  }),
+
+  tags: router({
+    list: isAuthenticated.query(async () => {
+      return await tagsDb.getAllTags();
+    }),
+
+    create: isAdmin
+      .input(z.object({
+        name: z.string().min(1).max(50),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+      }))
+      .mutation(async ({ input }) => {
+        await tagsDb.createTag(input);
+        return { success: true };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).max(50).optional(),
+        color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await tagsDb.updateTag(id, data);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await tagsDb.deleteTag(input.id);
+        return { success: true };
+      }),
+
+    getArticleTags: isAuthenticated
+      .input(z.object({ articleId: z.number() }))
+      .query(async ({ input }) => {
+        return await tagsDb.getArticleTags(input.articleId);
+      }),
+
+    setArticleTags: isAdmin
+      .input(z.object({
+        articleId: z.number(),
+        tagIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        await tagsDb.setArticleTags(input.articleId, input.tagIds);
+        return { success: true };
+      }),
+
+    getArticlesByTag: isAuthenticated
+      .input(z.object({ tagId: z.number() }))
+      .query(async ({ input }) => {
+        const articleIds = await tagsDb.getArticlesByTag(input.tagId);
+        return { articleIds };
+      }),
+
+    getArticlesByTags: isAuthenticated
+      .input(z.object({ tagIds: z.array(z.number()) }))
+      .query(async ({ input }) => {
+        const articleIds = await tagsDb.getArticlesByTags(input.tagIds);
+        return { articleIds };
+      }),
   }),
 });
 

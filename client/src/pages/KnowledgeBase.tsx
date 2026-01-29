@@ -184,9 +184,14 @@ export function KnowledgeBase() {
             </p>
           </div>
           {user?.role === "admin" && (
-            <Button onClick={() => setLocation("/manage-knowledge-categories")} variant="outline">
-              Gerir Categorias
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={() => setLocation("/manage-knowledge-categories")} variant="outline">
+                Gerir Categorias
+              </Button>
+              <Button onClick={() => setLocation("/manage-tags")} variant="outline">
+                Gerir Tags
+              </Button>
+            </div>
           )}
         </div>
 

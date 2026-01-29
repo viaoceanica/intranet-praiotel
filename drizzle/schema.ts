@@ -419,3 +419,29 @@ export const articleReads = mysqlTable("article_reads", {
 
 export type ArticleRead = typeof articleReads.$inferSelect;
 export type InsertArticleRead = typeof articleReads.$inferInsert;
+
+/**
+ * Tags para classificação de artigos
+ */
+export const tags = mysqlTable("tags", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 50 }).notNull().unique(),
+  color: varchar("color", { length: 7 }).notNull().default("#3b82f6"), // Cor em hexadecimal
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Tag = typeof tags.$inferSelect;
+export type InsertTag = typeof tags.$inferInsert;
+
+/**
+ * Relacionamento entre artigos e tags (muitos para muitos)
+ */
+export const articleTags = mysqlTable("article_tags", {
+  id: int("id").autoincrement().primaryKey(),
+  articleId: int("articleId").notNull(),
+  tagId: int("tagId").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type ArticleTag = typeof articleTags.$inferSelect;
+export type InsertArticleTag = typeof articleTags.$inferInsert;

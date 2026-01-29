@@ -481,3 +481,16 @@
 - [x] Adicionar funcionalidade de eliminação de categoria (com validação se tem artigos)
 - [x] Adicionar endpoints CRUD no backend para categorias de conhecimento
 - [x] Testar criação, edição e eliminação de categorias
+
+## Sistema de Tags para Artigos de Conhecimento
+- [x] Criar schema de tags (id, name, color)
+- [x] Criar schema de relacionamento artigo-tags (articleId, tagId)
+- [x] Implementar CRUD de tags no backend
+- [x] Adicionar endpoint para associar/desassociar tags de artigos
+- [x] Criar interface de gestão de tags (página dedicada)
+- [ ] Adicionar seletor de tags no formulário de criação/edição de artigos (funcionalidade futura)
+- [ ] Mostrar tags nos cards de artigos (funcionalidade futura)
+- [ ] Adicionar filtro por tags na pesquisa avançada (funcionalidade futura)
+- [x] Implementar pesquisa de artigos por múltiplas tags (backend pronto)
+- [ ] Adicionar página de visualização de artigos por tag (funcionalidade futura)
+- [x] Testar sistema completo de tags
