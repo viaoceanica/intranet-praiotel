@@ -506,3 +506,92 @@
 ## Bug: Clicar no Menu Principal Não Navega
 - [x] Ao clicar em menu principal com sub-itens (ex: Tickets), apenas expande/colapsa mas não navega para a página
 - [x] Adicionar navegação ao clicar no menu principal mantendo funcionalidade de toggle
+
+## Módulo CRM - Desenvolvimento Completo
+
+### Fase 1: Fundação - Schema e Estrutura Base
+- [ ] Criar schema de base de dados para leads
+- [ ] Criar schema de base de dados para oportunidades
+- [ ] Criar schema de base de dados para campanhas de marketing
+- [ ] Criar schema de base de dados para tarefas CRM
+- [ ] Criar schema de base de dados para interações/atividades
+- [ ] Criar schema de base de dados para documentos CRM
+- [ ] Criar schema de base de dados para configurações CRM (SMTP, lead scoring)
+- [ ] Adicionar menu "CRM" na sidebar com sub-itens
+- [ ] Criar estrutura de rotas para módulo CRM
+- [ ] Criar páginas base (layouts) para CRM
+
+### Fase 2: Gestão de Leads
+- [ ] Criar página de listagem de leads com filtros
+- [ ] Implementar CRUD completo de leads
+- [ ] Adicionar estados do lead (novo, contactado, qualificado, não_qualificado, convertido)
+- [ ] Implementar lead scoring manual
+- [ ] Criar formulário de qualificação de lead
+- [ ] Implementar conversão de lead para oportunidade
+- [ ] Adicionar histórico de interações ao perfil do lead
+- [ ] Implementar atribuição de leads a vendedores
+
+### Fase 3: Gestão de Oportunidades
+- [ ] Criar página de listagem de oportunidades
+- [ ] Implementar CRUD completo de oportunidades
+- [ ] Criar pipeline visual (Kanban drag-and-drop)
+- [ ] Implementar fases personalizáveis do pipeline
+- [ ] Adicionar gestão de valores e probabilidades
+- [ ] Criar página de detalhes da oportunidade (visão 360º)
+- [ ] Implementar conversão de oportunidade para cliente
+- [ ] Adicionar previsão de vendas (sales forecasting)
+
+### Fase 4: Tarefas e Calendário
+- [ ] Criar sistema de tarefas associadas a leads/oportunidades
+- [ ] Implementar calendário integrado
+- [ ] Adicionar lembretes e notificações de tarefas
+- [ ] Criar visualização de agenda diária/semanal/mensal
+- [ ] Implementar tipos de tarefas (chamada, reunião, email, follow-up)
+- [ ] Adicionar funcionalidade de agendamento rápido
+
+### Fase 5: Campanhas de Marketing
+- [ ] Criar menu "Configurações CRM" para SMTP
+- [ ] Implementar formulário de configuração de email
+- [ ] Criar CRUD de campanhas de marketing
+- [ ] Implementar segmentação de contactos para campanhas
+- [ ] Criar editor de templates de email
+- [ ] Adicionar funcionalidade de envio de campanhas
+- [ ] Implementar rastreamento de métricas (aberturas, cliques)
+- [ ] Criar página de análise de campanhas
+
+### Fase 6: Análise e Relatórios
+- [ ] Criar dashboard CRM principal
+- [ ] Implementar widgets de métricas (leads, oportunidades, conversões)
+- [ ] Adicionar gráficos de pipeline de vendas
+- [ ] Criar relatórios de desempenho de vendedores
+- [ ] Implementar relatórios de campanhas
+- [ ] Adicionar exportação de relatórios (PDF, CSV, Excel)
+- [ ] Criar visualizações de funil de vendas
+
+### Fase 7: Automação
+- [ ] Implementar motor de regras para automação
+- [ ] Criar workflows automáticos (triggers, condições, ações)
+- [ ] Adicionar lead scoring automático
+- [ ] Implementar atribuição automática de leads
+- [ ] Criar notificações automáticas
+- [ ] Adicionar encaminhamento automático de tarefas
+
+### Fase 8: Gestão de Documentos CRM
+- [ ] Criar sistema de upload de documentos associados a leads/oportunidades
+- [ ] Implementar controlo de versões
+- [ ] Adicionar templates de documentos (propostas, contratos)
+- [ ] Criar gerador de documentos a partir de templates
+- [ ] Implementar permissões de acesso a documentos
+
+### Fase 9: Roles e Permissões
+- [ ] Criar roles personalizados (Vendedor, Gestor Vendas, Marketing)
+- [ ] Implementar permissões por role
+- [ ] Adicionar gestão de territórios de vendas
+- [ ] Criar hierarquia de vendedores
+
+### Testes e Validação
+- [ ] Criar testes unitários para procedures CRM
+- [ ] Testar fluxo completo Lead → Oportunidade → Cliente
+- [ ] Validar automações e notificações
+- [ ] Testar envio de campanhas de email
+- [ ] Validar relatórios e dashboards
