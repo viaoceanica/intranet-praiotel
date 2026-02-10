@@ -811,3 +811,8 @@
 - [x] Implementar correção no layout (adicionar rodapé ao PraiotelLayout com flexbox)
 - [x] Testar em diferentes páginas (Dashboard, Tickets, Clientes)
 - [ ] Confirmar que logotipos aparecem corretamente
+
+## Ajuste do Tamanho da Barra de Logotipos
+- [x] Reduzir tamanho da imagem da barra em 50% no PraiotelLayout
+- [x] Reduzir tamanho da imagem da barra em 50% no DashboardLayout
+- [x] Testar visualização no browser

@@ -264,7 +264,7 @@ function DashboardLayoutContent({
               <img 
                 src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
                 alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
-                className="w-full max-w-5xl mx-auto h-auto"
+                className="w-full max-w-[640px] mx-auto h-auto"
               />
             </div>
           </footer>
