@@ -771,3 +771,20 @@
 - [x] Verificar se trpc.clients.list está a funcionar corretamente
 - [x] Corrigir lógica de pesquisa dinâmica para mostrar resultados conforme se escreve
 - [x] Testar pesquisa de clientes no browser
+
+## Histórico de Tickets e Notificações
+- [x] Criar query backend para buscar últimos 5 tickets do cliente
+- [x] Adicionar procedure tRPC para histórico de tickets
+- [ ] Implementar widget de histórico de tickets no formulário de novo ticket
+- [ ] Criar sistema de notificações ao técnico atribuído
+- [ ] Enviar notificação ao criar ticket com técnico atribuído
+- [ ] Testar histórico e notificações no browser
+
+## Melhorias no Sistema de Tickets - Histórico e Notificações
+- [x] Implementar widget de histórico de tickets do cliente no formulário de novo ticket
+- [x] Mostrar últimos 5 tickets do cliente selecionado com status, prioridade e data
+- [x] Criar query tRPC tickets.recentByClient para buscar histórico
+- [x] Sistema de notificações automáticas ao técnico atribuído já implementado
+- [x] Notificações enviadas quando ticket é criado e atribuído
+- [x] Criar dados de teste (5 tickets para cliente Hotel Exemplo)
+- [x] Criar utilizador de teste (admin@praiotel.pt / admin123)

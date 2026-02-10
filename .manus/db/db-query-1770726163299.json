@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO users (email, passwordHash, name, role, active) VALUES ('admin@praiotel.pt', '$2b$10$aFMghrGUeTwD8q.gihyP8eN2Xa0nF6fl.SRG3rU5EXXPWkE9qHkuW', 'Administrador', 'admin', 1) ON DUPLICATE KEY UPDATE passwordHash = '$2b$10$aFMghrGUeTwD8q.gihyP8eN2Xa0nF6fl.SRG3rU5EXXPWkE9qHkuW';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute INSERT INTO users (email, passwordHash, name, role, active) VALUES ('admin@praiotel.pt', '$2b$10$aFMghrGUeTwD8q.gihyP8eN2Xa0nF6fl.SRG3rU5EXXPWkE9qHkuW', 'Administrador', 'admin', 1) ON DUPLICATE KEY UPDATE passwordHash = '$2b$10$aFMghrGUeTwD8q.gihyP8eN2Xa0nF6fl.SRG3rU5EXXPWkE9qHkuW';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 67
+}

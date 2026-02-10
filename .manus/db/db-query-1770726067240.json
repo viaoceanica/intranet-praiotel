@@ -1,0 +1,28 @@
+{
+  "query": "SELECT id, email, name, role FROM users LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, email, name, role FROM users LIMIT 3;",
+  "rows": [
+    {
+      "id": "3",
+      "email": "admin@praiotel.pt",
+      "name": "Administrador",
+      "role": "admin"
+    },
+    {
+      "id": "7",
+      "email": "test-tech@praiotel.pt",
+      "name": "Técnico Teste",
+      "role": "tecnico"
+    },
+    {
+      "id": "30001",
+      "email": "tony@viaoceanica.com",
+      "name": "Tony Dias",
+      "role": "admin"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tname\trole\n3\tadmin@praiotel.pt\tAdministrador\tadmin\n7\ttest-tech@praiotel.pt\tTécnico Teste\ttecnico\n30001\ttony@viaoceanica.com\tTony Dias\tadmin\n",
+  "stderr": "",
+  "execution_time_ms": 63
+}

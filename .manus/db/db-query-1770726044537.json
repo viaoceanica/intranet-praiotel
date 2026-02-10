@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id, designation, primaryEmail FROM clients LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, designation, primaryEmail FROM clients LIMIT 5;",
+  "rows": [
+    {
+      "id": "1",
+      "designation": "Praiotel Lda",
+      "primaryEmail": "geral@praiotel.pt"
+    },
+    {
+      "id": "30001",
+      "designation": "Consultoria Digital - Startup Inovadora",
+      "primaryEmail": "contato@startupinov.pt"
+    },
+    {
+      "id": "60001",
+      "designation": "Via Oceanica",
+      "primaryEmail": "gerencia@viaoceanica.com"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdesignation\tprimaryEmail\n1\tPraiotel Lda\tgeral@praiotel.pt\n30001\tConsultoria Digital - Startup Inovadora\tcontato@startupinov.pt\n60001\tVia Oceanica\tgerencia@viaoceanica.com\n",
+  "stderr": "",
+  "execution_time_ms": 64
+}

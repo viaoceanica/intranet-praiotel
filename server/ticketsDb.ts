@@ -77,6 +77,19 @@ export async function getTicketsByClientId(clientId: number) {
   return result;
 }
 
+export async function getRecentTicketsByClientId(clientId: number, limit: number = 5) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(tickets)
+    .where(eq(tickets.clientId, clientId))
+    .orderBy(desc(tickets.createdAt))
+    .limit(limit);
+  return result;
+}
+
 export async function getClientTicketStats(clientId: number) {
   const db = await getDb();
   if (!db) return null;

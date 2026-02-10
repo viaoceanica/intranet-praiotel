@@ -353,6 +353,12 @@ export const appRouter = router({
         return await ticketsDb.getTicketsByClientId(input.clientId);
       }),
 
+    recentByClient: isAuthenticated
+      .input(z.object({ clientId: z.number(), limit: z.number().optional() }))
+      .query(async ({ input }) => {
+        return await ticketsDb.getRecentTicketsByClientId(input.clientId, input.limit);
+      }),
+
     clientStats: isAuthenticated
       .input(z.object({ clientId: z.number() }))
       .query(async ({ input }) => {

@@ -79,6 +79,12 @@ export default function NewTicket() {
     { clientId: formData.clientId! },
     { enabled: !!formData.clientId && !useCustomClient }
   );
+  
+  // Buscar histórico de tickets do cliente
+  const { data: recentTickets } = trpc.tickets.recentByClient.useQuery(
+    { clientId: formData.clientId!, limit: 5 },
+    { enabled: !!formData.clientId && !useCustomClient }
+  );
 
   const createMutation = trpc.tickets.create.useMutation({
     onSuccess: (data) => {
@@ -335,6 +341,50 @@ export default function NewTicket() {
                   </div>
                 )}
               </div>
+
+              {/* Widget de Histórico de Tickets */}
+              {!useCustomClient && formData.clientId && recentTickets && recentTickets.length > 0 && (
+                <Card className="bg-blue-50 border-blue-200">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-sm font-medium text-blue-900">Histórico Recente do Cliente</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {recentTickets.map((ticket) => (
+                      <div key={ticket.id} className="flex items-start justify-between p-2 bg-white rounded border border-blue-100">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm">#{ticket.ticketNumber}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              ticket.status === 'fechado' ? 'bg-gray-100 text-gray-700' :
+                              ticket.status === 'resolvido' ? 'bg-green-100 text-green-700' :
+                              ticket.status === 'em_progresso' ? 'bg-blue-100 text-blue-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {ticket.status === 'fechado' ? 'Fechado' :
+                               ticket.status === 'resolvido' ? 'Resolvido' :
+                               ticket.status === 'em_progresso' ? 'Em Progresso' : 'Aberto'}
+                            </span>
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              ticket.priority === 'urgente' ? 'bg-red-100 text-red-700' :
+                              ticket.priority === 'alta' ? 'bg-orange-100 text-orange-700' :
+                              ticket.priority === 'media' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {ticket.priority === 'urgente' ? 'Urgente' :
+                               ticket.priority === 'alta' ? 'Alta' :
+                               ticket.priority === 'media' ? 'Média' : 'Baixa'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1 line-clamp-1">{ticket.problemType || 'Sem descrição'}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {new Date(ticket.createdAt).toLocaleDateString('pt-PT')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
