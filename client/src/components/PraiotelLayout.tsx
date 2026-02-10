@@ -229,7 +229,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex flex-1 min-h-[calc(100vh-57px)]">
         {/* Sidebar */}
         <aside
           className={`
@@ -340,10 +340,23 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
           />
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {children}
-        </main>
+        {/* Main Content Area */}
+        <div className="flex-1 flex flex-col min-h-full">
+          <main className="flex-1 p-6">
+            {children}
+          </main>
+          
+          {/* Footer com logotipos */}
+          <footer className="border-t bg-white mt-auto">
+            <div className="container py-6 max-w-7xl mx-auto px-4">
+              <img 
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
+                alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
+                className="w-full max-w-5xl mx-auto h-auto"
+              />
+            </div>
+          </footer>
+        </div>
       </div>
     </div>
   );

@@ -804,3 +804,10 @@
 - [x] Fazer upload da imagem BARRA_ACORES_PRR.png para S3
 - [x] Adicionar componente de rodapé no layout principal
 - [x] Testar visualização em diferentes tamanhos de ecrã
+
+## Correção da Visualização do Rodapé
+- [x] Verificar se rodapé está visível no browser
+- [x] Diagnosticar problema de renderização (rodapé não estava no PraiotelLayout)
+- [x] Implementar correção no layout (adicionar rodapé ao PraiotelLayout com flexbox)
+- [x] Testar em diferentes páginas (Dashboard, Tickets, Clientes)
+- [ ] Confirmar que logotipos aparecem corretamente
