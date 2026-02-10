@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -37,7 +38,9 @@ import {
   TrendingUp,
   Target,
   CheckSquare,
-  Mail
+  Mail,
+  Sun,
+  Moon
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { useState, useEffect } from "react";
@@ -48,6 +51,7 @@ interface PraiotelLayoutProps {
 
 export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
@@ -196,6 +200,20 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
 
           <div className="flex items-center gap-2">
             <NotificationsDropdown />
+            
+            {/* Botão de alternância de tema */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-9 w-9"
+            >
+              {theme === "light" ? (
+                <Moon className="h-5 w-5" />
+              ) : (
+                <Sun className="h-5 w-5" />
+              )}
+            </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

@@ -820,3 +820,10 @@
 ## Barra de Logotipos na Página de Login
 - [x] Adicionar barra de logotipos abaixo do formulário de login
 - [x] Testar visualização no browser
+
+## Modo Claro/Escuro
+- [x] Verificar implementação atual do ThemeProvider
+- [x] Adicionar botão de alternância no header da aplicação
+- [x] Ajustar cores do tema escuro para melhor contraste
+- [x] Testar alternância entre temas no browser
+- [x] Garantir persistência da preferência do utilizador
