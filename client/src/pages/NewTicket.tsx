@@ -55,10 +55,17 @@ export default function NewTicket() {
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
   const { data: priorities } = trpc.sla.list.useQuery();
-  const { data: searchResults } = trpc.clients.search.useQuery(
-    { query: clientSearchQuery },
-    { enabled: clientSearchQuery.length > 0 && !useCustomClient }
+  const { data: searchResults } = trpc.clients.list.useQuery(
+    undefined,
+    { enabled: !useCustomClient }
   );
+  
+  // Filtrar clientes localmente se houver query de pesquisa
+  const filteredClients = searchResults?.filter(client => 
+    clientSearchQuery.length === 0 || 
+    client.name.toLowerCase().includes(clientSearchQuery.toLowerCase()) ||
+    (client.email && client.email.toLowerCase().includes(clientSearchQuery.toLowerCase()))
+  ) || [];
   const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
     { clientId: formData.clientId! },
     { enabled: !!formData.clientId && !useCustomClient }
@@ -107,7 +114,7 @@ export default function NewTicket() {
     // Se usar cliente da lista, preencher clientName
     let finalData = { ...formData };
     if (!useCustomClient && formData.clientId) {
-      const selectedClient = searchResults?.find((c: any) => c.id === formData.clientId);
+      const selectedClient = filteredClients?.find((c: any) => c.id === formData.clientId);
       if (selectedClient) {
         finalData.clientName = selectedClient.designation;
       }
@@ -217,9 +224,9 @@ export default function NewTicket() {
                         required={!useCustomClient}
                       />
                     </div>
-                    {showClientDropdown && searchResults && searchResults.length > 0 && (
+                    {showClientDropdown && filteredClients && filteredClients.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                        {searchResults.map((client) => (
+                        {filteredClients.map((client) => (
                           <button
                             key={client.id}
                             type="button"
@@ -238,7 +245,7 @@ export default function NewTicket() {
                         ))}
                       </div>
                     )}
-                    {showClientDropdown && clientSearchQuery && searchResults && searchResults.length === 0 && (
+                    {showClientDropdown && filteredClients && filteredClients.length === 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center text-gray-500">
                         Nenhum cliente encontrado
                       </div>

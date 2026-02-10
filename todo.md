@@ -745,3 +745,9 @@
 - [x] Adicionar dashboard de métricas (enviados, abertos, cliques, conversões)
 - [x] Implementar tracking de abertura e cliques
 - [x] Testar funcionalidades no browser
+
+## Correção: Campo de Seleção de Cliente em Novo Ticket
+- [x] Investigar erro "Nenhum cliente encontrado" no campo de seleção de cliente
+- [x] Verificar query de clientes no backend
+- [x] Corrigir query para buscar clientes da tabela correta
+- [x] Testar seleção de cliente no formulário de novo ticket
