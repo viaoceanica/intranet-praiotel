@@ -71,8 +71,9 @@ export default function NewTicket() {
   // Filtrar clientes localmente se houver query de pesquisa
   const filteredClients = searchResults?.filter(client => 
     clientSearchQuery.length === 0 || 
-    (client.name && client.name.toLowerCase().includes(clientSearchQuery.toLowerCase())) ||
-    (client.email && client.email.toLowerCase().includes(clientSearchQuery.toLowerCase()))
+    (client.designation && client.designation.toLowerCase().includes(clientSearchQuery.toLowerCase())) ||
+    (client.primaryEmail && client.primaryEmail.toLowerCase().includes(clientSearchQuery.toLowerCase())) ||
+    (client.nif && client.nif.includes(clientSearchQuery))
   ) || [];
   const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
     { clientId: formData.clientId! },

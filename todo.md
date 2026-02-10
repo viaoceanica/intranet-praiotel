@@ -765,3 +765,9 @@
 - [x] Auto-completar localização ao selecionar cliente
 - [x] Auto-completar contacto ao selecionar cliente
 - [x] Testar funcionalidades no browser
+
+## Correção: Pesquisa Dinâmica de Clientes no Novo Ticket
+- [x] Investigar por que a query de clientes não está a retornar resultados
+- [x] Verificar se trpc.clients.list está a funcionar corretamente
+- [x] Corrigir lógica de pesquisa dinâmica para mostrar resultados conforme se escreve
+- [x] Testar pesquisa de clientes no browser
