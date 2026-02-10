@@ -788,3 +788,14 @@
 - [x] Notificações enviadas quando ticket é criado e atribuído
 - [x] Criar dados de teste (5 tickets para cliente Hotel Exemplo)
 - [x] Criar utilizador de teste (admin@praiotel.pt / admin123)
+
+## Sistema de Anexos de Ficheiros para Tickets
+- [x] Verificar schema de anexos existente na base de dados
+- [x] Criar procedures tRPC para upload e listagem de anexos
+- [x] Implementar upload de ficheiros para S3 no backend
+- [x] Criar componente de upload de ficheiros no formulário de novo ticket
+- [x] Adicionar visualização de anexos na página de detalhes do ticket
+- [x] Permitir download de anexos
+- [x] Adicionar validação de tipos de ficheiro (imagens, PDFs, documentos)
+- [x] Adicionar validação de tamanho máximo de ficheiro
+- [x] Testar upload e visualização no browser

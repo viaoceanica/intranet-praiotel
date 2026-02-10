@@ -15,7 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Search, Plus } from "lucide-react";
+import { ArrowLeft, Loader2, Search, Plus, Upload, X, FileIcon, ImageIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -59,6 +59,7 @@ export default function NewTicket() {
     phone: "",
     address: "",
   });
+  const [attachments, setAttachments] = useState<Array<{ file: File; preview?: string }>>([]);
 
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
@@ -86,8 +87,48 @@ export default function NewTicket() {
     { enabled: !!formData.clientId && !useCustomClient }
   );
 
+  const uploadAttachmentMutation = trpc.tickets.uploadAttachment.useMutation();
+
   const createMutation = trpc.tickets.create.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
+      // Se houver anexos, fazer upload após criar ticket
+      if (attachments.length > 0) {
+        const ticketNumber = data.ticketNumber;
+        // Buscar o ticket recém-criado para obter o ID
+        const tickets = await utils.tickets.list.fetch();
+        const newTicket = tickets.find(t => t.ticketNumber === ticketNumber);
+        
+        if (newTicket) {
+          // Upload de cada anexo
+          for (const attachment of attachments) {
+            try {
+              const reader = new FileReader();
+              await new Promise((resolve, reject) => {
+                reader.onload = async () => {
+                  try {
+                    const base64 = (reader.result as string).split(',')[1];
+                    await uploadAttachmentMutation.mutateAsync({
+                      ticketId: newTicket.id,
+                      fileName: attachment.file.name,
+                      fileData: base64,
+                      mimeType: attachment.file.type,
+                    });
+                    resolve(true);
+                  } catch (error) {
+                    reject(error);
+                  }
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(attachment.file);
+              });
+            } catch (error) {
+              console.error('Erro ao fazer upload de anexo:', error);
+              toast.error(`Erro ao fazer upload de ${attachment.file.name}`);
+            }
+          }
+        }
+      }
+      
       toast.success(`Ticket ${data.ticketNumber} criado com sucesso!`);
       utils.tickets.list.invalidate();
       setLocation("/tickets");
@@ -601,6 +642,79 @@ export default function NewTicket() {
                   rows={6}
                   placeholder="Descreva detalhadamente o problema reportado..."
                 />
+              </div>
+
+              {/* Upload de Anexos */}
+              <div className="space-y-2">
+                <Label>Anexos (Imagens e Documentos)</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#F15A24] transition-colors">
+                  <input
+                    type="file"
+                    id="fileUpload"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      files.forEach(file => {
+                        // Validar tamanho (max 10MB)
+                        if (file.size > 10 * 1024 * 1024) {
+                          toast.error(`${file.name} excede o tamanho máximo de 10MB`);
+                          return;
+                        }
+                        
+                        // Criar preview para imagens
+                        if (file.type.startsWith('image/')) {
+                          const reader = new FileReader();
+                          reader.onload = (e) => {
+                            setAttachments(prev => [...prev, { file, preview: e.target?.result as string }]);
+                          };
+                          reader.readAsDataURL(file);
+                        } else {
+                          setAttachments(prev => [...prev, { file }]);
+                        }
+                      });
+                      // Reset input
+                      e.target.value = '';
+                    }}
+                    className="hidden"
+                  />
+                  <label htmlFor="fileUpload" className="cursor-pointer">
+                    <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm text-gray-600">Clique para selecionar ficheiros</p>
+                    <p className="text-xs text-gray-400 mt-1">Imagens, PDF, Word (máx. 10MB cada)</p>
+                  </label>
+                </div>
+                
+                {/* Lista de ficheiros selecionados */}
+                {attachments.length > 0 && (
+                  <div className="space-y-2 mt-3">
+                    {attachments.map((attachment, index) => (
+                      <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                        {attachment.preview ? (
+                          <img src={attachment.preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
+                        ) : (
+                          <FileIcon className="h-12 w-12 text-gray-400" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{attachment.file.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {(attachment.file.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setAttachments(prev => prev.filter((_, i) => i !== index));
+                          }}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3">
