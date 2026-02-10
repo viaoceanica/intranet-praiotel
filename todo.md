@@ -756,3 +756,12 @@
 - [x] Investigar erro "Cannot read properties of undefined (reading 'toLowerCase')"
 - [x] Adicionar verificação de null/undefined nos campos de filtro
 - [x] Testar seleção de cliente no browser
+
+## Melhorias Formulário de Novo Ticket
+- [x] Implementar validação em tempo real de campos obrigatórios
+- [x] Adicionar feedback visual de erros antes do submit
+- [x] Criar botão "Novo Cliente" no dropdown de seleção
+- [x] Implementar dialog de criação rápida de cliente
+- [x] Auto-completar localização ao selecionar cliente
+- [x] Auto-completar contacto ao selecionar cliente
+- [x] Testar funcionalidades no browser

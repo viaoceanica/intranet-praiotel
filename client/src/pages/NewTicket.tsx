@@ -51,6 +51,14 @@ export default function NewTicket() {
     serialNumber: "",
     isCritical: 0,
   });
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [showNewClientDialog, setShowNewClientDialog] = useState(false);
+  const [newClientData, setNewClientData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
 
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
@@ -96,6 +104,21 @@ export default function NewTicket() {
     },
   });
 
+  const createClientMutation = trpc.clients.create.useMutation({
+    onSuccess: (data) => {
+      toast.success("Cliente criado com sucesso!");
+      utils.clients.list.invalidate();
+      setShowNewClientDialog(false);
+      setNewClientData({ name: "", email: "", phone: "", address: "" });
+      // Selecionar o cliente recém-criado
+      setFormData({ ...formData, clientId: data.id });
+      setClientSearchQuery(`${data.designation} - ${data.nif}`);
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const handleCreateEquipment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.clientId) {
@@ -108,8 +131,36 @@ export default function NewTicket() {
     });
   };
 
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+    
+    if (!useCustomClient && !formData.clientId) {
+      errors.clientId = "Selecione um cliente";
+    }
+    if (useCustomClient && !formData.clientName.trim()) {
+      errors.clientName = "Digite o nome do cliente";
+    }
+    if (!formData.location.trim()) {
+      errors.location = "Selecione a localização";
+    }
+    if (!formData.priority) {
+      errors.priority = "Selecione a prioridade";
+    }
+    if (!formData.description.trim()) {
+      errors.description = "Descreva o problema";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
+    }
     
     // Se usar cliente da lista, preencher clientName
     let finalData = { ...formData };
@@ -197,10 +248,19 @@ export default function NewTicket() {
                     <Input
                       id="clientName"
                       value={formData.clientName}
-                      onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, clientName: e.target.value });
+                        if (validationErrors.clientName) {
+                          setValidationErrors({ ...validationErrors, clientName: "" });
+                        }
+                      }}
                       required
                       placeholder="Nome do cliente ou empresa"
+                      className={validationErrors.clientName ? "border-red-500" : ""}
                     />
+                    {validationErrors.clientName && (
+                      <p className="text-sm text-red-500">{validationErrors.clientName}</p>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-2 relative">
@@ -217,6 +277,9 @@ export default function NewTicket() {
                           if (!e.target.value) {
                             setFormData({ ...formData, clientId: undefined });
                           }
+                          if (validationErrors.clientId) {
+                            setValidationErrors({ ...validationErrors, clientId: "" });
+                          }
                         }}
                         onFocus={() => setShowClientDropdown(true)}
                         placeholder="Pesquisar por nome, NIF ou email..."
@@ -226,14 +289,32 @@ export default function NewTicket() {
                     </div>
                     {showClientDropdown && filteredClients && filteredClients.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setShowNewClientDialog(true);
+                            setShowClientDropdown(false);
+                          }}
+                          className="w-full text-left px-4 py-3 bg-orange-50 hover:bg-orange-100 border-b border-orange-200 flex items-center gap-2 text-orange-600 font-medium"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Novo Cliente
+                        </button>
                         {filteredClients.map((client) => (
                           <button
                             key={client.id}
                             type="button"
                             onClick={() => {
-                              setFormData({ ...formData, clientId: client.id });
+                              setFormData({ 
+                                ...formData, 
+                                clientId: client.id,
+                                location: client.address || formData.location
+                              });
                               setClientSearchQuery(`${client.designation} - ${client.nif}`);
                               setShowClientDropdown(false);
+                              if (validationErrors.clientId) {
+                                setValidationErrors({ ...validationErrors, clientId: "" });
+                              }
                             }}
                             className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                           >
@@ -573,6 +654,91 @@ export default function NewTicket() {
                   </>
                 ) : (
                   "Criar Equipamento"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog de Novo Cliente */}
+      <Dialog open={showNewClientDialog} onOpenChange={setShowNewClientDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Novo Cliente</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            createClientMutation.mutate({
+              designation: newClientData.name,
+              nif: "",
+              primaryEmail: newClientData.email,
+              phone: newClientData.phone,
+              address: newClientData.address,
+            });
+          }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newClientName">Nome / Empresa *</Label>
+              <Input
+                id="newClientName"
+                value={newClientData.name}
+                onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
+                required
+                placeholder="Nome do cliente ou empresa"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newClientEmail">Email</Label>
+              <Input
+                id="newClientEmail"
+                type="email"
+                value={newClientData.email}
+                onChange={(e) => setNewClientData({ ...newClientData, email: e.target.value })}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newClientPhone">Telefone</Label>
+              <Input
+                id="newClientPhone"
+                value={newClientData.phone}
+                onChange={(e) => setNewClientData({ ...newClientData, phone: e.target.value })}
+                placeholder="+351 912 345 678"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="newClientAddress">Morada</Label>
+              <Input
+                id="newClientAddress"
+                value={newClientData.address}
+                onChange={(e) => setNewClientData({ ...newClientData, address: e.target.value })}
+                placeholder="Rua, Cidade"
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowNewClientDialog(false)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-[#F15A24] hover:bg-[#D14A1A]"
+                disabled={createClientMutation.isPending}
+              >
+                {createClientMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    A criar...
+                  </>
+                ) : (
+                  "Criar Cliente"
                 )}
               </Button>
             </DialogFooter>
