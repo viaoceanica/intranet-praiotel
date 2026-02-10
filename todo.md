@@ -799,3 +799,8 @@
 - [x] Adicionar validação de tipos de ficheiro (imagens, PDFs, documentos)
 - [x] Adicionar validação de tamanho máximo de ficheiro
 - [x] Testar upload e visualização no browser
+
+## Barra de Logotipos no Rodapé
+- [x] Fazer upload da imagem BARRA_ACORES_PRR.png para S3
+- [x] Adicionar componente de rodapé no layout principal
+- [x] Testar visualização em diferentes tamanhos de ecrã

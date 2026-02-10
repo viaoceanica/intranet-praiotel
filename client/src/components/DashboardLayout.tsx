@@ -257,7 +257,18 @@ function DashboardLayoutContent({
             </div>
           </div>
         )}
-        <main className="flex-1 p-4">{children}</main>
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-1 p-4">{children}</main>
+          <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur mt-auto">
+            <div className="container py-6">
+              <img 
+                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
+                alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
+                className="w-full max-w-5xl mx-auto h-auto"
+              />
+            </div>
+          </footer>
+        </div>
       </SidebarInset>
     </>
   );
