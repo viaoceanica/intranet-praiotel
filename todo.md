@@ -751,3 +751,8 @@
 - [x] Verificar query de clientes no backend
 - [x] Corrigir query para buscar clientes da tabela correta
 - [x] Testar seleção de cliente no formulário de novo ticket
+
+## Correção: Erro toLowerCase ao Selecionar Cliente
+- [x] Investigar erro "Cannot read properties of undefined (reading 'toLowerCase')"
+- [x] Adicionar verificação de null/undefined nos campos de filtro
+- [x] Testar seleção de cliente no browser
