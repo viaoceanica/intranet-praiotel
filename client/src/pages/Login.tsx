@@ -29,7 +29,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#2F2F2F] p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#2F2F2F] p-4 gap-8">
       <Card className="w-full max-w-md border-[#4A4A4A]">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
@@ -85,6 +85,15 @@ export default function Login() {
           </form>
         </CardContent>
       </Card>
+      
+      {/* Barra de logotipos */}
+      <div className="w-full max-w-[640px] px-4">
+        <img 
+          src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
+          alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
+          className="w-full h-auto"
+        />
+      </div>
     </div>
   );
 }

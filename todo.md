@@ -816,3 +816,7 @@
 - [x] Reduzir tamanho da imagem da barra em 50% no PraiotelLayout
 - [x] Reduzir tamanho da imagem da barra em 50% no DashboardLayout
 - [x] Testar visualização no browser
+
+## Barra de Logotipos na Página de Login
+- [x] Adicionar barra de logotipos abaixo do formulário de login
+- [x] Testar visualização no browser
