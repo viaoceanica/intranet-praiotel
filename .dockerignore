@@ -1,0 +1,57 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+.vite
+.turbo
+
+# Development
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.manus-logs
+
+# Testing
+coverage
+.nyc_output
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+DEPLOY_EASYPANEL.md
+*.md
+
+# CI/CD
+.github
+.gitlab-ci.yml
+
+# Misc
+.prettierrc
+.eslintrc
+.editorconfig
+tsconfig.json
+vite.config.ts

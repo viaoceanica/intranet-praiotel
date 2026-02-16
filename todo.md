@@ -827,3 +827,11 @@
 - [x] Ajustar cores do tema escuro para melhor contraste
 - [x] Testar alternância entre temas no browser
 - [x] Garantir persistência da preferência do utilizador
+
+## Preparação para Deploy no Easypanel
+- [x] Criar Dockerfile otimizado com multi-stage build
+- [x] Criar .dockerignore para otimizar tamanho da imagem
+- [x] Adicionar endpoint /health para healthcheck
+- [x] Criar documentação DEPLOY_EASYPANEL.md com instruções completas
+- [x] Verificar e ajustar package.json com scripts necessários (já estava correto)
+- [ ] Testar build do Docker localmente (opcional - pode ser testado pelo utilizador)
