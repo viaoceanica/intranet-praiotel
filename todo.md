@@ -842,3 +842,6 @@
 - [x] Testar build localmente (sucesso - 367.90 kB HTML + 2.3 MB JS)
 - [x] Erro persiste no Docker - vite.config.ts estava excluído no .dockerignore
 - [x] Ajustar .dockerignore removendo vite.config.ts e tsconfig.json
+
+## Correção Final do Dockerfile
+- [x] Remover linha COPY storage do Dockerfile (pasta não existe no build)
