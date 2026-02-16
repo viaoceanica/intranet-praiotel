@@ -835,3 +835,8 @@
 - [x] Criar documentação DEPLOY_EASYPANEL.md com instruções completas
 - [x] Verificar e ajustar package.json com scripts necessários (já estava correto)
 - [ ] Testar build do Docker localmente (opcional - pode ser testado pelo utilizador)
+
+## Correção do Build do Docker no Easypanel
+- [x] Verificar localização do index.html e configuração do Vite
+- [x] Corrigir vite.config.ts (substituir import.meta.dirname por process.cwd())
+- [x] Testar build localmente (sucesso - 367.90 kB HTML + 2.3 MB JS)
