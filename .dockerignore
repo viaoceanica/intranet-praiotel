@@ -53,5 +53,3 @@ DEPLOY_EASYPANEL.md
 .prettierrc
 .eslintrc
 .editorconfig
-tsconfig.json
-vite.config.ts

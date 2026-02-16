@@ -840,3 +840,5 @@
 - [x] Verificar localização do index.html e configuração do Vite
 - [x] Corrigir vite.config.ts (substituir import.meta.dirname por process.cwd())
 - [x] Testar build localmente (sucesso - 367.90 kB HTML + 2.3 MB JS)
+- [x] Erro persiste no Docker - vite.config.ts estava excluído no .dockerignore
+- [x] Ajustar .dockerignore removendo vite.config.ts e tsconfig.json
