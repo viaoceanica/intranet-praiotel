@@ -850,3 +850,8 @@
 - [x] Criar guia detalhado com instruções passo-a-passo
 - [x] Listar todas as variáveis VITE necessárias
 - [x] Explicar diferença entre Build Arguments e Environment Variables
+
+## Simplificar Variáveis de Ambiente para Deploy Independente
+- [x] Remover dependências de variáveis Manus
+- [x] Criar valores alternativos para JWT_SECRET e outras variáveis
+- [x] Atualizar guia com valores prontos a usar (EASYPANEL_ENV_SIMPLES.md)
