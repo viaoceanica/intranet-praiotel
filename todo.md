@@ -845,3 +845,8 @@
 
 ## Correção Final do Dockerfile
 - [x] Remover linha COPY storage do Dockerfile (pasta não existe no build)
+
+## Guia de Configuração VITE para Easypanel
+- [x] Criar guia detalhado com instruções passo-a-passo
+- [x] Listar todas as variáveis VITE necessárias
+- [x] Explicar diferença entre Build Arguments e Environment Variables
