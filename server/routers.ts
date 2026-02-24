@@ -436,12 +436,19 @@ export const appRouter = router({
         if (input.id === ctx.user.id) {
           throw new TRPCError({ 
             code: "BAD_REQUEST", 
-            message: "Não pode eliminar o próprio utilizador" 
+            message: "Não pode desativar o próprio utilizador" 
           });
         }
 
-        await db.deleteUser(input.id);
-        return { success: true };
+        const user = await db.getUserById(input.id);
+        if (!user) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Utilizador não encontrado" });
+        }
+
+        // Soft delete: alternar entre ativo e inativo
+        const newStatus = user.active ? 0 : 1;
+        await db.updateUser(input.id, { active: newStatus });
+        return { success: true, active: newStatus === 1 };
       }),
   }),
 

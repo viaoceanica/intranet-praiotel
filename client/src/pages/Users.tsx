@@ -29,7 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { UserPlus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { UserPlus, Pencil, Loader2, UserX, UserCheck, Filter } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Users() {
@@ -79,15 +79,17 @@ export default function Users() {
     },
   });
 
-  const deleteMutation = trpc.users.delete.useMutation({
-    onSuccess: () => {
-      toast.success("Utilizador eliminado com sucesso");
+  const toggleStatusMutation = trpc.users.delete.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.active ? "Utilizador reativado com sucesso" : "Utilizador desativado com sucesso");
       utils.users.list.invalidate();
     },
     onError: (error) => {
       toast.error(error.message);
     },
   });
+
+  const [showInactive, setShowInactive] = useState(false);
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,9 +115,10 @@ export default function Users() {
     updateMutation.mutate(updateData);
   };
 
-  const handleDelete = (id: number) => {
-    if (confirm("Tem a certeza que deseja eliminar este utilizador?")) {
-      deleteMutation.mutate({ id });
+  const handleToggleStatus = (id: number, currentlyActive: boolean) => {
+    const action = currentlyActive ? "desativar" : "reativar";
+    if (confirm(`Tem a certeza que deseja ${action} este utilizador?`)) {
+      toggleStatusMutation.mutate({ id });
     }
   };
 
@@ -236,6 +239,23 @@ export default function Users() {
           </Dialog>
         </div>
 
+        <div className="flex items-center gap-3 mb-4">
+          <Button
+            variant={showInactive ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowInactive(!showInactive)}
+            className={showInactive ? "bg-[#F15A24] hover:bg-[#D14A1A]" : ""}
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            {showInactive ? "A mostrar todos" : "Mostrar inativos"}
+          </Button>
+          {showInactive && (
+            <span className="text-sm text-gray-500">
+              {users?.filter(u => !u.active).length || 0} utilizador(es) inativo(s)
+            </span>
+          )}
+        </div>
+
         <div className="bg-white rounded-lg border border-gray-200">
           {isLoading ? (
             <div className="flex justify-center items-center p-12">
@@ -254,9 +274,12 @@ export default function Users() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {users?.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
+                {users?.filter(u => showInactive || u.active).map((user) => (
+                  <TableRow key={user.id} className={!user.active ? "opacity-50 bg-gray-50" : ""}>
+                    <TableCell className="font-medium">
+                      {user.name}
+                      {!user.active && <span className="ml-2 text-xs text-red-500">(desativado)</span>}
+                    </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <Badge className={roleBadgeColors[user.role]}>
@@ -285,10 +308,11 @@ export default function Users() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleDelete(user.id)}
-                          className="text-red-600 hover:text-red-700"
+                          onClick={() => handleToggleStatus(user.id, !!user.active)}
+                          className={user.active ? "text-red-600 hover:text-red-700" : "text-green-600 hover:text-green-700"}
+                          title={user.active ? "Desativar utilizador" : "Reativar utilizador"}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {user.active ? <UserX className="h-4 w-4" /> : <UserCheck className="h-4 w-4" />}
                         </Button>
                       </div>
                     </TableCell>

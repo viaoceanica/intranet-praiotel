@@ -1011,3 +1011,11 @@
 - [x] Registar no histórico quando um ticket é atribuído ou reatribuído (quem atribuiu, a quem, quando)
 - [x] Mostrar histórico de atribuições na página de detalhe do ticket
 - [x] Testar reatribuição e verificar registo no histórico
+
+## Soft Delete de Utilizadores (Desativação em vez de Eliminação)
+- [x] Adicionar campo status (ativo/inativo) ao schema de utilizadores (já existia campo active)
+- [x] Substituir eliminação definitiva por mudança de estado (desativar)
+- [x] Permitir reativar utilizadores desativados
+- [x] Filtrar utilizadores inativos da listagem principal (com opção de ver todos)
+- [x] Preservar histórico de tickets e ações de utilizadores desativados
+- [x] Atualizar frontend com botões desativar/ativar
