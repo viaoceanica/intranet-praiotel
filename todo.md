@@ -1005,3 +1005,9 @@
 
 ## Link Manual no Sub-menu de Tickets
 - [ ] Garantir que o link "Manual" aparece visível no sub-menu de Tickets na sidebar
+
+## Histórico de Atribuição/Reatribuição de Tickets
+- [x] Analisar lógica atual de atribuição de tickets
+- [x] Registar no histórico quando um ticket é atribuído ou reatribuído (quem atribuiu, a quem, quando)
+- [x] Mostrar histórico de atribuições na página de detalhe do ticket
+- [x] Testar reatribuição e verificar registo no histórico

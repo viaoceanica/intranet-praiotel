@@ -34,7 +34,8 @@ import {
   MessageSquare,
   Clock,
   User,
-  FileText
+  FileText,
+  UserCheck
 } from "lucide-react";
 import { format } from "date-fns";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -208,6 +209,8 @@ export default function TicketDetail() {
   const actionLabels: Record<string, string> = {
     status_change: "Alterou o estado",
     note_added: "Adicionou uma nota",
+    assignment: "Atribuiu o ticket",
+    reassignment: "Reatribuiu o ticket",
   };
 
   if (isLoading) {
@@ -465,8 +468,12 @@ export default function TicketDetail() {
                       return (
                         <div key={item.id} className="flex gap-3 pb-3 border-b last:border-0">
                           <div className="flex-shrink-0">
-                            <div className="w-8 h-8 rounded-full bg-[#F15A24] flex items-center justify-center">
-                              <User className="h-4 w-4 text-white" />
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${(item.action === "assignment" || item.action === "reassignment") ? "bg-blue-500" : "bg-[#F15A24]"}`}>
+                              {(item.action === "assignment" || item.action === "reassignment") ? (
+                                <UserCheck className="h-4 w-4 text-white" />
+                              ) : (
+                                <User className="h-4 w-4 text-white" />
+                              )}
                             </div>
                           </div>
                           <div className="flex-1">
@@ -485,6 +492,15 @@ export default function TicketDetail() {
                             {item.action === "note_added" && (
                               <p className="text-sm text-gray-700 mt-1 bg-gray-50 p-2 rounded">
                                 {item.newValue}
+                              </p>
+                            )}
+                            {(item.action === "assignment" || item.action === "reassignment") && (
+                              <p className="text-sm text-gray-600">
+                                {item.action === "reassignment" ? (
+                                  <>De <Badge className="bg-gray-100 text-gray-700" variant="secondary">{item.oldValue}</Badge>{" "}para <Badge className="bg-blue-100 text-blue-800" variant="secondary">{item.newValue}</Badge></>
+                                ) : (
+                                  <>Atribuído a <Badge className="bg-blue-100 text-blue-800" variant="secondary">{item.newValue}</Badge></>
+                                )}
                               </p>
                             )}
                             <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">

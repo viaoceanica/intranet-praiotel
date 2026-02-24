@@ -592,16 +592,28 @@ export const appRouter = router({
         // Obter ID do ticket recém-criado
         const createdTicket = await ticketsDb.getTicketByNumber(ticketNumber);
 
-        // Notificar técnico se ticket foi atribuído
+        if (!createdTicket) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao criar ticket" });
+        }
+
+        // Registar atribuição inicial no histórico
         if (input.assignedToId) {
+          const assignedUser = await db.getUserById(input.assignedToId);
+          await ticketsDb.createTicketHistory({
+            ticketId: createdTicket.id,
+            userId: ctx.user.id,
+            action: "assignment",
+            fieldChanged: "assignedToId",
+            oldValue: "Não atribuído",
+            newValue: assignedUser ? assignedUser.name : "Desconhecido",
+          });
+
+          // Notificar técnico
           await notificationHelpers.notifyTicketAssigned(
-            createdTicket!.id,
+            createdTicket.id,
             ticketNumber,
             input.assignedToId
           );
-        }
-        if (!createdTicket) {
-          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao criar ticket" });
         }
 
         // Registar alteração de prioridade se foi automática
@@ -691,13 +703,28 @@ export const appRouter = router({
           );
         }
 
-        // Notificar sobre nova atribuição
-        if (input.assignedToId && input.assignedToId !== ticket.assignedToId) {
-          await notificationHelpers.notifyTicketAssigned(
-            id,
-            ticket.ticketNumber,
-            input.assignedToId
-          );
+        // Registar atribuição/reatribuição no histórico
+        if (input.assignedToId !== undefined && input.assignedToId !== ticket.assignedToId) {
+          const oldAssignedUser = ticket.assignedToId ? await db.getUserById(ticket.assignedToId) : null;
+          const newAssignedUser = input.assignedToId ? await db.getUserById(input.assignedToId) : null;
+          
+          await ticketsDb.createTicketHistory({
+            ticketId: id,
+            userId: ctx.user.id,
+            action: ticket.assignedToId ? "reassignment" : "assignment",
+            fieldChanged: "assignedToId",
+            oldValue: oldAssignedUser ? oldAssignedUser.name : "Não atribuído",
+            newValue: newAssignedUser ? newAssignedUser.name : "Não atribuído",
+          });
+
+          // Notificar sobre nova atribuição
+          if (input.assignedToId) {
+            await notificationHelpers.notifyTicketAssigned(
+              id,
+              ticket.ticketNumber,
+              input.assignedToId
+            );
+          }
         }
 
         await ticketsDb.updateTicket(id, dataToUpdate);
