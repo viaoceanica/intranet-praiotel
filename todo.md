@@ -992,3 +992,6 @@
 - [x] Carregar ordem personalizada ao iniciar sessão
 - [x] Adicionar ícone de arrastar (grip) nos itens do menu
 - [x] Testar reordenação e persistência
+
+## Bug: Ordem dos menus reseta ao navegar
+- [x] Corrigir: ao navegar para outra página (ex: Configurações), a ordem dos menus volta à posição original

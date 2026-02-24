@@ -233,7 +233,13 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
     staleTime: 1000 * 60 * 5, // Cache por 5 minutos
   });
   
-  const saveMenuOrderMutation = trpc.menuOrder.save.useMutation();
+  const utils = trpc.useUtils();
+  const saveMenuOrderMutation = trpc.menuOrder.save.useMutation({
+    onSuccess: () => {
+      // Invalidar o cache para que a próxima leitura traga a ordem atualizada
+      utils.menuOrder.get.invalidate();
+    },
+  });
   
   // Expandir automaticamente o menu correto baseado na rota atual
   useEffect(() => {
@@ -366,10 +372,17 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   }, [filteredNavigation, savedMenuOrder]);
 
   // Estado local da ordem (para drag & drop imediato)
+  // Usar useRef para controlar se o utilizador já fez drag & drop
   const [localOrder, setLocalOrder] = useState<NavItem[]>([]);
+  const [hasUserReordered, setHasUserReordered] = useState(false);
   
   useEffect(() => {
-    setLocalOrder(orderedNavigation);
+    // Só sincronizar com o servidor se o utilizador não tiver feito reordenação manual
+    // ou se os dados do servidor acabaram de ser carregados/atualizados
+    if (!hasUserReordered || (savedMenuOrder && savedMenuOrder.length > 0)) {
+      setLocalOrder(orderedNavigation);
+      setHasUserReordered(false);
+    }
   }, [orderedNavigation]);
 
   // Sensores para drag & drop
@@ -388,6 +401,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
+      setHasUserReordered(true);
       setLocalOrder((items) => {
         const oldIndex = items.findIndex(i => i.name === active.id);
         const newIndex = items.findIndex(i => i.name === over.id);
