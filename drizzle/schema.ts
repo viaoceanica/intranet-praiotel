@@ -930,3 +930,42 @@ export const systemSettings = mysqlTable("system_settings", {
 
 export type SystemSetting = typeof systemSettings.$inferSelect;
 export type InsertSystemSetting = typeof systemSettings.$inferInsert;
+
+
+/**
+ * Clientes Gestão Comercial (importados do ERP/Excel)
+ * Separados dos clientes de assistência técnica (tabela clients)
+ */
+export const commercialClients = mysqlTable("commercial_clients", {
+  id: int("id").autoincrement().primaryKey(),
+  externalId: int("external_id"), // N_ do ERP
+  company: varchar("company", { length: 500 }).notNull(),
+  address: text("address"),
+  locality: varchar("locality", { length: 255 }),
+  postalCode: varchar("postal_code", { length: 50 }),
+  county: varchar("county", { length: 255 }),
+  district: varchar("district", { length: 255 }),
+  country: varchar("country", { length: 100 }).default("Portugal"),
+  nif: varchar("nif", { length: 20 }),
+  phone1: varchar("phone1", { length: 50 }),
+  phone2: varchar("phone2", { length: 50 }),
+  fax: varchar("fax", { length: 50 }),
+  mobile1: varchar("mobile1", { length: 50 }),
+  mobile2: varchar("mobile2", { length: 50 }),
+  email: varchar("email", { length: 320 }),
+  website: varchar("website", { length: 500 }),
+  salesperson: varchar("salesperson", { length: 255 }),
+  zone: varchar("zone", { length: 255 }),
+  paymentTerms: varchar("payment_terms", { length: 100 }),
+  discount: decimal("discount", { precision: 5, scale: 2 }).default("0"),
+  balance: decimal("balance", { precision: 12, scale: 2 }),
+  active: int("active").default(1).notNull(),
+  blocked: int("blocked").default(0).notNull(),
+  clientSince: date("client_since"),
+  comments: text("comments"),
+  importedAt: timestamp("imported_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CommercialClient = typeof commercialClients.$inferSelect;
+export type InsertCommercialClient = typeof commercialClients.$inferInsert;

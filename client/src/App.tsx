@@ -44,6 +44,7 @@ import Settings from "./pages/crm/Settings";
 import EmailTemplates from "./pages/crm/EmailTemplates";
 import Workflows from "./pages/crm/Workflows";
 import Duplicates from "./pages/crm/Duplicates";
+import CommercialClients from "./pages/crm/CommercialClients";
 import RecuperarPassword from "./pages/RecuperarPassword";
 import GeneralSettings from "./pages/settings/GeneralSettings";
 import EmailSettings from "./pages/settings/EmailSettings";
@@ -116,6 +117,7 @@ function Router() {
       <Route path="/crm/email-templates" component={() => <ProtectedRoute component={EmailTemplates} />} />
       <Route path="/crm/workflows" component={() => <ProtectedRoute component={Workflows} />} />
       <Route path="/crm/duplicates" component={() => <ProtectedRoute component={Duplicates} />} />
+      <Route path="/crm/commercial-clients" component={() => <ProtectedRoute component={CommercialClients} />} />
       
       {/* Rotas Configurações */}
       <Route path="/settings/general" component={() => <ProtectedRoute component={GeneralSettings} />} />

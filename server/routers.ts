@@ -35,6 +35,8 @@ import * as crmEmailTemplatesDb from "./crmEmailTemplatesDb";
 import * as crmWorkflowsDb from "./crmWorkflowsDb";
 import * as crmDuplicatesDb from "./crmDuplicatesDb";
 import * as systemSettingsDb from "./systemSettingsDb";
+import * as commercialClientsDb from "./commercialClientsDb";
+import * as XLSX from "xlsx";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -2790,6 +2792,168 @@ export const appRouter = router({
       return { success: true };
     }),
   }),
-});
 
+  commercialClients: router({
+    list: isAuthenticated
+      .input(z.object({
+        search: z.string().optional(),
+        zone: z.string().optional(),
+        salesperson: z.string().optional(),
+        active: z.boolean().optional(),
+        page: z.number().optional(),
+        limit: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return await commercialClientsDb.getAllCommercialClients(input || {});
+      }),
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await commercialClientsDb.getCommercialClientById(input.id);
+      }),
+    create: isAdmin
+      .input(z.object({
+        company: z.string().min(1),
+        address: z.string().optional(),
+        locality: z.string().optional(),
+        postalCode: z.string().optional(),
+        county: z.string().optional(),
+        district: z.string().optional(),
+        country: z.string().optional(),
+        nif: z.string().optional(),
+        phone1: z.string().optional(),
+        phone2: z.string().optional(),
+        fax: z.string().optional(),
+        mobile1: z.string().optional(),
+        mobile2: z.string().optional(),
+        email: z.string().optional(),
+        website: z.string().optional(),
+        salesperson: z.string().optional(),
+        zone: z.string().optional(),
+        paymentTerms: z.string().optional(),
+        discount: z.string().optional(),
+        comments: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const id = await commercialClientsDb.createCommercialClient(input);
+        return { id };
+      }),
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        company: z.string().optional(),
+        address: z.string().optional(),
+        locality: z.string().optional(),
+        postalCode: z.string().optional(),
+        county: z.string().optional(),
+        district: z.string().optional(),
+        country: z.string().optional(),
+        nif: z.string().optional(),
+        phone1: z.string().optional(),
+        phone2: z.string().optional(),
+        fax: z.string().optional(),
+        mobile1: z.string().optional(),
+        mobile2: z.string().optional(),
+        email: z.string().optional(),
+        website: z.string().optional(),
+        salesperson: z.string().optional(),
+        zone: z.string().optional(),
+        paymentTerms: z.string().optional(),
+        discount: z.string().optional(),
+        comments: z.string().optional(),
+        active: z.number().optional(),
+        blocked: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await commercialClientsDb.updateCommercialClient(id, data);
+        return { success: true };
+      }),
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await commercialClientsDb.deleteCommercialClient(input.id);
+        return { success: true };
+      }),
+    stats: isAuthenticated.query(async () => {
+      return await commercialClientsDb.getCommercialClientStats();
+    }),
+    zones: isAuthenticated.query(async () => {
+      return await commercialClientsDb.getZones();
+    }),
+    salespersons: isAuthenticated.query(async () => {
+      return await commercialClientsDb.getSalespersons();
+    }),
+    import: isAdmin
+      .input(z.object({
+        fileBase64: z.string(),
+        fileName: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const buffer = Buffer.from(input.fileBase64, "base64");
+          const workbook = XLSX.read(buffer, { type: "buffer" });
+          const sheetName = workbook.SheetNames[0];
+          const sheet = workbook.Sheets[sheetName];
+          const rows: any[] = XLSX.utils.sheet_to_json(sheet);
+
+          const clients = rows.map((row: any) => {
+            const clean = (val: any) => {
+              if (val === undefined || val === null || val === "" || val === "NaN" || Number.isNaN(val)) return null;
+              return String(val).trim();
+            };
+            const cleanDate = (val: any) => {
+              if (!val) return null;
+              try {
+                if (typeof val === "number") {
+                  // Excel date serial number
+                  const date = XLSX.SSF.parse_date_code(val);
+                  return `${date.y}-${String(date.m).padStart(2, "0")}-${String(date.d).padStart(2, "0")}`;
+                }
+                const d = new Date(val);
+                if (isNaN(d.getTime())) return null;
+                return d.toISOString().split("T")[0];
+              } catch { return null; }
+            };
+
+            return {
+              externalId: row["N_"] ? Number(row["N_"]) : null,
+              company: clean(row["Empresa"]) || "Sem Nome",
+              address: clean(row["Morada"]),
+              locality: clean(row["Localidade"]),
+              postalCode: clean(row["C_ Postal"]),
+              county: clean(row["Concelho"]),
+              district: clean(row["Distrito"]),
+              country: clean(row["Pais"]) || "Portugal",
+              nif: clean(row["Contribuinte"]),
+              phone1: clean(row["Telefone _1_"]),
+              phone2: clean(row["Telefone _2_"]),
+              fax: clean(row["Fax"]),
+              mobile1: clean(row["Telemovel _1_"]),
+              mobile2: clean(row["Telemovel _2_"]),
+              email: clean(row["Email"]),
+              website: clean(row["Site"]),
+              salesperson: clean(row["Vendedor"]),
+              zone: clean(row["Zona"]),
+              paymentTerms: clean(row["Pagamento"]),
+              discount: row["Desconto Directo"] ? String(row["Desconto Directo"]) : "0",
+              balance: row["Saldo"] !== undefined && row["Saldo"] !== null && !isNaN(Number(row["Saldo"])) ? String(row["Saldo"]) : null,
+              active: row["Activo"] === true || row["Activo"] === "True" || row["Activo"] === 1 ? 1 : 0,
+              blocked: row["Bloqueado"] === true || row["Bloqueado"] === "True" || row["Bloqueado"] === 1 ? 1 : 0,
+              clientSince: cleanDate(row["Cliente desde"]),
+              comments: clean(row["Comentarios"]),
+            };
+          });
+
+          const result = await commercialClientsDb.importCommercialClients(clients as any);
+          return result;
+        } catch (err: any) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: `Erro ao processar ficheiro Excel: ${err.message}`,
+          });
+        }
+      }),
+  }),
+});
 export type AppRouter = typeof appRouter;

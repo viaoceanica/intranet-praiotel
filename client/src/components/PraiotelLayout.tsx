@@ -132,6 +132,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Relatórios", href: "/crm/reports", icon: BarChart3, roles: ["admin"] },
         { name: "Templates Email", href: "/crm/email-templates", icon: FileTemplate, roles: ["admin"] },
         { name: "Automações", href: "/crm/workflows", icon: Zap, roles: ["admin"] },
+        { name: "Clientes Comerciais", href: "/crm/commercial-clients", icon: Building2, roles: ["admin"] },
         { name: "Duplicados", href: "/crm/duplicates", icon: Copy, roles: ["admin"] },
         { name: "Configurações", href: "/crm/settings", icon: Settings, roles: ["admin"] },
       ]

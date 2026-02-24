@@ -947,3 +947,13 @@
 ## Bug Fix - Pesquisa de Clientes no Criar Ticket
 - [x] Investigar e corrigir pesquisa de clientes na página /tickets/new
 - [x] Melhorar a experiência de seleção de cliente (badge com nome/NIF/email + botão X para limpar)
+
+## Separação de Clientes: Gestão Comercial vs Assistência Técnica
+- [x] Analisar estrutura do ficheiro Excel de clientes comerciais
+- [x] Criar tabela separada "crm_commercial_clients" para clientes de gestão comercial
+- [x] Criar backend CRUD + importação Excel para clientes comerciais
+- [x] Criar página de Clientes Gestão Comercial com listagem e upload Excel
+- [x] Manter clientes existentes (tabela clients) como clientes de assistência técnica
+- [x] Atualizar navegação: CRM > Clientes Comerciais
+- [ ] Integrar clientes comerciais com módulo CRM (leads, oportunidades)
+- [x] Escrever testes para a funcionalidade de importação (8 testes - todos passaram)
