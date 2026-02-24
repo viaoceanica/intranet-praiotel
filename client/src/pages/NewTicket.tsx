@@ -256,7 +256,10 @@ export default function NewTicket() {
       }
     }
     
-    createMutation.mutate(finalData);
+    createMutation.mutate({
+      ...finalData,
+      isManualClient: useCustomClient,
+    });
   };
 
   const technicians = users?.filter(u => 

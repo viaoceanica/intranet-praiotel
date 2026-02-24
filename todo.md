@@ -1029,3 +1029,9 @@
 - [x] Criar tabela de auditoria de utilizadores no schema
 - [x] Registar quem desativou/reativou, quando e qual utilizador
 - [x] Mostrar histórico de auditoria na página de utilizadores
+
+## Criação Automática de Clientes Manuais em Tickets
+- [x] Quando utilizador marca "Inserir cliente manualmente" ao criar ticket, criar automaticamente o cliente na tabela clients
+- [x] Cliente criado manualmente aparece na listagem de Assistência Técnica
+- [x] Ticket fica ligado ao cliente criado (clientId preenchido)
+- [x] Testes automatizados criados e a passar (4/4)

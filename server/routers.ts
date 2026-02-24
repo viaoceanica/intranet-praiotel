@@ -595,9 +595,24 @@ export const appRouter = router({
         location: z.string().min(1),
         description: z.string().min(1),
         assignedToId: z.number().optional(),
+        isManualClient: z.boolean().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const ticketNumber = await ticketsDb.generateTicketNumber();
+        
+        // Se é cliente manual de assistência técnica, criar o cliente
+        let finalClientId = input.clientId;
+        if (input.isManualClient && input.clientType === "assistencia" && !input.clientId) {
+          // Criar cliente com dados mínimos
+          const newClient = await clientsDb.createClient({
+            designation: input.clientName,
+            address: "",
+            primaryEmail: `cliente_${Date.now()}@temp.praiotel.pt`, // Email temporário único
+            nif: `TEMP${Date.now()}`, // NIF temporário único
+            source: "direto",
+          });
+          finalClientId = Number(newClient[0].insertId);
+        }
         
         // Aplicar priorização automática
         let finalPriority = input.priority;
@@ -615,7 +630,7 @@ export const appRouter = router({
 
         const ticketData = {
           ticketNumber,
-          clientId: input.clientType === "assistencia" ? input.clientId : undefined,
+          clientId: input.clientType === "assistencia" ? finalClientId : undefined,
           commercialClientId: input.clientType === "comercial" ? input.commercialClientId : undefined,
           clientType: input.clientType,
           clientName: input.clientName,

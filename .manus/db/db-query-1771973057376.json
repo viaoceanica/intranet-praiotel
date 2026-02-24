@@ -1,0 +1,22 @@
+{
+  "query": "SELECT * FROM clients WHERE nif LIKE 'TEMP%' ORDER BY createdAt DESC LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT * FROM clients WHERE nif LIKE 'TEMP%' ORDER BY createdAt DESC LIMIT 10;",
+  "rows": [
+    {
+      "id": "90001",
+      "designation": "Cliente Teste Manual 1771973041078",
+      "address": "",
+      "primaryEmail": "cliente_1771973041078@temp.praiotel.pt",
+      "nif": "TEMP1771973041078",
+      "responsiblePerson": "NULL",
+      "createdAt": "2026-02-24 22:44:01",
+      "updatedAt": "2026-02-24 22:44:01",
+      "source": "direto",
+      "leadId": "NULL"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdesignation\taddress\tprimaryEmail\tnif\tresponsiblePerson\tcreatedAt\tupdatedAt\tsource\tleadId\n90001\tCliente Teste Manual 1771973041078\t\tcliente_1771973041078@temp.praiotel.pt\tTEMP1771973041078\tNULL\t2026-02-24 22:44:01\t2026-02-24 22:44:01\tdireto\tNULL\n",
+  "stderr": "",
+  "execution_time_ms": 154
+}
