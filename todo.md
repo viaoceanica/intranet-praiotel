@@ -1002,3 +1002,6 @@
 - [x] Criar página do manual na intranet com índice lateral e navegação por secções
 - [x] Integrar no menu da sidebar e rotas do App.tsx
 - [x] Testar navegação e conteúdo no browser
+
+## Link Manual no Sub-menu de Tickets
+- [ ] Garantir que o link "Manual" aparece visível no sub-menu de Tickets na sidebar
