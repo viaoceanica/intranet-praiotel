@@ -798,3 +798,116 @@ export const crmOpportunityHistory = mysqlTable("crm_opportunity_history", {
 
 export type CrmOpportunityHistory = typeof crmOpportunityHistory.$inferSelect;
 export type InsertCrmOpportunityHistory = typeof crmOpportunityHistory.$inferInsert;
+
+// ============================================================================
+// TEMPLATES DE EMAIL PARA CAMPANHAS
+// ============================================================================
+
+/**
+ * Templates de email para campanhas CRM
+ * Suportam variáveis dinâmicas como {{nome}}, {{empresa}}, {{email}}
+ */
+export const crmEmailTemplates = mysqlTable("crm_email_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Informação do template
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  category: varchar("category", { length: 100 }).default("geral").notNull(),
+  
+  // Conteúdo
+  subject: varchar("subject", { length: 500 }).notNull(),
+  htmlContent: text("htmlContent").notNull(),
+  
+  // Variáveis disponíveis (JSON array de strings)
+  variables: text("variables"),
+  
+  // Estado
+  isDefault: int("isDefault").default(0).notNull(),
+  active: int("active").default(1).notNull(),
+  
+  // Criador
+  createdById: int("createdById").notNull(),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmEmailTemplate = typeof crmEmailTemplates.$inferSelect;
+export type InsertCrmEmailTemplate = typeof crmEmailTemplates.$inferInsert;
+
+// ============================================================================
+// AUTOMAÇÃO DE WORKFLOWS CRM
+// ============================================================================
+
+/**
+ * Regras de automação de workflows CRM
+ * Definem triggers, condições e ações automáticas
+ */
+export const crmWorkflowRules = mysqlTable("crm_workflow_rules", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Informação da regra
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  
+  // Trigger (o que dispara a regra)
+  triggerType: varchar("triggerType", { length: 100 }).notNull(),
+  // Valores: opportunity_stage_change, new_lead, lead_status_change, task_completed, lead_score_change
+  
+  // Condição (JSON com condições específicas)
+  conditions: text("conditions").notNull(),
+  // Ex: {"fromStage": "qualificacao", "toStage": "proposta"}
+  
+  // Ação (o que acontece quando a regra é ativada)
+  actionType: varchar("actionType", { length: 100 }).notNull(),
+  // Valores: create_task, send_notification, change_status, assign_user, update_score
+  
+  // Parâmetros da ação (JSON)
+  actionParams: text("actionParams").notNull(),
+  // Ex: {"taskTitle": "Follow-up proposta", "taskType": "follow_up", "dueDays": 3}
+  
+  // Estado
+  active: int("active").default(1).notNull(),
+  
+  // Prioridade (ordem de execução)
+  priority: int("priority").default(0).notNull(),
+  
+  // Estatísticas
+  executionCount: int("executionCount").default(0).notNull(),
+  lastExecutedAt: timestamp("lastExecutedAt"),
+  
+  // Criador
+  createdById: int("createdById").notNull(),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CrmWorkflowRule = typeof crmWorkflowRules.$inferSelect;
+export type InsertCrmWorkflowRule = typeof crmWorkflowRules.$inferInsert;
+
+/**
+ * Log de execução de workflows
+ */
+export const crmWorkflowLogs = mysqlTable("crm_workflow_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Regra executada
+  ruleId: int("ruleId").notNull(),
+  
+  // Contexto (JSON com dados do trigger)
+  triggerData: text("triggerData").notNull(),
+  
+  // Resultado
+  success: int("success").default(1).notNull(),
+  resultMessage: text("resultMessage"),
+  
+  // Timestamp
+  executedAt: timestamp("executedAt").defaultNow().notNull(),
+});
+
+export type CrmWorkflowLog = typeof crmWorkflowLogs.$inferSelect;
+export type InsertCrmWorkflowLog = typeof crmWorkflowLogs.$inferInsert;

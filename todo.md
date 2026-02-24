@@ -884,3 +884,28 @@
 - [x] Melhorar exibição do score de leads na listagem (indicador visual colorido)
 - [x] Escrever testes para as funcionalidades CRM (10 testes - todos passaram)
 - [ ] Testar todas as funcionalidades no browser
+
+## Templates de Email para Campanhas
+- [x] Criar schema de templates de email na base de dados (nome, assunto, corpo HTML, variáveis)
+- [x] Implementar CRUD de templates de email (criar, editar, eliminar, listar)
+- [x] Criar editor de templates com variáveis dinâmicas ({{nome}}, {{empresa}}, {{email}})
+- [x] Pré-visualização de template com dados de exemplo
+- [x] Adicionar página e navegação no menu CRM
+
+## Automação de Workflows CRM
+- [x] Criar schema de regras de automação (trigger, condição, ação)
+- [x] Implementar triggers configuráveis (mudança de fase, novo lead, mudança de status)
+- [x] Implementar ações automáticas (criar tarefa, enviar notificação, mudar status, atualizar score)
+- [x] Criar interface de gestão de workflows (criar, editar, ativar/desativar)
+- [x] Motor de execução de workflows no backend
+- [x] Integrar triggers nas operações CRM existentes (oportunidade moveStage/update, lead create/update)
+- [x] Histórico de execução com logs
+- [x] Adicionar página e navegação no menu CRM
+
+## Deteção de Duplicados de Leads
+- [x] Criar algoritmo de deteção de duplicados (por email, telefone, nome+empresa)
+- [x] Implementar endpoint de verificação de duplicados
+- [x] Criar interface de gestão de duplicados (listar, fundir)
+- [x] Funcionalidade de fusão de leads duplicados (merge)
+- [x] Adicionar página e navegação no menu CRM
+- [x] Escrever testes para as 3 funcionalidades (13 testes - todos passaram)

@@ -155,6 +155,13 @@
       "when": 1771937586893,
       "tag": "0021_rich_meltdown",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1771944471216,
+      "tag": "0022_jazzy_kate_bishop",
+      "breakpoints": true
     }
   ]
 }

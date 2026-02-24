@@ -41,6 +41,9 @@ import MyTasks from "./pages/crm/MyTasks";
 import Campaigns from "./pages/crm/Campaigns";
 import Reports from "./pages/crm/Reports";
 import Settings from "./pages/crm/Settings";
+import EmailTemplates from "./pages/crm/EmailTemplates";
+import Workflows from "./pages/crm/Workflows";
+import Duplicates from "./pages/crm/Duplicates";
 import RecuperarPassword from "./pages/RecuperarPassword";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -108,6 +111,9 @@ function Router() {
       <Route path="/crm/campaigns" component={() => <ProtectedRoute component={Campaigns} />} />
       <Route path="/crm/reports" component={() => <ProtectedRoute component={Reports} />} />
       <Route path="/crm/settings" component={() => <ProtectedRoute component={Settings} />} />
+      <Route path="/crm/email-templates" component={() => <ProtectedRoute component={EmailTemplates} />} />
+      <Route path="/crm/workflows" component={() => <ProtectedRoute component={Workflows} />} />
+      <Route path="/crm/duplicates" component={() => <ProtectedRoute component={Duplicates} />} />
       
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

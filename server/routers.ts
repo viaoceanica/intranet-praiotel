@@ -31,6 +31,9 @@ import * as crmTasksReports from "./crmTasksReports";
 import * as crmTasksPersonal from "./crmTasksPersonal";
 import * as crmCampaignsDb from "./crmCampaignsDb";
 import * as crmLeadScoringDb from "./crmLeadScoringDb";
+import * as crmEmailTemplatesDb from "./crmEmailTemplatesDb";
+import * as crmWorkflowsDb from "./crmWorkflowsDb";
+import * as crmDuplicatesDb from "./crmDuplicatesDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -1743,6 +1746,14 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         const leadId = await crmLeadsDb.createLead(input as any);
+        // Trigger workflow para novo lead
+        try {
+          await crmWorkflowsDb.executeWorkflows("new_lead", {
+            leadId,
+            source: input.source,
+            assignedToId: input.assignedToId,
+          });
+        } catch (e) { /* workflow errors should not block */ }
         return { id: leadId };
       }),
 
@@ -1764,7 +1775,23 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         const { id, ...data } = input;
+        // Detetar mudança de status para trigger
+        let oldLead: any = null;
+        if (data.status) {
+          oldLead = await crmLeadsDb.getLeadById(id);
+        }
         await crmLeadsDb.updateLead(id, data);
+        // Trigger workflow se o status mudou
+        if (data.status && oldLead && oldLead.status !== data.status) {
+          try {
+            await crmWorkflowsDb.executeWorkflows("lead_status_change", {
+              leadId: id,
+              fromStatus: oldLead.status,
+              toStatus: data.status,
+              assignedToId: oldLead.assignedToId,
+            });
+          } catch (e) { /* workflow errors should not block */ }
+        }
         return { success: true };
       }),
 
@@ -1908,13 +1935,31 @@ export const appRouter = router({
           notes: z.string().optional(),
         })
       )
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         const { id, value, expectedCloseDate, ...data } = input;
+        // Obter oportunidade antes da atualização para detetar mudança de fase
+        let oldOpp: any = null;
+        if (data.stage) {
+          oldOpp = await crmOpportunitiesDb.getOpportunityById(id);
+        }
         await crmOpportunitiesDb.updateOpportunity(id, { 
           ...data, 
           value: value?.toString(), 
           expectedCloseDate: expectedCloseDate ? new Date(expectedCloseDate) : undefined 
         });
+        // Trigger workflow se a fase mudou
+        if (data.stage && oldOpp && oldOpp.stage !== data.stage) {
+          try {
+            await crmWorkflowsDb.executeWorkflows("opportunity_stage_change", {
+              opportunityId: id,
+              fromStage: oldOpp.stage,
+              toStage: data.stage,
+              assignedToId: oldOpp.assignedToId,
+              leadId: oldOpp.leadId,
+              clientId: oldOpp.clientId,
+            });
+          } catch (e) { /* workflow errors should not block the update */ }
+        }
         return { success: true };
       }),
 
@@ -1928,7 +1973,22 @@ export const appRouter = router({
     moveStage: isAuthenticated
       .input(z.object({ id: z.number(), newStage: z.string(), notes: z.string().optional() }))
       .mutation(async ({ input }) => {
+        // Obter oportunidade antes para o trigger
+        const oldOpp = await crmOpportunitiesDb.getOpportunityById(input.id);
         await crmOpportunitiesDb.moveOpportunityStage(input.id, input.newStage, input.notes);
+        // Trigger workflow
+        if (oldOpp && oldOpp.stage !== input.newStage) {
+          try {
+            await crmWorkflowsDb.executeWorkflows("opportunity_stage_change", {
+              opportunityId: input.id,
+              fromStage: oldOpp.stage,
+              toStage: input.newStage,
+              assignedToId: oldOpp.assignedToId,
+              leadId: oldOpp.leadId,
+              clientId: oldOpp.clientId,
+            });
+          } catch (e) { /* workflow errors should not block */ }
+        }
         return { success: true };
       }),
 
@@ -2470,6 +2530,191 @@ export const appRouter = router({
 
     getDistribution: isAuthenticated.query(async () => {
       return await crmLeadScoringDb.getScoreDistribution();
+    }),
+  }),
+
+  // ============================================================================
+  // TEMPLATES DE EMAIL
+  // ============================================================================
+  crmEmailTemplates: router({
+    list: isAuthenticated
+      .input(z.object({ category: z.string().optional(), active: z.boolean().optional() }).optional())
+      .query(async ({ input }) => {
+        return await crmEmailTemplatesDb.listTemplates(input || undefined);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmEmailTemplatesDb.getTemplateById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        subject: z.string().min(1),
+        htmlContent: z.string().min(1),
+        variables: z.array(z.string()).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await crmEmailTemplatesDb.createTemplate({
+          ...input,
+          createdById: ctx.user!.id,
+        });
+        return { id };
+      }),
+
+    update: isAuthenticated
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        subject: z.string().optional(),
+        htmlContent: z.string().optional(),
+        variables: z.array(z.string()).optional(),
+        active: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await crmEmailTemplatesDb.updateTemplate(id, data);
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmEmailTemplatesDb.deleteTemplate(input.id);
+        return { success: true };
+      }),
+
+    preview: isAuthenticated
+      .input(z.object({ subject: z.string(), htmlContent: z.string() }))
+      .query(async ({ input }) => {
+        return crmEmailTemplatesDb.previewTemplate(input.subject, input.htmlContent);
+      }),
+
+    getCategories: isAuthenticated.query(async () => {
+      return await crmEmailTemplatesDb.getCategories();
+    }),
+
+    getAvailableVariables: isAuthenticated.query(async () => {
+      return crmEmailTemplatesDb.AVAILABLE_VARIABLES;
+    }),
+  }),
+
+  // ============================================================================
+  // AUTOMAÇÃO DE WORKFLOWS
+  // ============================================================================
+  crmWorkflows: router({
+    list: isAuthenticated
+      .input(z.object({ active: z.boolean().optional(), triggerType: z.string().optional() }).optional())
+      .query(async ({ input }) => {
+        return await crmWorkflowsDb.listRules(input || undefined);
+      }),
+
+    getById: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        return await crmWorkflowsDb.getRuleById(input.id);
+      }),
+
+    create: isAuthenticated
+      .input(z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        triggerType: z.string(),
+        conditions: z.record(z.string(), z.any()),
+        actionType: z.string(),
+        actionParams: z.record(z.string(), z.any()),
+        priority: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const id = await crmWorkflowsDb.createRule({
+          ...input,
+          createdById: ctx.user!.id,
+        });
+        return { id };
+      }),
+
+    update: isAuthenticated
+      .input(z.object({
+        id: z.number(),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        triggerType: z.string().optional(),
+        conditions: z.record(z.string(), z.any()).optional(),
+        actionType: z.string().optional(),
+        actionParams: z.record(z.string(), z.any()).optional(),
+        active: z.boolean().optional(),
+        priority: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await crmWorkflowsDb.updateRule(id, data);
+        return { success: true };
+      }),
+
+    delete: isAuthenticated
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await crmWorkflowsDb.deleteRule(input.id);
+        return { success: true };
+      }),
+
+    getLogs: isAuthenticated
+      .input(z.object({ ruleId: z.number().optional(), limit: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return await crmWorkflowsDb.getExecutionLogs(input || undefined);
+      }),
+
+    getStats: isAuthenticated.query(async () => {
+      return await crmWorkflowsDb.getWorkflowStats();
+    }),
+
+    getTriggerTypes: isAuthenticated.query(async () => {
+      return crmWorkflowsDb.TRIGGER_TYPES;
+    }),
+
+    getActionTypes: isAuthenticated.query(async () => {
+      return crmWorkflowsDb.ACTION_TYPES;
+    }),
+  }),
+
+  // ============================================================================
+  // DETEÇÃO DE DUPLICADOS
+  // ============================================================================
+  crmDuplicates: router({
+    findAll: isAuthenticated.query(async () => {
+      return await crmDuplicatesDb.findAllDuplicates();
+    }),
+
+    check: isAuthenticated
+      .input(z.object({
+        email: z.string(),
+        phone: z.string().optional(),
+        name: z.string().optional(),
+        company: z.string().optional(),
+        excludeId: z.number().optional(),
+      }))
+      .query(async ({ input }) => {
+        return await crmDuplicatesDb.checkForDuplicates(input);
+      }),
+
+    merge: isAuthenticated
+      .input(z.object({
+        primaryId: z.number(),
+        secondaryId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        await crmDuplicatesDb.mergeLeads(input.primaryId, input.secondaryId);
+        return { success: true };
+      }),
+
+    getStats: isAuthenticated.query(async () => {
+      return await crmDuplicatesDb.getDuplicateStats();
     }),
   }),
 });

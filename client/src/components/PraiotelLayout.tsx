@@ -40,7 +40,10 @@ import {
   CheckSquare,
   Mail,
   Sun,
-  Moon
+  Moon,
+  FileText as FileTemplate,
+  Merge,
+  Copy
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { useState, useEffect } from "react";
@@ -133,6 +136,9 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "As Minhas Tarefas", href: "/crm/my-tasks", icon: CheckSquare, roles: ["admin"] },
         { name: "Campanhas", href: "/crm/campaigns", icon: Mail, roles: ["admin"] },
         { name: "Relatórios", href: "/crm/reports", icon: BarChart3, roles: ["admin"] },
+        { name: "Templates Email", href: "/crm/email-templates", icon: FileTemplate, roles: ["admin"] },
+        { name: "Automações", href: "/crm/workflows", icon: Zap, roles: ["admin"] },
+        { name: "Duplicados", href: "/crm/duplicates", icon: Copy, roles: ["admin"] },
         { name: "Configurações", href: "/crm/settings", icon: Settings, roles: ["admin"] },
       ]
     },
