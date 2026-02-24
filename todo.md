@@ -957,3 +957,7 @@
 - [x] Atualizar navegação: CRM > Clientes Comerciais
 - [ ] Integrar clientes comerciais com módulo CRM (leads, oportunidades)
 - [x] Escrever testes para a funcionalidade de importação (8 testes - todos passaram)
+
+## Correção: Clientes Comerciais são Gerais (não específicos do CRM)
+- [x] Mover "Clientes Comerciais" do menu CRM para o menu Clientes
+- [x] Atualizar sidebar para mostrar sub-item no menu Clientes

@@ -70,7 +70,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   useEffect(() => {
     if (location.startsWith('/sla-config') || location.startsWith('/prioritization') || location.startsWith('/technician-stats') || location.startsWith('/response-templates')) {
       setTicketsExpanded(true);
-    } else if (location.startsWith('/equipment')) {
+    } else if (location.startsWith('/equipment') || location.startsWith('/commercial-clients')) {
       setClientsExpanded(true);
     } else if (location.startsWith('/roles')) {
       setUsersExpanded(true);
@@ -114,6 +114,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       icon: Building2, 
       roles: ["admin", "gestor", "tecnico", "visualizador"],
       subItems: [
+        { name: "Clientes Comerciais", href: "/commercial-clients", icon: Building2, roles: ["admin", "gestor"] },
         { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
       ]
     },
@@ -132,7 +133,6 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Relatórios", href: "/crm/reports", icon: BarChart3, roles: ["admin"] },
         { name: "Templates Email", href: "/crm/email-templates", icon: FileTemplate, roles: ["admin"] },
         { name: "Automações", href: "/crm/workflows", icon: Zap, roles: ["admin"] },
-        { name: "Clientes Comerciais", href: "/crm/commercial-clients", icon: Building2, roles: ["admin"] },
         { name: "Duplicados", href: "/crm/duplicates", icon: Copy, roles: ["admin"] },
         { name: "Configurações", href: "/crm/settings", icon: Settings, roles: ["admin"] },
       ]

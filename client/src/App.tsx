@@ -44,7 +44,7 @@ import Settings from "./pages/crm/Settings";
 import EmailTemplates from "./pages/crm/EmailTemplates";
 import Workflows from "./pages/crm/Workflows";
 import Duplicates from "./pages/crm/Duplicates";
-import CommercialClients from "./pages/crm/CommercialClients";
+import CommercialClients from "./pages/CommercialClients";
 import RecuperarPassword from "./pages/RecuperarPassword";
 import GeneralSettings from "./pages/settings/GeneralSettings";
 import EmailSettings from "./pages/settings/EmailSettings";
@@ -84,6 +84,7 @@ function Router() {
       <Route path="/clients/new" component={() => <ProtectedRoute component={ClientForm} />} />
       <Route path="/clients/:id" component={() => <ProtectedRoute component={ClientForm} />} />
       <Route path="/clients/:id/tickets" component={() => <ProtectedRoute component={ClientTickets} />} />
+      <Route path="/commercial-clients" component={() => <ProtectedRoute component={CommercialClients} />} />
       <Route path="/sla-config" component={() => <ProtectedRoute component={SlaConfig} />} />
       <Route path="/equipment" component={() => <ProtectedRoute component={Equipment} />} />
       <Route path="/equipment/new" component={() => <ProtectedRoute component={EquipmentForm} />} />
@@ -117,7 +118,6 @@ function Router() {
       <Route path="/crm/email-templates" component={() => <ProtectedRoute component={EmailTemplates} />} />
       <Route path="/crm/workflows" component={() => <ProtectedRoute component={Workflows} />} />
       <Route path="/crm/duplicates" component={() => <ProtectedRoute component={Duplicates} />} />
-      <Route path="/crm/commercial-clients" component={() => <ProtectedRoute component={CommercialClients} />} />
       
       {/* Rotas Configurações */}
       <Route path="/settings/general" component={() => <ProtectedRoute component={GeneralSettings} />} />
