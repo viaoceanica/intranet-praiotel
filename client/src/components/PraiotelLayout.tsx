@@ -80,6 +80,7 @@ interface NavItem {
 
 interface PraiotelLayoutProps {
   children: React.ReactNode;
+  hideFooter?: boolean;
 }
 
 // Componente de item arrastável do menu
@@ -218,7 +219,7 @@ function SortableMenuItem({
   );
 }
 
-export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
+export default function PraiotelLayout({ children, hideFooter = false }: PraiotelLayoutProps) {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [location, setLocation] = useLocation();
@@ -243,7 +244,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   
   // Expandir automaticamente o menu correto baseado na rota atual
   useEffect(() => {
-    if (location.startsWith('/sla-config') || location.startsWith('/prioritization') || location.startsWith('/technician-stats') || location.startsWith('/response-templates')) {
+    if (location.startsWith('/sla-config') || location.startsWith('/prioritization') || location.startsWith('/technician-stats') || location.startsWith('/response-templates') || location.startsWith('/tickets/manual')) {
       setExpandedMenus(prev => ({ ...prev, Tickets: true }));
     } else if (location.startsWith('/equipment') || location.startsWith('/commercial-clients')) {
       setExpandedMenus(prev => ({ ...prev, Clientes: true }));
@@ -281,6 +282,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
         { name: "Estatísticas", href: "/technician-stats", icon: BarChart3, roles: ["admin", "gestor"] },
         { name: "Templates", href: "/response-templates", icon: FileText, roles: ["admin", "gestor"] },
+        { name: "Manual de Tickets", href: "/tickets/manual", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
       ]
     },
     { 
@@ -567,15 +569,17 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
           </main>
           
           {/* Footer com logotipos */}
-          <footer className="border-t bg-white mt-auto">
-            <div className="container py-6 max-w-7xl mx-auto px-4">
-              <img 
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
-                alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
-                className="w-full max-w-[640px] mx-auto h-auto"
-              />
-            </div>
-          </footer>
+          {!hideFooter && (
+            <footer className="border-t bg-white mt-auto">
+              <div className="container py-6 max-w-7xl mx-auto px-4">
+                <img 
+                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
+                  alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
+                  className="w-full max-w-[640px] mx-auto h-auto"
+                />
+              </div>
+            </footer>
+          )}
         </div>
       </div>
     </div>

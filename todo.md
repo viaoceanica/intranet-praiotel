@@ -995,3 +995,10 @@
 
 ## Bug: Ordem dos menus reseta ao navegar
 - [x] Corrigir: ao navegar para outra página (ex: Configurações), a ordem dos menus volta à posição original
+
+## Manual de Utilizador - Sistema de Tickets
+- [x] Analisar todas as funcionalidades de tickets existentes
+- [x] Escrever conteúdo completo do manual (visão geral, criar ticket, lista, detalhe, estados, prioridades, SLA, templates, estatísticas)
+- [x] Criar página do manual na intranet com índice lateral e navegação por secções
+- [x] Integrar no menu da sidebar e rotas do App.tsx
+- [x] Testar navegação e conteúdo no browser

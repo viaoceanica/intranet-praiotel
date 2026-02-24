@@ -46,6 +46,7 @@ import Workflows from "./pages/crm/Workflows";
 import Duplicates from "./pages/crm/Duplicates";
 import CommercialClients from "./pages/CommercialClients";
 import RecuperarPassword from "./pages/RecuperarPassword";
+import TicketManual from "./pages/TicketManual";
 import GeneralSettings from "./pages/settings/GeneralSettings";
 import EmailSettings from "./pages/settings/EmailSettings";
 import { useAuth } from "./_core/hooks/useAuth";
@@ -78,6 +79,7 @@ function Router() {
       <Route path="/users" component={() => <ProtectedRoute component={Users} />} />
       <Route path="/tickets" component={() => <ProtectedRoute component={Tickets} />} />
       <Route path="/tickets/new" component={() => <ProtectedRoute component={NewTicket} />} />
+      <Route path="/tickets/manual" component={() => <ProtectedRoute component={TicketManual} />} />
       <Route path="/tickets/:id" component={() => <ProtectedRoute component={TicketDetail} />} />
       <Route path="/notifications" component={() => <ProtectedRoute component={Notifications} />} />
       <Route path="/clients" component={() => <ProtectedRoute component={Clients} />} />
