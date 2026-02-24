@@ -983,3 +983,12 @@
 - [x] Permitir criar tickets associados a clientes comerciais
 - [x] Atualizar schema de tickets para suportar referência a cliente comercial
 - [x] Testar pesquisa e criação de tickets com clientes comerciais
+
+## Reordenação de Menus por Drag & Drop
+- [x] Instalar biblioteca de drag & drop (@dnd-kit/core + @dnd-kit/sortable)
+- [x] Implementar drag & drop nos itens do menu lateral (sidebar)
+- [x] Criar tabela/endpoint para guardar ordem dos menus por utilizador
+- [x] Persistir ordem personalizada na base de dados
+- [x] Carregar ordem personalizada ao iniciar sessão
+- [x] Adicionar ícone de arrastar (grip) nos itens do menu
+- [x] Testar reordenação e persistência

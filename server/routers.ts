@@ -169,6 +169,36 @@ export const appRouter = router({
 
   system: systemRouter,
 
+  menuOrder: router({
+    get: isAuthenticated.query(async ({ ctx }) => {
+      const { getDb } = await import("./db");
+      const database = await getDb();
+      if (!database) return null;
+      const { userMenuOrder } = await import("../drizzle/schema");
+      const { eq } = await import("drizzle-orm");
+      const result = await database.select().from(userMenuOrder).where(eq(userMenuOrder.userId, ctx.user.id)).limit(1);
+      if (result.length === 0) return null;
+      return JSON.parse(result[0].menuOrder) as string[];
+    }),
+
+    save: isAuthenticated
+      .input(z.object({ order: z.array(z.string()) }))
+      .mutation(async ({ ctx, input }) => {
+        const { getDb } = await import("./db");
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+        const { userMenuOrder } = await import("../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const existing = await database.select().from(userMenuOrder).where(eq(userMenuOrder.userId, ctx.user.id)).limit(1);
+        if (existing.length > 0) {
+          await database.update(userMenuOrder).set({ menuOrder: JSON.stringify(input.order) }).where(eq(userMenuOrder.userId, ctx.user.id));
+        } else {
+          await database.insert(userMenuOrder).values({ userId: ctx.user.id, menuOrder: JSON.stringify(input.order) });
+        }
+        return { success: true };
+      }),
+  }),
+
   technicianStats: router({
     // Estatísticas de um técnico específico
     byTechnician: isAuthenticated

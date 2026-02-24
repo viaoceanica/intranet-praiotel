@@ -42,14 +42,180 @@ import {
   Sun,
   Moon,
   FileText as FileTemplate,
-  Merge,
-  Copy
+  Copy,
+  GripVertical
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+interface NavItem {
+  name: string;
+  href: string;
+  icon: any;
+  roles: string[];
+  subItems?: {
+    name: string;
+    href: string;
+    icon: any;
+    roles: string[];
+  }[];
+}
 
 interface PraiotelLayoutProps {
   children: React.ReactNode;
+}
+
+// Componente de item arrastável do menu
+function SortableMenuItem({ 
+  item, 
+  isActive, 
+  isExpanded,
+  onToggle,
+  onNavigate,
+  onCloseSidebar,
+  user,
+  location,
+  isDragging: parentIsDragging,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+  onNavigate: (href: string) => void;
+  onCloseSidebar: () => void;
+  user: any;
+  location: string;
+  isDragging: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.name });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : undefined,
+    opacity: isDragging ? 0.8 : 1,
+  };
+
+  const hasSubItems = item.subItems && item.subItems.length > 0;
+  const filteredSubItems = hasSubItems 
+    ? item.subItems!.filter(sub => user && sub.roles.includes(user.role)) 
+    : [];
+  const showSubItems = hasSubItems && filteredSubItems.length > 0;
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      {showSubItems ? (
+        <div>
+          <div className="flex items-center group">
+            <div
+              {...attributes}
+              {...listeners}
+              className="flex items-center justify-center w-6 h-8 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-50 hover:!opacity-100 transition-opacity flex-shrink-0"
+              title="Arrastar para reordenar"
+            >
+              <GripVertical className="h-4 w-4 text-gray-400" />
+            </div>
+            <button
+              onClick={() => {
+                onNavigate(item.href);
+                onToggle();
+              }}
+              className={`
+                flex-1 flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                transition-colors
+                ${isActive 
+                  ? "bg-[#F15A24] text-white" 
+                  : "text-gray-700 hover:bg-gray-100"
+                }
+              `}
+            >
+              <div className="flex items-center gap-3">
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </div>
+              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            </button>
+          </div>
+          {isExpanded && (
+            <div className="ml-12 mt-1 space-y-1">
+              {filteredSubItems.map((subItem) => {
+                const isSubActive = location === subItem.href;
+                return (
+                  <Link key={subItem.name} href={subItem.href}>
+                    <div
+                      className={`
+                        flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                        transition-colors cursor-pointer
+                        ${isSubActive 
+                          ? "bg-[#F15A24] text-white" 
+                          : "text-gray-600 hover:bg-gray-100"
+                        }
+                      `}
+                      onClick={onCloseSidebar}
+                    >
+                      <subItem.icon className="h-4 w-4" />
+                      {subItem.name}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex items-center group">
+          <div
+            {...attributes}
+            {...listeners}
+            className="flex items-center justify-center w-6 h-8 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-50 hover:!opacity-100 transition-opacity flex-shrink-0"
+            title="Arrastar para reordenar"
+          >
+            <GripVertical className="h-4 w-4 text-gray-400" />
+          </div>
+          <Link href={item.href} className="flex-1">
+            <div
+              className={`
+                flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+                transition-colors cursor-pointer
+                ${isActive 
+                  ? "bg-[#F15A24] text-white" 
+                  : "text-gray-700 hover:bg-gray-100"
+                }
+              `}
+              onClick={onCloseSidebar}
+            >
+              <item.icon className="h-5 w-5" />
+              {item.name}
+            </div>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
@@ -59,27 +225,30 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Estados para controlar expansão dos menus (permitindo toggle manual)
-  const [ticketsExpanded, setTicketsExpanded] = useState(false);
-  const [clientsExpanded, setClientsExpanded] = useState(false);
-  const [usersExpanded, setUsersExpanded] = useState(false);
-  const [crmExpanded, setCrmExpanded] = useState(false);
-  const [internalManagementExpanded, setInternalManagementExpanded] = useState(false);
-  const [settingsExpanded, setSettingsExpanded] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
   
-  // Expandir automaticamente o menu correto baseado na rota atual (apenas na montagem e mudança de rota)
+  // Carregar ordem dos menus do utilizador
+  const { data: savedMenuOrder } = trpc.menuOrder.get.useQuery(undefined, {
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5, // Cache por 5 minutos
+  });
+  
+  const saveMenuOrderMutation = trpc.menuOrder.save.useMutation();
+  
+  // Expandir automaticamente o menu correto baseado na rota atual
   useEffect(() => {
     if (location.startsWith('/sla-config') || location.startsWith('/prioritization') || location.startsWith('/technician-stats') || location.startsWith('/response-templates')) {
-      setTicketsExpanded(true);
+      setExpandedMenus(prev => ({ ...prev, Tickets: true }));
     } else if (location.startsWith('/equipment') || location.startsWith('/commercial-clients')) {
-      setClientsExpanded(true);
+      setExpandedMenus(prev => ({ ...prev, Clientes: true }));
     } else if (location.startsWith('/roles')) {
-      setUsersExpanded(true);
+      setExpandedMenus(prev => ({ ...prev, Utilizadores: true }));
     } else if (location.startsWith('/crm/')) {
-      setCrmExpanded(true);
+      setExpandedMenus(prev => ({ ...prev, CRM: true }));
     } else if (location.startsWith('/internal-dashboard') || location.startsWith('/announcements') || location.startsWith('/bulletin-board') || location.startsWith('/documents') || location.startsWith('/knowledge-base') || location.startsWith('/favorites') || location.startsWith('/internal-management-analytics') || location.startsWith('/manage-document-categories') || location.startsWith('/manage-knowledge-categories') || location.startsWith('/manage-tags') || location.startsWith('/article/')) {
-      setInternalManagementExpanded(true);
+      setExpandedMenus(prev => ({ ...prev, "Gestão Interna": true }));
     } else if (location.startsWith('/settings')) {
-      setSettingsExpanded(true);
+      setExpandedMenus(prev => ({ ...prev, "Configurações": true }));
     }
   }, [location]);
 
@@ -94,7 +263,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
     logoutMutation.mutate();
   };
 
-  const navigation = [
+  const navigation: NavItem[] = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "gestor", "tecnico", "visualizador"] },
     { 
       name: "Tickets", 
@@ -102,9 +271,9 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       icon: Ticket, 
       roles: ["admin", "gestor", "tecnico", "visualizador"],
       subItems: [
-        { name: "Configura\u00e7\u00e3o SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
-        { name: "Prioriza\u00e7\u00e3o Autom\u00e1tica", href: "/prioritization", icon: Zap, roles: ["admin"] },
-        { name: "Estat\u00edsticas", href: "/technician-stats", icon: BarChart3, roles: ["admin", "gestor"] },
+        { name: "Configuração SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
+        { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
+        { name: "Estatísticas", href: "/technician-stats", icon: BarChart3, roles: ["admin", "gestor"] },
         { name: "Templates", href: "/response-templates", icon: FileText, roles: ["admin", "gestor"] },
       ]
     },
@@ -172,9 +341,66 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
     },
   ];
 
-  const filteredNavigation = navigation.filter(item => 
-    user && item.roles.includes(user.role)
+  // Filtrar navegação por role
+  const filteredNavigation = useMemo(() => {
+    return navigation.filter(item => user && item.roles.includes(user.role));
+  }, [user]);
+
+  // Aplicar ordem personalizada
+  const orderedNavigation = useMemo(() => {
+    if (!savedMenuOrder || savedMenuOrder.length === 0) return filteredNavigation;
+    
+    const ordered: NavItem[] = [];
+    // Primeiro, adicionar itens na ordem guardada
+    for (const name of savedMenuOrder) {
+      const item = filteredNavigation.find(n => n.name === name);
+      if (item) ordered.push(item);
+    }
+    // Depois, adicionar itens novos que não estejam na ordem guardada
+    for (const item of filteredNavigation) {
+      if (!ordered.find(o => o.name === item.name)) {
+        ordered.push(item);
+      }
+    }
+    return ordered;
+  }, [filteredNavigation, savedMenuOrder]);
+
+  // Estado local da ordem (para drag & drop imediato)
+  const [localOrder, setLocalOrder] = useState<NavItem[]>([]);
+  
+  useEffect(() => {
+    setLocalOrder(orderedNavigation);
+  }, [orderedNavigation]);
+
+  // Sensores para drag & drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Precisa arrastar 8px antes de ativar (evita conflito com cliques)
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setLocalOrder((items) => {
+        const oldIndex = items.findIndex(i => i.name === active.id);
+        const newIndex = items.findIndex(i => i.name === over.id);
+        const newOrder = arrayMove(items, oldIndex, newIndex);
+        
+        // Guardar a nova ordem no backend
+        const orderNames = newOrder.map(i => i.name);
+        saveMenuOrderMutation.mutate({ order: orderNames });
+        
+        return newOrder;
+      });
+    }
+  }, [saveMenuOrderMutation]);
 
   const getInitials = (name: string) => {
     return name
@@ -191,6 +417,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
     tecnico: "Técnico",
     visualizador: "Visualizador",
   };
+
+  const menuItems = localOrder.length > 0 ? localOrder : filteredNavigation;
 
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
@@ -277,97 +505,36 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
           `}
         >
           <nav className="p-4 space-y-1">
-            {filteredNavigation.map((item) => {
-              const isActive = location === item.href;
-              const hasSubItems = item.subItems && item.subItems.length > 0;
-              const filteredSubItems = hasSubItems ? item.subItems!.filter(sub => user && sub.roles.includes(user.role)) : [];
-              const showSubItems = hasSubItems && filteredSubItems.length > 0;
-              
-              return (
-                <div key={item.name}>
-                  {showSubItems ? (
-                    <div>
-                      <button
-                        onClick={() => {
-                          // Navegar para a página principal
-                          setLocation(item.href);
-                          // Toggle do estado de expansão
-                          if (item.name === "Tickets") {
-                            setTicketsExpanded(!ticketsExpanded);
-                          } else if (item.name === "Clientes") {
-                            setClientsExpanded(!clientsExpanded);
-                          } else if (item.name === "Utilizadores") {
-                            setUsersExpanded(!usersExpanded);
-                          } else if (item.name === "CRM") {
-                            setCrmExpanded(!crmExpanded);
-                          } else if (item.name === "Gestão Interna") {
-                            setInternalManagementExpanded(!internalManagementExpanded);
-                          } else if (item.name === "Configurações") {
-                            setSettingsExpanded(!settingsExpanded);
-                          }
-                        }}
-                        className={`
-                          w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                          transition-colors
-                          ${isActive 
-                            ? "bg-[#F15A24] text-white" 
-                            : "text-gray-700 hover:bg-gray-100"
-                          }
-                        `}
-                      >
-                        <div className="flex items-center gap-3">
-                          <item.icon className="h-5 w-5" />
-                          {item.name}
-                        </div>
-                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : item.name === "Configurações" ? settingsExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-                      </button>
-                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : item.name === "Configurações" ? settingsExpanded : false) && (
-                        <div className="ml-8 mt-1 space-y-1">
-                          {filteredSubItems.map((subItem) => {
-                            const isSubActive = location === subItem.href;
-                            return (
-                              <Link key={subItem.name} href={subItem.href}>
-                                <div
-                                  className={`
-                                    flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                                    transition-colors cursor-pointer
-                                    ${isSubActive 
-                                      ? "bg-[#F15A24] text-white" 
-                                      : "text-gray-600 hover:bg-gray-100"
-                                    }
-                                  `}
-                                  onClick={() => setSidebarOpen(false)}
-                                >
-                                  <subItem.icon className="h-4 w-4" />
-                                  {subItem.name}
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Link href={item.href}>
-                      <div
-                        className={`
-                          flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
-                          transition-colors cursor-pointer
-                          ${isActive 
-                            ? "bg-[#F15A24] text-white" 
-                            : "text-gray-700 hover:bg-gray-100"
-                          }
-                        `}
-                        onClick={() => setSidebarOpen(false)}
-                      >
-                        <item.icon className="h-5 w-5" />
-                        {item.name}
-                      </div>
-                    </Link>
-                  )}
-                </div>
-              );
-            })}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={menuItems.map(i => i.name)}
+                strategy={verticalListSortingStrategy}
+              >
+                {menuItems.map((item) => {
+                  const isActive = location === item.href;
+                  const isExpanded = expandedMenus[item.name] || false;
+                  
+                  return (
+                    <SortableMenuItem
+                      key={item.name}
+                      item={item}
+                      isActive={isActive}
+                      isExpanded={isExpanded}
+                      onToggle={() => setExpandedMenus(prev => ({ ...prev, [item.name]: !prev[item.name] }))}
+                      onNavigate={(href) => setLocation(href)}
+                      onCloseSidebar={() => setSidebarOpen(false)}
+                      user={user}
+                      location={location}
+                      isDragging={false}
+                    />
+                  );
+                })}
+              </SortableContext>
+            </DndContext>
           </nav>
         </aside>
 

@@ -1,6 +1,16 @@
 import { date, decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
+ * Preferências de ordem dos menus por utilizador
+ */
+export const userMenuOrder = mysqlTable("user_menu_order", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  menuOrder: text("menuOrder").notNull(), // JSON array of menu item names in order
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
  * Utilizadores do sistema com autenticação autónoma
  */
 export const users = mysqlTable("users", {
