@@ -114,7 +114,6 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       icon: Building2, 
       roles: ["admin", "gestor", "tecnico", "visualizador"],
       subItems: [
-        { name: "Clientes Comerciais", href: "/commercial-clients", icon: Building2, roles: ["admin", "gestor"] },
         { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
       ]
     },

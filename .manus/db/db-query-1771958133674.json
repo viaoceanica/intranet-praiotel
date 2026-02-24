@@ -1,0 +1,80 @@
+{
+  "query": "SELECT id, company, nif, locality, salesperson, zone, active, blocked FROM commercial_clients LIMIT 10;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, company, nif, locality, salesperson, zone, active, blocked FROM commercial_clients LIMIT 10;",
+  "rows": [
+    {
+      "id": "1",
+      "company": "Sem Nome",
+      "nif": "NULL",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva",
+      "zone": "SÃ£o Miguel",
+      "active": "0",
+      "blocked": "0"
+    },
+    {
+      "id": "2",
+      "company": "Sem Nome",
+      "nif": "NULL",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva",
+      "zone": "SÃ£o Miguel",
+      "active": "0",
+      "blocked": "0"
+    },
+    {
+      "id": "3",
+      "company": "Sem Nome",
+      "nif": "NULL",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva",
+      "zone": "SÃ£o Miguel",
+      "active": "0",
+      "blocked": "0"
+    },
+    {
+      "id": "4",
+      "company": "Sem Nome",
+      "nif": "NULL",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva",
+      "zone": "SÃ£o Miguel",
+      "active": "0",
+      "blocked": "0"
+    },
+    {
+      "id": "5",
+      "company": "Sem Nome",
+      "nif": "NULL",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva",
+      "zone": "SÃ£o Miguel",
+      "active": "0",
+      "blocked": "0"
+    },
+    {
+      "id": "6",
+      "company": "Sem Nome",
+      "nif": "NULL",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva",
+      "zone": "SÃ£o Miguel",
+      "active": "0",
+      "blocked": "0"
+    },
+    {
+      "id": "7",
+      "company": "Sem Nome",
+      "nif": "NULL",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva",
+      "zone": "SÃ£o Miguel",
+      "active": "0",
+      "blocked": "0"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tcompany\tnif\tlocality\tsalesperson\tzone\tactive\tblocked\n1\tSem Nome\tNULL\tPonta Delgada\tJoÃ£o Silva\tSÃ£o Miguel\t0\t0\n2\tSem Nome\tNULL\tPonta Delgada\tJoÃ£o Silva\tSÃ£o Miguel\t0\t0\n3\tSem Nome\tNULL\tPonta Delgada\tJoÃ£o Silva\tSÃ£o Miguel\t0\t0\n4\tSem Nome\tNULL\tPonta Delgada\tJoÃ£o Silva\tSÃ£o Miguel\t0\t0\n5\tSem Nome\tNULL\tPonta Delgada\tJoÃ£o Silva\tSÃ£o Miguel\t0\t0\n6\tSem Nome\tNULL\tPonta Delgada\tJoÃ£o Silva\tSÃ£o Miguel\t0\t0\n7\tSem Nome\tNULL\tPonta Delgada\tJoÃ£o Silva\tSÃ£o Miguel\t0\t0\n",
+  "stderr": "",
+  "execution_time_ms": 140
+}

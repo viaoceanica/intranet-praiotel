@@ -961,3 +961,10 @@
 ## Correção: Clientes Comerciais são Gerais (não específicos do CRM)
 - [x] Mover "Clientes Comerciais" do menu CRM para o menu Clientes
 - [x] Atualizar sidebar para mostrar sub-item no menu Clientes
+
+## Integrar Clientes Comerciais na Página de Clientes (Tabs)
+- [x] Adicionar sistema de tabs/separadores na página /clients
+- [x] Tab "Assistência Técnica" com a listagem atual de clientes
+- [x] Tab "Gestão Comercial" com a listagem de clientes comerciais (importados do Excel)
+- [x] Remover sub-menu "Clientes Comerciais" do menu Clientes (fica tudo na mesma página)
+- [x] Manter funcionalidade de importação Excel no tab de Gestão Comercial

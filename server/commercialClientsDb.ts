@@ -1,11 +1,15 @@
 import { eq, like, or, sql, desc, asc, and } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/mysql2";
 import { commercialClients, type InsertCommercialClient } from "../drizzle/schema";
 
+let _db: ReturnType<typeof drizzle> | null = null;
+
 function getDb() {
-  const { drizzle } = require("drizzle-orm/mysql2");
-  const mysql = require("mysql2/promise");
-  const pool = mysql.createPool(process.env.DATABASE_URL!);
-  return drizzle(pool);
+  if (!_db && process.env.DATABASE_URL) {
+    _db = drizzle(process.env.DATABASE_URL);
+  }
+  if (!_db) throw new Error("Database not available");
+  return _db;
 }
 
 export async function getAllCommercialClients(opts?: {

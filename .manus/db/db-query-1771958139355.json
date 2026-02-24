@@ -1,0 +1,31 @@
+{
+  "query": "SELECT id, HEX(company), company, locality, salesperson FROM commercial_clients LIMIT 3;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, HEX(company), company, locality, salesperson FROM commercial_clients LIMIT 3;",
+  "rows": [
+    {
+      "id": "1",
+      "HEX(company)": "53656D204E6F6D65",
+      "company": "Sem Nome",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva"
+    },
+    {
+      "id": "2",
+      "HEX(company)": "53656D204E6F6D65",
+      "company": "Sem Nome",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva"
+    },
+    {
+      "id": "3",
+      "HEX(company)": "53656D204E6F6D65",
+      "company": "Sem Nome",
+      "locality": "Ponta Delgada",
+      "salesperson": "JoÃ£o Silva"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tHEX(company)\tcompany\tlocality\tsalesperson\n1\t53656D204E6F6D65\tSem Nome\tPonta Delgada\tJoÃ£o Silva\n2\t53656D204E6F6D65\tSem Nome\tPonta Delgada\tJoÃ£o Silva\n3\t53656D204E6F6D65\tSem Nome\tPonta Delgada\tJoÃ£o Silva\n",
+  "stderr": "",
+  "execution_time_ms": 60
+}
