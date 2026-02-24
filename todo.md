@@ -873,3 +873,14 @@
 - [x] Criar formulário/dialog de edição de role (nome protegido, descrição, permissões)
 - [x] Implementar backend para guardar alterações de roles (já existia)
 - [x] Testar funcionalidade no browser
+
+## Melhorias CRM Comercial (Baseado no Relatório Sailingside)
+- [x] Corrigir erros TypeScript existentes no MyTasks.tsx e NewTicket.tsx
+- [x] Criar vista de Calendário mensal interativo para tarefas CRM (já existia no TaskCalendar.tsx)
+- [x] Melhorar Dashboard CRM com 8 gráficos + 4 KPIs reais (Receita, Conversão, Leads Ativos, Campanhas)
+- [x] Implementar Lead Scoring automático com regras configuráveis
+- [x] Melhorar página de Configurações CRM (Lead Scoring funcional, tabs SMTP, Geral)
+- [x] Melhorar Relatórios CRM com secções de Vendas, Leads e Produtividade
+- [x] Melhorar exibição do score de leads na listagem (indicador visual colorido)
+- [x] Escrever testes para as funcionalidades CRM (10 testes - todos passaram)
+- [ ] Testar todas as funcionalidades no browser

@@ -836,9 +836,8 @@ export default function NewTicket() {
             e.preventDefault();
             createClientMutation.mutate({
               designation: newClientData.name,
-              nif: "",
+              nif: "000000000",
               primaryEmail: newClientData.email,
-              phone: newClientData.phone,
               address: newClientData.address,
             });
           }} className="space-y-4">

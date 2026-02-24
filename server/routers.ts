@@ -30,6 +30,7 @@ import * as crmTasksDb from "./crmTasksDb";
 import * as crmTasksReports from "./crmTasksReports";
 import * as crmTasksPersonal from "./crmTasksPersonal";
 import * as crmCampaignsDb from "./crmCampaignsDb";
+import * as crmLeadScoringDb from "./crmLeadScoringDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -811,8 +812,8 @@ export const appRouter = router({
         responsiblePerson: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        await clientsDb.createClient(input);
-        return { success: true };
+        const result = await clientsDb.createClient(input);
+        return { success: true, id: Number(result[0].insertId), designation: input.designation, nif: input.nif };
       }),
 
     update: isAuthenticated
@@ -2424,6 +2425,52 @@ export const appRouter = router({
         await crmCampaignsDb.markCampaignAsSent(input.id);
         return { success: true };
       }),
+  }),
+
+  // Lead Scoring Router
+  crmLeadScoring: router({
+    getRules: isAuthenticated.query(async () => {
+      return crmLeadScoringDb.getScoringRules();
+    }),
+
+    updateRules: isAuthenticated
+      .input(
+        z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            description: z.string(),
+            field: z.string(),
+            condition: z.enum(["equals", "not_empty", "greater_than", "contains", "activity_count", "has_opportunity"]),
+            value: z.string(),
+            points: z.number(),
+            active: z.boolean(),
+          })
+        )
+      )
+      .mutation(async ({ input }) => {
+        crmLeadScoringDb.updateScoringRules(input);
+        return { success: true };
+      }),
+
+    resetRules: isAuthenticated.mutation(async () => {
+      crmLeadScoringDb.resetScoringRules();
+      return { success: true };
+    }),
+
+    calculateScore: isAuthenticated
+      .input(z.object({ leadId: z.number() }))
+      .query(async ({ input }) => {
+        return await crmLeadScoringDb.calculateLeadScore(input.leadId);
+      }),
+
+    recalculateAll: isAuthenticated.mutation(async () => {
+      return await crmLeadScoringDb.recalculateAllLeadScores();
+    }),
+
+    getDistribution: isAuthenticated.query(async () => {
+      return await crmLeadScoringDb.getScoreDistribution();
+    }),
   }),
 });
 

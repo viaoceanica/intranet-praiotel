@@ -482,12 +482,16 @@ export default function Leads() {
                         <Badge className={statusColors[lead.status as keyof typeof statusColors]}>
                           {statusLabels[lead.status as keyof typeof statusLabels]}
                         </Badge>
-                        {lead.score > 0 && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <TrendingUp className="h-4 w-4" />
-                            {lead.score}
-                          </div>
-                        )}
+                        <div className={`flex items-center gap-1.5 text-sm font-medium px-2 py-0.5 rounded-full ${
+                          lead.score >= 80 ? "bg-red-100 text-red-700" :
+                          lead.score >= 60 ? "bg-orange-100 text-orange-700" :
+                          lead.score >= 40 ? "bg-yellow-100 text-yellow-700" :
+                          lead.score >= 20 ? "bg-blue-100 text-blue-700" :
+                          "bg-gray-100 text-gray-600"
+                        }`}>
+                          <TrendingUp className="h-3.5 w-3.5" />
+                          {lead.score}pts
+                        </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
                         {lead.email && (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import PraiotelLayout from "@/components/PraiotelLayout";
@@ -167,10 +167,29 @@ export default function MyTasks() {
 
   // Queries
   const { data: stats } = trpc.crmTasksPersonal.getStats.useQuery();
-  const { data: allTasks } = trpc.crmTasks.list.useQuery({});
+  const { data: rawTasks } = trpc.crmTasks.list.useQuery({});
   const { data: productivityTimeline } = trpc.crmTasksPersonal.getProductivityTimeline.useQuery();
   const { data: tasksByPriority } = trpc.crmTasksPersonal.getTasksByPriority.useQuery();
   const { data: tasksByType } = trpc.crmTasksPersonal.getTasksByType.useQuery();
+
+  // Map raw tasks (which have {task, lead, opportunity, client, assignedTo} structure) to flat Task objects
+  const allTasks = useMemo(() => {
+    if (!rawTasks) return undefined;
+    return rawTasks.map((item: any) => {
+      const t = item.task || item;
+      return {
+        id: t.id,
+        title: t.title,
+        description: t.description,
+        type: t.type,
+        priority: t.priority,
+        status: t.status,
+        dueDate: t.dueDate,
+        assignedToId: t.assignedToId,
+        reminderMinutes: t.reminderMinutes,
+      } as Task;
+    });
+  }, [rawTasks]);
 
   // Mutations
   const utils = trpc.useUtils();
@@ -240,11 +259,11 @@ export default function MyTasks() {
       id: taskId,
       title: task.title,
       description: task.description || "",
-      type: task.type,
-      priority: task.priority,
+      type: task.type as any,
+      priority: task.priority as any,
       status: newStatus,
       assignedToId: task.assignedToId,
-      dueDate: new Date(task.dueDate),
+      dueDate: new Date(task.dueDate).toISOString(),
       reminderMinutes: task.reminderMinutes || 30,
     });
 
@@ -265,7 +284,7 @@ export default function MyTasks() {
 
   const timelineData = productivityTimeline?.map((item) => ({
     date: new Date(item.date).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' }),
-    concluídas: item.completed,
+    concluídas: (item as any).completed || item.count,
   })) || [];
 
   const activeTask = activeId ? allTasks?.find((t: Task) => t.id === activeId) : null;
@@ -409,9 +428,9 @@ export default function MyTasks() {
                   <div className="flex items-start gap-2">
                     <GripVertical className="h-4 w-4 mt-1 text-gray-400" />
                     <div className="flex-1">
-                      <h4 className="font-medium text-sm">{(activeTask as any).task?.title || activeTask.title}</h4>
-                      {((activeTask as any).task?.description || activeTask.description) && (
-                        <p className="text-xs text-gray-600 mt-1">{(activeTask as any).task?.description || activeTask.description}</p>
+                      <h4 className="font-medium text-sm">{activeTask.title}</h4>
+                      {activeTask.description && (
+                        <p className="text-xs text-gray-600 mt-1">{activeTask.description}</p>
                       )}
                     </div>
                   </div>
@@ -523,7 +542,7 @@ export default function MyTasks() {
                   <Label>Estado</Label>
                   <Select
                     value={editingTask.status}
-                    onValueChange={(value) => setEditingTask({ ...editingTask, status: value })}
+                    onValueChange={(value) => setEditingTask({ ...editingTask, status: value as "pendente" | "em_progresso" | "concluida" })}
                   >
                     <SelectTrigger>
                       <SelectValue />
