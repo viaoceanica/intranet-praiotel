@@ -1,0 +1,1 @@
+ALTER TABLE `crm_campaigns` ADD `templateId` int;

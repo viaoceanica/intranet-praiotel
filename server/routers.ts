@@ -2405,6 +2405,7 @@ export const appRouter = router({
           type: z.enum(["email", "newsletter", "evento", "webinar", "outro"]),
           subject: z.string().optional(),
           emailContent: z.string().optional(),
+          templateId: z.number().optional(),
           scheduledAt: z.string().optional(),
         })
       )
@@ -2427,6 +2428,7 @@ export const appRouter = router({
           status: z.enum(["rascunho", "agendada", "em_envio", "enviada", "cancelada"]).optional(),
           subject: z.string().optional(),
           emailContent: z.string().optional(),
+          templateId: z.number().nullable().optional(),
           scheduledAt: z.string().optional(),
         })
       )
@@ -2680,6 +2682,26 @@ export const appRouter = router({
 
     getActionTypes: isAuthenticated.query(async () => {
       return crmWorkflowsDb.ACTION_TYPES;
+    }),
+
+    getExecutionTimeline: isAuthenticated
+      .input(z.object({ days: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return await crmWorkflowsDb.getExecutionTimeline(input?.days || 30);
+      }),
+
+    getTopRules: isAuthenticated
+      .input(z.object({ limit: z.number().optional() }).optional())
+      .query(async ({ input }) => {
+        return await crmWorkflowsDb.getTopRules(input?.limit || 10);
+      }),
+
+    getSuccessRateByAction: isAuthenticated.query(async () => {
+      return await crmWorkflowsDb.getSuccessRateByAction();
+    }),
+
+    getSuccessRateByTrigger: isAuthenticated.query(async () => {
+      return await crmWorkflowsDb.getSuccessRateByTrigger();
     }),
   }),
 

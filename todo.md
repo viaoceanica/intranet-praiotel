@@ -909,3 +909,25 @@
 - [x] Funcionalidade de fusão de leads duplicados (merge)
 - [x] Adicionar página e navegação no menu CRM
 - [x] Escrever testes para as 3 funcionalidades (13 testes - todos passaram)
+
+## Integração de Templates de Email nas Campanhas
+- [x] Adicionar seletor de template no formulário de criação/edição de campanha
+- [x] Preencher automaticamente assunto e conteúdo ao selecionar template
+- [x] Pré-visualização do email com variáveis substituídas por dados de exemplo
+- [x] Guardar referência ao template usado na campanha (templateId)
+- [x] Atualizar backend (schema + router + db) para suportar templateId
+
+## Aviso de Duplicados ao Criar Lead
+- [x] Verificar duplicados em tempo real ao digitar email (debounced 500ms)
+- [x] Mostrar aviso visual com detalhes do lead duplicado (nome, email, empresa, telefone)
+- [x] Indicar nível de confiança do match (alta, média, baixa)
+- [x] Permitir continuar a criar ou verificar o lead existente
+
+## Dashboard de Performance de Workflows
+- [x] Criar queries para métricas (timeline, top rules, success rate by action/trigger)
+- [x] Gráfico de execuções por dia (últimos 30 dias) com área empilhada
+- [x] Taxa de sucesso por tipo de ação (gráfico de barras)
+- [x] Distribuição de execuções por tipo de trigger (gráfico circular)
+- [x] Top 10 regras mais ativas com barra de progresso
+- [x] KPIs: execuções totais, sucesso, falhas, taxa de sucesso
+- [x] Integrado como nova tab "Performance" na página de Workflows

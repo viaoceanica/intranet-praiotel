@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Users, Plus, Search, Filter, Mail, Phone, Building, TrendingUp, Edit, Trash2, ArrowRight, ClipboardList, Calendar } from "lucide-react";
+import { Users, Plus, Search, Filter, Mail, Phone, Building, TrendingUp, Edit, Trash2, ArrowRight, ClipboardList, Calendar, AlertTriangle, ExternalLink } from "lucide-react";
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -73,6 +73,49 @@ export default function Leads() {
     score: 0,
     notes: "",
   });
+
+  // Duplicate detection state
+  const [duplicateWarnings, setDuplicateWarnings] = useState<Array<{ lead: any; matchType: string; confidence: string }>>([]);
+  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Utils (must be before useCallback)
+  const utils = trpc.useUtils();
+
+  const checkDuplicatesDebounced = useCallback((email: string, phone: string, name: string, company: string) => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    if (!email || email.length < 3) {
+      setDuplicateWarnings([]);
+      return;
+    }
+    debounceTimerRef.current = setTimeout(async () => {
+      setIsCheckingDuplicates(true);
+      try {
+        const result = await utils.crmDuplicates.check.fetch({
+          email,
+          phone: phone || undefined,
+          name: name || undefined,
+          company: company || undefined,
+          excludeId: editingLead?.id,
+        });
+        setDuplicateWarnings(result || []);
+      } catch {
+        setDuplicateWarnings([]);
+      } finally {
+        setIsCheckingDuplicates(false);
+      }
+    }, 500);
+  }, [editingLead]);
+
+  // Watch form changes for duplicate detection
+  useEffect(() => {
+    if (isCreateDialogOpen && !editingLead) {
+      checkDuplicatesDebounced(formData.email, formData.phone, formData.name, formData.company);
+    }
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [formData.email, formData.phone, isCreateDialogOpen, editingLead]);
 
   // Queries
   const { data: leads = [], isLoading, refetch } = trpc.crmLeads.list.useQuery({
@@ -143,6 +186,7 @@ export default function Leads() {
       score: 0,
       notes: "",
     });
+    setDuplicateWarnings([]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -252,6 +296,52 @@ export default function Leads() {
                   />
                 </div>
               </div>
+
+              {/* Duplicate Warning */}
+              {!editingLead && duplicateWarnings.length > 0 && (
+                <div className="border border-amber-300 bg-amber-50 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-amber-800">
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    <span className="text-sm font-semibold">
+                      {duplicateWarnings.length === 1 ? "Possível duplicado encontrado" : `${duplicateWarnings.length} possíveis duplicados encontrados`}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {duplicateWarnings.slice(0, 3).map((dup, i) => (
+                      <div key={i} className="flex items-center justify-between bg-white rounded-md px-3 py-2 border border-amber-200">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900 truncate">{dup.lead.name}</span>
+                            <Badge variant="outline" className={`text-xs ${
+                              dup.confidence === "alta" ? "border-red-300 text-red-700 bg-red-50" :
+                              dup.confidence === "media" ? "border-amber-300 text-amber-700 bg-amber-50" :
+                              "border-gray-300 text-gray-600"
+                            }`}>
+                              {dup.confidence === "alta" ? "Alta" : dup.confidence === "media" ? "Média" : "Baixa"}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-gray-500 mt-0.5">
+                            {dup.lead.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{dup.lead.email}</span>}
+                            {dup.lead.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{dup.lead.phone}</span>}
+                            {dup.lead.company && <span className="flex items-center gap-1"><Building className="h-3 w-3" />{dup.lead.company}</span>}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-amber-700">
+                          <span className="capitalize">{dup.matchType.replace("_", " ")}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-amber-700">
+                    Pode continuar a criar o lead ou verificar os duplicados existentes.
+                  </p>
+                </div>
+              )}
+              {!editingLead && isCheckingDuplicates && (
+                <p className="text-xs text-gray-400 flex items-center gap-1">
+                  <span className="animate-pulse">●</span> A verificar duplicados...
+                </p>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">

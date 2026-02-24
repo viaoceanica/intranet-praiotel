@@ -389,3 +389,88 @@ export async function getWorkflowStats() {
     ...logStats[0],
   };
 }
+
+/**
+ * Obter estatísticas de execuções por dia (últimos 30 dias)
+ */
+export async function getExecutionTimeline(days: number = 30) {
+  const db = await getDb();
+  if (!db) throw new Error("Database connection failed");
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  const results = await db
+    .select({
+      date: sql<string>`DATE(executedAt)`,
+      total: sql<number>`COUNT(*)`,
+      success: sql<number>`SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END)`,
+      failed: sql<number>`SUM(CASE WHEN success = 0 THEN 1 ELSE 0 END)`,
+    })
+    .from(crmWorkflowLogs)
+    .where(sql`executedAt >= ${startDate}`)
+    .groupBy(sql`DATE(executedAt)`)
+    .orderBy(sql`DATE(executedAt)`);
+
+  return results;
+}
+
+/**
+ * Obter regras mais ativas (top N por execuções)
+ */
+export async function getTopRules(limit: number = 10) {
+  const db = await getDb();
+  if (!db) throw new Error("Database connection failed");
+
+  return db
+    .select({
+      id: crmWorkflowRules.id,
+      name: crmWorkflowRules.name,
+      triggerType: crmWorkflowRules.triggerType,
+      actionType: crmWorkflowRules.actionType,
+      executionCount: crmWorkflowRules.executionCount,
+      active: crmWorkflowRules.active,
+      lastExecutedAt: crmWorkflowRules.lastExecutedAt,
+    })
+    .from(crmWorkflowRules)
+    .orderBy(desc(crmWorkflowRules.executionCount))
+    .limit(limit);
+}
+
+/**
+ * Obter taxa de sucesso por tipo de ação
+ */
+export async function getSuccessRateByAction() {
+  const db = await getDb();
+  if (!db) throw new Error("Database connection failed");
+
+  return db
+    .select({
+      actionType: crmWorkflowRules.actionType,
+      total: sql<number>`COUNT(${crmWorkflowLogs.id})`,
+      success: sql<number>`SUM(CASE WHEN ${crmWorkflowLogs.success} = 1 THEN 1 ELSE 0 END)`,
+      failed: sql<number>`SUM(CASE WHEN ${crmWorkflowLogs.success} = 0 THEN 1 ELSE 0 END)`,
+    })
+    .from(crmWorkflowLogs)
+    .innerJoin(crmWorkflowRules, eq(crmWorkflowLogs.ruleId, crmWorkflowRules.id))
+    .groupBy(crmWorkflowRules.actionType);
+}
+
+/**
+ * Obter taxa de sucesso por tipo de trigger
+ */
+export async function getSuccessRateByTrigger() {
+  const db = await getDb();
+  if (!db) throw new Error("Database connection failed");
+
+  return db
+    .select({
+      triggerType: crmWorkflowRules.triggerType,
+      total: sql<number>`COUNT(${crmWorkflowLogs.id})`,
+      success: sql<number>`SUM(CASE WHEN ${crmWorkflowLogs.success} = 1 THEN 1 ELSE 0 END)`,
+      failed: sql<number>`SUM(CASE WHEN ${crmWorkflowLogs.success} = 0 THEN 1 ELSE 0 END)`,
+    })
+    .from(crmWorkflowLogs)
+    .innerJoin(crmWorkflowRules, eq(crmWorkflowLogs.ruleId, crmWorkflowRules.id))
+    .groupBy(crmWorkflowRules.triggerType);
+}

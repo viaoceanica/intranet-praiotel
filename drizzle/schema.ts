@@ -654,6 +654,7 @@ export const crmCampaigns = mysqlTable("crm_campaigns", {
   // Conteúdo (para campanhas de email)
   subject: varchar("subject", { length: 255 }),
   emailContent: text("emailContent"), // HTML do email
+  templateId: int("templateId"), // Referência ao template de email
   
   // Agendamento
   scheduledAt: timestamp("scheduledAt"),

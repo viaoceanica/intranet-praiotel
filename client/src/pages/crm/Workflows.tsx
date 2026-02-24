@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Zap, Plus, Edit2, Trash2, Play, Pause, History, Settings, ArrowRight, CheckCircle2, XCircle, AlertTriangle } from "lucide-react";
+import { Zap, Plus, Edit2, Trash2, Play, Pause, History, Settings, ArrowRight, CheckCircle2, XCircle, AlertTriangle, BarChart3, TrendingUp, Activity } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area, Legend } from "recharts";
 import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -130,6 +131,10 @@ export default function Workflows() {
   const { data: actionTypes } = trpc.crmWorkflows.getActionTypes.useQuery();
   const { data: logs } = trpc.crmWorkflows.getLogs.useQuery(undefined, { enabled: activeTab === "logs" });
   const { data: stats } = trpc.crmWorkflows.getStats.useQuery();
+  const { data: timeline } = trpc.crmWorkflows.getExecutionTimeline.useQuery();
+  const { data: topRules } = trpc.crmWorkflows.getTopRules.useQuery();
+  const { data: successByAction } = trpc.crmWorkflows.getSuccessRateByAction.useQuery();
+  const { data: successByTrigger } = trpc.crmWorkflows.getSuccessRateByTrigger.useQuery();
 
   // Mutations
   const utils = trpc.useUtils();
@@ -283,6 +288,10 @@ export default function Workflows() {
           <TabsList>
             <TabsTrigger value="rules">Regras de Automação</TabsTrigger>
             <TabsTrigger value="logs">Histórico de Execução</TabsTrigger>
+            <TabsTrigger value="dashboard">
+              <BarChart3 className="h-4 w-4 mr-1" />
+              Performance
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="rules" className="space-y-4">
@@ -548,6 +557,239 @@ export default function Workflows() {
                   <div className="text-center py-8 text-gray-400">
                     <History className="h-8 w-8 mx-auto mb-2" />
                     <p>Nenhuma execução registada</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            {/* KPIs */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                      <Activity className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.totalExecutions ?? 0}</p>
+                      <p className="text-xs text-gray-500">Execuções Totais</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
+                      <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.successLogs ?? 0}</p>
+                      <p className="text-xs text-gray-500">Sucesso</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                      <XCircle className="h-5 w-5 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">{stats?.failedLogs ?? 0}</p>
+                      <p className="text-xs text-gray-500">Falhas</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                      <TrendingUp className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold">
+                        {stats?.totalExecutions && stats.totalExecutions > 0
+                          ? `${(((stats.successLogs ?? 0) / stats.totalExecutions) * 100).toFixed(1)}%`
+                          : "N/A"}
+                      </p>
+                      <p className="text-xs text-gray-500">Taxa de Sucesso</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Gráfico de Timeline de Execuções */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Execuções nos Últimos 30 Dias</CardTitle>
+                <CardDescription>Volume diário de execuções de workflows com taxa de sucesso</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {timeline && timeline.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={timeline}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(val) => {
+                          const d = new Date(val);
+                          return `${d.getDate()}/${d.getMonth() + 1}`;
+                        }}
+                        fontSize={12}
+                      />
+                      <YAxis fontSize={12} />
+                      <Tooltip
+                        labelFormatter={(val) => {
+                          const d = new Date(val);
+                          return d.toLocaleDateString("pt-PT");
+                        }}
+                      />
+                      <Legend />
+                      <Area type="monotone" dataKey="success" name="Sucesso" stackId="1" stroke="#22c55e" fill="#22c55e" fillOpacity={0.6} />
+                      <Area type="monotone" dataKey="failed" name="Falhas" stackId="1" stroke="#ef4444" fill="#ef4444" fillOpacity={0.6} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-[200px] text-gray-400">
+                    <div className="text-center">
+                      <Activity className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      <p>Sem dados de execução nos últimos 30 dias</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Taxa de Sucesso por Tipo de Ação */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Taxa de Sucesso por Ação</CardTitle>
+                  <CardDescription>Performance de cada tipo de ação automática</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {successByAction && successByAction.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={successByAction.map((item: any) => ({
+                        name: item.actionType === "create_task" ? "Criar Tarefa" :
+                              item.actionType === "send_notification" ? "Notificação" :
+                              item.actionType === "change_lead_status" ? "Mudar Status" :
+                              item.actionType === "update_score" ? "Atualizar Score" :
+                              item.actionType,
+                        sucesso: Number(item.success) || 0,
+                        falhas: Number(item.failed) || 0,
+                      }))}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                        <XAxis dataKey="name" fontSize={11} />
+                        <YAxis fontSize={12} />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="sucesso" name="Sucesso" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="falhas" name="Falhas" fill="#ef4444" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[200px] text-gray-400">
+                      <p>Sem dados disponíveis</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Taxa de Sucesso por Tipo de Trigger */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Execuções por Trigger</CardTitle>
+                  <CardDescription>Distribuição de execuções por tipo de evento</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {successByTrigger && successByTrigger.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie
+                          data={successByTrigger.map((item: any) => ({
+                            name: item.triggerType === "opportunity_stage_change" ? "Mudança Fase" :
+                                  item.triggerType === "new_lead" ? "Novo Lead" :
+                                  item.triggerType === "lead_status_change" ? "Status Lead" :
+                                  item.triggerType === "task_completed" ? "Tarefa Concluída" :
+                                  item.triggerType === "deal_won" ? "Negócio Ganho" :
+                                  item.triggerType,
+                            value: Number(item.total) || 0,
+                          }))}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={90}
+                          paddingAngle={3}
+                          dataKey="value"
+                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {successByTrigger.map((_: any, index: number) => (
+                            <Cell key={index} fill={["#F15A24", "#3b82f6", "#22c55e", "#a855f7", "#eab308"][index % 5]} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex items-center justify-center h-[200px] text-gray-400">
+                      <p>Sem dados disponíveis</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Regras Mais Ativas */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Regras Mais Ativas</CardTitle>
+                <CardDescription>Top 10 regras de automação por número de execuções</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {topRules && topRules.length > 0 ? (
+                  <div className="space-y-3">
+                    {topRules.map((rule: any, index: number) => {
+                      const maxExec = topRules[0]?.executionCount || 1;
+                      const pct = ((rule.executionCount || 0) / maxExec) * 100;
+                      return (
+                        <div key={rule.id} className="flex items-center gap-3">
+                          <span className="text-sm font-bold text-gray-400 w-6 text-right">#{index + 1}</span>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium truncate">{rule.name}</span>
+                              <Badge variant={rule.active ? "default" : "secondary"} className="text-xs">
+                                {rule.active ? "Ativa" : "Inativa"}
+                              </Badge>
+                            </div>
+                            <div className="w-full bg-gray-100 rounded-full h-2">
+                              <div
+                                className="bg-[#F15A24] h-2 rounded-full transition-all"
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-sm font-bold">{rule.executionCount || 0}</p>
+                            <p className="text-xs text-gray-500">execuções</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-[150px] text-gray-400">
+                    <div className="text-center">
+                      <Zap className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                      <p>Nenhuma regra executada ainda</p>
+                    </div>
                   </div>
                 )}
               </CardContent>

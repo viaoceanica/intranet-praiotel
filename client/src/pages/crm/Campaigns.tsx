@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 import PraiotelLayout from "@/components/PraiotelLayout";
@@ -9,9 +9,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Mail, Send, Calendar, Users, TrendingUp, Eye, MousePointer, AlertCircle, Plus, Edit2, Trash2, Copy } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Mail, Send, Calendar, Users, TrendingUp, Eye, MousePointer, AlertCircle, Plus, Edit2, Trash2, Copy, FileText, Sparkles, X } from "lucide-react";
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   rascunho: { label: "Rascunho", color: "bg-gray-100 text-gray-800", icon: Edit2 },
   agendada: { label: "Agendada", color: "bg-blue-100 text-blue-800", icon: Calendar },
   em_envio: { label: "Em Envio", color: "bg-yellow-100 text-yellow-800", icon: Send },
@@ -19,7 +21,7 @@ const STATUS_CONFIG = {
   cancelada: { label: "Cancelada", color: "bg-red-100 text-red-800", icon: AlertCircle },
 };
 
-const TYPE_CONFIG = {
+const TYPE_CONFIG: Record<string, { label: string; icon: any }> = {
   email: { label: "Email", icon: Mail },
   newsletter: { label: "Newsletter", icon: Mail },
   evento: { label: "Evento", icon: Calendar },
@@ -33,6 +35,9 @@ export default function Campaigns() {
   const [deletingCampaignId, setDeletingCampaignId] = useState<number | null>(null);
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewTab, setPreviewTab] = useState<"edit" | "preview">("edit");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -40,8 +45,11 @@ export default function Campaigns() {
     type: "email" as "email" | "newsletter" | "evento" | "webinar" | "outro",
     subject: "",
     emailContent: "",
+    templateId: null as number | null,
     scheduledAt: "",
   });
+
+  const [selectedTemplateName, setSelectedTemplateName] = useState<string>("");
 
   // Queries
   const { data: campaigns, isLoading } = trpc.crmCampaigns.list.useQuery({
@@ -50,6 +58,7 @@ export default function Campaigns() {
   });
 
   const { data: stats } = trpc.crmCampaigns.getStats.useQuery();
+  const { data: templates } = trpc.crmEmailTemplates.list.useQuery();
 
   // Mutations
   const utils = trpc.useUtils();
@@ -92,8 +101,32 @@ export default function Campaigns() {
       type: "email",
       subject: "",
       emailContent: "",
+      templateId: null,
       scheduledAt: "",
     });
+    setSelectedTemplateName("");
+    setPreviewTab("edit");
+  };
+
+  const handleSelectTemplate = (template: any) => {
+    setFormData({
+      ...formData,
+      subject: template.subject || formData.subject,
+      emailContent: template.htmlContent || "",
+      templateId: template.id,
+    });
+    setSelectedTemplateName(template.name);
+    setShowTemplateSelector(false);
+    toast.success(`Template "${template.name}" aplicado!`);
+  };
+
+  const handleRemoveTemplate = () => {
+    setFormData({
+      ...formData,
+      templateId: null,
+    });
+    setSelectedTemplateName("");
+    toast.info("Template removido. O conteúdo permanece editável.");
   };
 
   const handleCreate = () => {
@@ -102,21 +135,27 @@ export default function Campaigns() {
       return;
     }
 
-    createMutation.mutate(formData);
+    createMutation.mutate({
+      ...formData,
+      templateId: formData.templateId || undefined,
+    });
   };
 
   const handleEdit = (campaign: any) => {
     setEditingCampaign(campaign);
+    const tpl = templates?.find((t: any) => t.id === campaign.templateId);
     setFormData({
       name: campaign.name,
       description: campaign.description || "",
       type: campaign.type,
       subject: campaign.subject || "",
       emailContent: campaign.emailContent || "",
+      templateId: campaign.templateId || null,
       scheduledAt: campaign.scheduledAt
         ? new Date(campaign.scheduledAt).toISOString().slice(0, 16)
         : "",
     });
+    setSelectedTemplateName(tpl?.name || "");
   };
 
   const handleUpdate = () => {
@@ -125,18 +164,22 @@ export default function Campaigns() {
     updateMutation.mutate({
       id: editingCampaign.id,
       ...formData,
+      templateId: formData.templateId || undefined,
     });
   };
 
   const handleDuplicate = (campaign: any) => {
+    const tpl = templates?.find((t: any) => t.id === campaign.templateId);
     setFormData({
       name: `${campaign.name} (Cópia)`,
       description: campaign.description || "",
       type: campaign.type,
       subject: campaign.subject || "",
       emailContent: campaign.emailContent || "",
+      templateId: campaign.templateId || null,
       scheduledAt: "",
     });
+    setSelectedTemplateName(tpl?.name || "");
     setIsCreating(true);
     toast.info("Campanha duplicada. Edite e guarde.");
   };
@@ -149,6 +192,26 @@ export default function Campaigns() {
   const calculateClickRate = (campaign: any) => {
     if (campaign.sentCount === 0) return 0;
     return ((campaign.clickedCount / campaign.sentCount) * 100).toFixed(1);
+  };
+
+  // Substituir variáveis no conteúdo para pré-visualização
+  const getPreviewContent = (content: string) => {
+    const sampleData: Record<string, string> = {
+      nome: "João Silva",
+      empresa: "Empresa Exemplo, Lda",
+      email: "joao.silva@exemplo.pt",
+      telefone: "+351 912 345 678",
+      cargo: "Diretor Comercial",
+      vendedor: "Ana Costa",
+      data_atual: new Date().toLocaleDateString("pt-PT"),
+      nome_empresa: "Praiotel",
+    };
+
+    let preview = content;
+    Object.entries(sampleData).forEach(([key, value]) => {
+      preview = preview.replace(new RegExp(`\\{\\{${key}\\}\\}`, "g"), value);
+    });
+    return preview;
   };
 
   return (
@@ -280,91 +343,80 @@ export default function Campaigns() {
 
           {isLoading ? (
             <Card className="p-8 text-center text-gray-400">
-              <p>A carregar campanhas...</p>
+              A carregar campanhas...
             </Card>
           ) : campaigns && campaigns.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-3">
               {campaigns.map((campaign: any) => {
-                const StatusIcon = STATUS_CONFIG[campaign.status as keyof typeof STATUS_CONFIG].icon;
-                const TypeIcon = TYPE_CONFIG[campaign.type as keyof typeof TYPE_CONFIG].icon;
+                const statusConf = STATUS_CONFIG[campaign.status] || STATUS_CONFIG.rascunho;
+                const typeConf = TYPE_CONFIG[campaign.type] || TYPE_CONFIG.outro;
+                const StatusIcon = statusConf.icon;
+                const TypeIcon = typeConf.icon;
+                const tpl = templates?.find((t: any) => t.id === campaign.templateId);
 
                 return (
-                  <Card key={campaign.id} className="p-6">
+                  <Card key={campaign.id} className="p-5">
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <TypeIcon className="h-5 w-5 text-gray-600" />
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center gap-3">
+                          <TypeIcon className="h-5 w-5 text-gray-500" />
                           <h3 className="text-lg font-semibold">{campaign.name}</h3>
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              STATUS_CONFIG[campaign.status as keyof typeof STATUS_CONFIG].color
-                            }`}
-                          >
-                            <StatusIcon className="h-3 w-3 inline mr-1" />
-                            {STATUS_CONFIG[campaign.status as keyof typeof STATUS_CONFIG].label}
-                          </span>
-                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                            {TYPE_CONFIG[campaign.type as keyof typeof TYPE_CONFIG].label}
-                          </span>
+                          <Badge className={statusConf.color}>
+                            <StatusIcon className="h-3 w-3 mr-1" />
+                            {statusConf.label}
+                          </Badge>
+                          <Badge variant="outline">{typeConf.label}</Badge>
+                          {tpl && (
+                            <Badge variant="outline" className="text-purple-600 border-purple-300 bg-purple-50">
+                              <FileText className="h-3 w-3 mr-1" />
+                              {tpl.name}
+                            </Badge>
+                          )}
                         </div>
 
                         {campaign.description && (
-                          <p className="text-gray-600 mb-3">{campaign.description}</p>
+                          <p className="text-sm text-gray-600">{campaign.description}</p>
                         )}
 
                         {campaign.subject && (
-                          <p className="text-sm text-gray-500 mb-3">
+                          <p className="text-sm text-gray-500">
                             <strong>Assunto:</strong> {campaign.subject}
                           </p>
                         )}
 
-                        {/* Metrics */}
-                        {campaign.status === "enviada" && (
-                          <div className="flex items-center gap-6 text-sm">
-                            <div className="flex items-center gap-2">
-                              <Users className="h-4 w-4 text-gray-400" />
-                              <span className="text-gray-600">
-                                {campaign.sentCount} enviados
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Eye className="h-4 w-4 text-blue-400" />
-                              <span className="text-gray-600">
-                                {campaign.openedCount} abertos ({calculateOpenRate(campaign)}%)
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <MousePointer className="h-4 w-4 text-green-400" />
-                              <span className="text-gray-600">
-                                {campaign.clickedCount} cliques ({calculateClickRate(campaign)}%)
-                              </span>
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                          <span>
-                            Criada em {new Date(campaign.createdAt).toLocaleDateString('pt-PT')}
+                        <div className="flex items-center gap-6 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            {campaign.totalRecipients} destinatários
                           </span>
-                          {campaign.scheduledAt && (
-                            <span>
-                              Agendada para {new Date(campaign.scheduledAt).toLocaleString('pt-PT')}
-                            </span>
+                          {campaign.status === "enviada" && (
+                            <>
+                              <span className="flex items-center gap-1">
+                                <Eye className="h-4 w-4" />
+                                {calculateOpenRate(campaign)}% aberturas
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MousePointer className="h-4 w-4" />
+                                {calculateClickRate(campaign)}% cliques
+                              </span>
+                            </>
                           )}
-                          {campaign.sentAt && (
-                            <span>
-                              Enviada em {new Date(campaign.sentAt).toLocaleString('pt-PT')}
+                          {campaign.scheduledAt && (
+                            <span className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(campaign.scheduledAt).toLocaleString("pt-PT")}
                             </span>
                           )}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
                         <Button
                           size="sm"
                           variant="ghost"
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
                           onClick={() => handleDuplicate(campaign)}
+                          title="Duplicar"
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -420,7 +472,7 @@ export default function Campaigns() {
           }
         }}
       >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingCampaign ? "Editar Campanha" : "Nova Campanha"}
@@ -445,7 +497,7 @@ export default function Campaigns() {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Descrição interna da campanha"
-                rows={3}
+                rows={2}
               />
             </div>
 
@@ -482,6 +534,46 @@ export default function Campaigns() {
 
             {(formData.type === "email" || formData.type === "newsletter") && (
               <>
+                {/* Template Selector */}
+                <div className="border rounded-lg p-4 bg-gray-50/50 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-purple-600" />
+                      <Label className="font-medium">Template de Email</Label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowTemplateSelector(true)}
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      {selectedTemplateName ? "Trocar Template" : "Usar Template"}
+                    </Button>
+                  </div>
+
+                  {selectedTemplateName ? (
+                    <div className="flex items-center gap-2 bg-purple-50 border border-purple-200 rounded-md px-3 py-2">
+                      <FileText className="h-4 w-4 text-purple-600 shrink-0" />
+                      <span className="text-sm font-medium text-purple-800 flex-1">{selectedTemplateName}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-purple-600 hover:text-purple-800"
+                        onClick={handleRemoveTemplate}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500">
+                      Selecione um template para preencher automaticamente o assunto e conteúdo do email.
+                      As variáveis (ex: {"{{nome}}"}, {"{{empresa}}"}) serão substituídas com dados reais ao enviar.
+                    </p>
+                  )}
+                </div>
+
                 <div>
                   <Label htmlFor="subject">Assunto do Email</Label>
                   <Input
@@ -490,17 +582,63 @@ export default function Campaigns() {
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     placeholder="Assunto que aparecerá no email"
                   />
+                  {formData.subject.includes("{{") && (
+                    <p className="text-xs text-purple-600 mt-1">
+                      Pré-visualização: {getPreviewContent(formData.subject)}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <Label htmlFor="emailContent">Conteúdo do Email</Label>
-                  <Textarea
-                    id="emailContent"
-                    value={formData.emailContent}
-                    onChange={(e) => setFormData({ ...formData, emailContent: e.target.value })}
-                    placeholder="Conteúdo HTML ou texto do email"
-                    rows={8}
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <Label htmlFor="emailContent">Conteúdo do Email</Label>
+                    <div className="flex gap-1">
+                      <Button
+                        type="button"
+                        variant={previewTab === "edit" ? "default" : "ghost"}
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => setPreviewTab("edit")}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={previewTab === "preview" ? "default" : "ghost"}
+                        size="sm"
+                        className="h-7 text-xs"
+                        onClick={() => setPreviewTab("preview")}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        Pré-visualizar
+                      </Button>
+                    </div>
+                  </div>
+
+                  {previewTab === "edit" ? (
+                    <Textarea
+                      id="emailContent"
+                      value={formData.emailContent}
+                      onChange={(e) => setFormData({ ...formData, emailContent: e.target.value })}
+                      placeholder="Conteúdo HTML ou texto do email. Use {{nome}}, {{empresa}}, etc. para variáveis dinâmicas."
+                      rows={10}
+                      className="font-mono text-sm"
+                    />
+                  ) : (
+                    <div className="border rounded-md p-4 bg-white min-h-[200px] max-h-[400px] overflow-y-auto">
+                      {formData.emailContent ? (
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: getPreviewContent(formData.emailContent),
+                          }}
+                        />
+                      ) : (
+                        <p className="text-gray-400 text-center py-8">
+                          Sem conteúdo para pré-visualizar
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -521,6 +659,71 @@ export default function Campaigns() {
               {editingCampaign ? "Guardar Alterações" : "Criar Campanha"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Selector Dialog */}
+      <Dialog open={showTemplateSelector} onOpenChange={setShowTemplateSelector}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Selecionar Template de Email</DialogTitle>
+            <DialogDescription>
+              Escolha um template para preencher automaticamente o conteúdo da campanha
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            {templates && templates.length > 0 ? (
+              templates.filter((t: any) => t.active === 1).map((template: any) => (
+                <Card
+                  key={template.id}
+                  className="p-4 cursor-pointer hover:border-purple-300 hover:bg-purple-50/30 transition-colors"
+                  onClick={() => handleSelectTemplate(template)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-purple-600" />
+                        <h4 className="font-semibold">{template.name}</h4>
+                        {template.category && (
+                          <Badge variant="outline" className="text-xs">{template.category}</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        <strong>Assunto:</strong> {template.subject}
+                      </p>
+                      {template.description && (
+                        <p className="text-xs text-gray-500">{template.description}</p>
+                      )}
+                      {template.variables && (
+                        <div className="flex gap-1 flex-wrap mt-1">
+                          {(typeof template.variables === "string"
+                            ? JSON.parse(template.variables)
+                            : template.variables
+                          ).map((v: string) => (
+                            <Badge key={v} variant="secondary" className="text-xs">
+                              {`{{${v}}}`}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <Button size="sm" variant="outline" className="shrink-0">
+                      Usar
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                <p className="text-gray-600 font-medium">Nenhum template disponível</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Crie templates em CRM → Templates de Email
+                </p>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 

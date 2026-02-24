@@ -53,6 +53,7 @@ export async function createCampaign(data: {
   status?: "rascunho" | "agendada" | "em_envio" | "enviada" | "cancelada";
   subject?: string;
   emailContent?: string;
+  templateId?: number;
   scheduledAt?: Date;
   createdById: number;
 }) {
@@ -66,6 +67,7 @@ export async function createCampaign(data: {
     status: data.status || "rascunho",
     subject: data.subject || null,
     emailContent: data.emailContent || null,
+    templateId: data.templateId || null,
     scheduledAt: data.scheduledAt || null,
     createdById: data.createdById,
   });
@@ -85,6 +87,7 @@ export async function updateCampaign(
     status?: "rascunho" | "agendada" | "em_envio" | "enviada" | "cancelada";
     subject?: string;
     emailContent?: string;
+    templateId?: number | null;
     scheduledAt?: Date;
   }
 ) {
