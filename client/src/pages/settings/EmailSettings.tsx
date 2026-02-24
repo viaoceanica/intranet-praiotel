@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import PraiotelLayout from "@/components/PraiotelLayout";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,13 +77,16 @@ export default function EmailSettings() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-[#F15A24]" />
-      </div>
+      <PraiotelLayout>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-[#F15A24]" />
+        </div>
+      </PraiotelLayout>
     );
   }
 
   return (
+    <PraiotelLayout>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -306,5 +310,6 @@ export default function EmailSettings() {
         </CardContent>
       </Card>
     </div>
+    </PraiotelLayout>
   );
 }

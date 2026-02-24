@@ -939,3 +939,7 @@
 - [x] Adicionar outras configurações gerais necessárias (nome da empresa, NIF, morada, fuso horário, idioma, moeda, etc.)
 - [x] Backend: tabela e CRUD para configurações do sistema
 - [x] Escrever testes para as novas funcionalidades de configurações (8 testes - todos passaram)
+
+## Bug Fix - Barra Lateral nas Configurações
+- [x] Página de Configurações Gerais não mostra a barra lateral (PraiotelLayout)
+- [x] Página de Configurações Email não mostra a barra lateral (PraiotelLayout)
