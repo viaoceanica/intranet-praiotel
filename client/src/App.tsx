@@ -41,6 +41,7 @@ import MyTasks from "./pages/crm/MyTasks";
 import Campaigns from "./pages/crm/Campaigns";
 import Reports from "./pages/crm/Reports";
 import Settings from "./pages/crm/Settings";
+import RecuperarPassword from "./pages/RecuperarPassword";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -66,6 +67,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/recuperar-password" component={RecuperarPassword} />
       <Route path="/" component={() => <ProtectedRoute component={Dashboard} />} />
       <Route path="/users" component={() => <ProtectedRoute component={Users} />} />
       <Route path="/tickets" component={() => <ProtectedRoute component={Tickets} />} />

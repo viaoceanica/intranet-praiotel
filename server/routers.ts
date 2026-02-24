@@ -249,6 +249,78 @@ export const appRouter = router({
       return { success: true };
     }),
 
+    changePassword: isAuthenticated
+      .input(z.object({
+        currentPassword: z.string().min(1),
+        newPassword: z.string().min(6, "A nova password deve ter pelo menos 6 caracteres"),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const user = await db.getUserById(ctx.user.id);
+        if (!user) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Utilizador n\u00e3o encontrado" });
+        }
+
+        const validPassword = await bcrypt.compare(input.currentPassword, user.passwordHash);
+        if (!validPassword) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Password atual incorreta" });
+        }
+
+        const newHash = await bcrypt.hash(input.newPassword, 10);
+        await db.updateUser(user.id, { passwordHash: newHash });
+
+        return { success: true };
+      }),
+
+    requestPasswordReset: publicProcedure
+      .input(z.object({
+        email: z.string().email(),
+      }))
+      .mutation(async ({ input }) => {
+        const user = await db.getUserByEmail(input.email);
+        
+        // Sempre retornar sucesso para n\u00e3o revelar se o email existe
+        if (!user) {
+          return { success: true, message: "Se o email existir no sistema, receber\u00e1 instru\u00e7\u00f5es para recuperar a password." };
+        }
+
+        // Gerar token aleat\u00f3rio
+        const crypto = await import("crypto");
+        const token = crypto.randomBytes(32).toString("hex");
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+        await db.createPasswordResetToken(user.id, token, expiresAt);
+
+        // Retornar o token (em produ\u00e7\u00e3o seria enviado por email)
+        return { 
+          success: true, 
+          message: "Se o email existir no sistema, receber\u00e1 instru\u00e7\u00f5es para recuperar a password.",
+          // Em ambiente de desenvolvimento, retornar o token para facilitar testes
+          resetToken: token,
+        };
+      }),
+
+    resetPassword: publicProcedure
+      .input(z.object({
+        token: z.string().min(1),
+        newPassword: z.string().min(6, "A nova password deve ter pelo menos 6 caracteres"),
+      }))
+      .mutation(async ({ input }) => {
+        const resetToken = await db.getValidPasswordResetToken(input.token);
+        
+        if (!resetToken) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: "Token inv\u00e1lido ou expirado. Solicite uma nova recupera\u00e7\u00e3o de password." 
+          });
+        }
+
+        const newHash = await bcrypt.hash(input.newPassword, 10);
+        await db.updateUser(resetToken.userId, { passwordHash: newHash });
+        await db.markPasswordResetTokenUsed(input.token);
+
+        return { success: true };
+      }),
+
     getPermissions: isAuthenticated.query(async ({ ctx }) => {
       const { getUserPermissions } = await import("./permissions");
       const permissions = await getUserPermissions(ctx.user.role);

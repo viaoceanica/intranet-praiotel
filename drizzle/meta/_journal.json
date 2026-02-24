@@ -148,6 +148,13 @@
       "when": 1769707599830,
       "tag": "0020_fat_zarda",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1771937586893,
+      "tag": "0021_rich_meltdown",
+      "breakpoints": true
     }
   ]
 }

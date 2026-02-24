@@ -855,3 +855,14 @@
 - [x] Remover dependências de variáveis Manus
 - [x] Criar valores alternativos para JWT_SECRET e outras variáveis
 - [x] Atualizar guia com valores prontos a usar (EASYPANEL_ENV_SIMPLES.md)
+
+## Melhorias de Autenticação e Password (CONCLUÍDO)
+- [ ] Verificar credenciais admin na BD
+- [x] Toggle de visibilidade da password no login (ícone olho)
+- [x] Função de guardar/alterar password no perfil
+- [x] Sistema de recuperação de password (esqueci-me da password)
+
+## Correção JWT_SECRET e Melhorias Password
+- [x] Corrigir erro "Zero-length key is not supported" no JWT_SECRET (fallback seguro adicionado)
+- [x] Implementar função de alterar password no perfil (procedure changePassword)
+- [x] Implementar sistema de recuperação de password (página /recuperar-password com 4 passos)

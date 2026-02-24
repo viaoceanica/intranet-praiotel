@@ -1,0 +1,24 @@
+{
+  "query": "SELECT id, email, name, role, passwordHash FROM users WHERE role = 'admin' LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, email, name, role, passwordHash FROM users WHERE role = 'admin' LIMIT 5;",
+  "rows": [
+    {
+      "id": "3",
+      "email": "admin@praiotel.pt",
+      "name": "Administrador",
+      "role": "admin",
+      "passwordHash": "$2b$10$aFMghrGUeTwD8q.gihyP8eN2Xa0nF6fl.SRG3rU5EXXPWkE9qHkuW"
+    },
+    {
+      "id": "30001",
+      "email": "tony@viaoceanica.com",
+      "name": "Tony Dias",
+      "role": "admin",
+      "passwordHash": "$2b$10$OB7aCVqmjw2ufmcvVhnaQOB9/iTYNorYoa7uPnBg6T9eHKxQiDUoK"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tname\trole\tpasswordHash\n3\tadmin@praiotel.pt\tAdministrador\tadmin\t$2b$10$aFMghrGUeTwD8q.gihyP8eN2Xa0nF6fl.SRG3rU5EXXPWkE9qHkuW\n30001\ttony@viaoceanica.com\tTony Dias\tadmin\t$2b$10$OB7aCVqmjw2ufmcvVhnaQOB9/iTYNorYoa7uPnBg6T9eHKxQiDUoK\n",
+  "stderr": "",
+  "execution_time_ms": 59
+}
