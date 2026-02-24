@@ -866,3 +866,10 @@
 - [x] Corrigir erro "Zero-length key is not supported" no JWT_SECRET (fallback seguro adicionado)
 - [x] Implementar função de alterar password no perfil (procedure changePassword)
 - [x] Implementar sistema de recuperação de password (página /recuperar-password com 4 passos)
+
+## Edição de Roles Existentes
+- [x] Analisar código atual da página de roles e backend
+- [x] Adicionar botão de editar nos cards de roles do sistema
+- [x] Criar formulário/dialog de edição de role (nome protegido, descrição, permissões)
+- [x] Implementar backend para guardar alterações de roles (já existia)
+- [x] Testar funcionalidade no browser

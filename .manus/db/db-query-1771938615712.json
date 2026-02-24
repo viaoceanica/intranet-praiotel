@@ -1,0 +1,38 @@
+{
+  "query": "SELECT id, name, description, is_system, permissions FROM custom_roles WHERE is_system = 1 ORDER BY id;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, name, description, is_system, permissions FROM custom_roles WHERE is_system = 1 ORDER BY id;",
+  "rows": [
+    {
+      "id": "1",
+      "name": "admin",
+      "description": "Acesso total ao sistema, incluindo gestão de utilizadores, configurações e todas as funcionalidades.",
+      "is_system": "1",
+      "permissions": "[\"canViewTickets\",\"canCreateTickets\",\"canEditTickets\",\"canDeleteTickets\",\"canManageUsers\",\"canManageClients\",\"canManageEquipment\",\"canViewStats\",\"canManageSettings\"]"
+    },
+    {
+      "id": "2",
+      "name": "gestor",
+      "description": "Supervisão de operações, estatísticas e gestão de tickets sem acesso a configurações críticas.",
+      "is_system": "1",
+      "permissions": "[\"tickets.view\",\"tickets.assign\",\"clients.view\",\"clients.create\",\"clients.edit\",\"equipment.view\",\"equipment.create\",\"equipment.edit\",\"users.view\",\"stats.view\",\"stats.export\",\"config.templates\"]"
+    },
+    {
+      "id": "3",
+      "name": "tecnico",
+      "description": "Execução de assistência técnica, gestão dos seus tickets atribuídos e interação com clientes.",
+      "is_system": "1",
+      "permissions": "[\"tickets.view\",\"tickets.edit\",\"equipment.view\",\"stats.view\"]"
+    },
+    {
+      "id": "4",
+      "name": "visualizador",
+      "description": "Acesso apenas de leitura para consulta de informações sem capacidade de edição.",
+      "is_system": "1",
+      "permissions": "[\"tickets.view\",\"clients.view\",\"equipment.view\",\"stats.view\"]"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\tdescription\tis_system\tpermissions\n1\tadmin\tAcesso total ao sistema, incluindo gestão de utilizadores, configurações e todas as funcionalidades.\t1\t[\"canViewTickets\",\"canCreateTickets\",\"canEditTickets\",\"canDeleteTickets\",\"canManageUsers\",\"canManageClients\",\"canManageEquipment\",\"canViewStats\",\"canManageSettings\"]\n2\tgestor\tSupervisão de operações, estatísticas e gestão de tickets sem acesso a configurações críticas.\t1\t[\"tickets.view\",\"tickets.assign\",\"clients.view\",\"clients.create\",\"clients.edit\",\"equipment.view\",\"equipment.create\",\"equipment.edit\",\"users.view\",\"stats.view\",\"stats.export\",\"config.templates\"]\n3\ttecnico\tExecução de assistência técnica, gestão dos seus tickets atribuídos e interação com clientes.\t1\t[\"tickets.view\",\"tickets.edit\",\"equipment.view\",\"stats.view\"]\n4\tvisualizador\tAcesso apenas de leitura para consulta de informações sem capacidade de edição.\t1\t[\"tickets.view\",\"clients.view\",\"equipment.view\",\"stats.view\"]\n",
+  "stderr": "",
+  "execution_time_ms": 54
+}

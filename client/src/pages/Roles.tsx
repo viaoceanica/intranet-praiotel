@@ -87,6 +87,7 @@ export default function Roles() {
 
   const { data: users, isLoading } = trpc.users.list.useQuery();
   const { data: customRoles, refetch: refetchRoles } = trpc.customRoles.list.useQuery();
+  const { data: systemRoles, refetch: refetchSystemRoles } = trpc.customRoles.listAll.useQuery();
   const { data: availablePermissions } = trpc.customRoles.getPermissions.useQuery();
   const createRoleMutation = trpc.customRoles.create.useMutation();
   const updateRoleMutation = trpc.customRoles.update.useMutation();
@@ -136,6 +137,7 @@ export default function Roles() {
       setNewRoleDescription("");
       setSelectedPermissions([]);
       refetchRoles();
+      refetchSystemRoles();
     } catch (error) {
       console.error("Erro ao editar role:", error);
     }
@@ -153,8 +155,8 @@ export default function Roles() {
     }
   };
 
-  const openEditModal = (role: any) => {
-    setEditingRole(role);
+  const openEditModal = (role: any, isSystemRole = false) => {
+    setEditingRole({ ...role, isSystemRole });
     setNewRoleName(role.name);
     setNewRoleDescription(role.description || "");
     setSelectedPermissions(role.permissions || []);
@@ -203,6 +205,8 @@ export default function Roles() {
             {Object.entries(roleInfo).map(([roleKey, info]) => {
               const Icon = info.icon;
               const roleUsers = usersByRole?.[roleKey] || [];
+              // Encontrar o role do sistema na BD para poder editar
+              const systemRole = systemRoles?.find((r: any) => r.name.toLowerCase() === info.name.toLowerCase() || r.name.toLowerCase() === roleKey);
               
               return (
                 <Card key={roleKey}>
@@ -219,9 +223,19 @@ export default function Roles() {
                               {roleUsers.length} {roleUsers.length === 1 ? "utilizador" : "utilizadores"}
                             </Badge>
                           </CardTitle>
-                          <CardDescription>{info.description}</CardDescription>
+                          <CardDescription>{systemRole?.description || info.description}</CardDescription>
                         </div>
                       </div>
+                      {systemRole && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditModal(systemRole, true)}
+                          title="Editar role"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -421,9 +435,11 @@ export default function Roles() {
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Editar Role</DialogTitle>
+              <DialogTitle>Editar Role{editingRole?.isSystemRole ? " do Sistema" : ""}</DialogTitle>
               <DialogDescription>
-                Atualize o nome, descrição e permissões do role
+                {editingRole?.isSystemRole
+                  ? "Atualize a descrição e permissões deste role do sistema"
+                  : "Atualize o nome, descrição e permissões do role"}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -434,7 +450,11 @@ export default function Roles() {
                   value={newRoleName}
                   onChange={(e) => setNewRoleName(e.target.value)}
                   placeholder="Ex: Supervisor, Coordenador..."
+                  disabled={editingRole?.isSystemRole}
                 />
+                {editingRole?.isSystemRole && (
+                  <p className="text-xs text-muted-foreground mt-1">O nome dos roles do sistema não pode ser alterado</p>
+                )}
               </div>
               <div>
                 <Label htmlFor="edit-description">Descrição</Label>
