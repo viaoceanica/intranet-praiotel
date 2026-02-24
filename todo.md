@@ -943,3 +943,7 @@
 ## Bug Fix - Barra Lateral nas Configurações
 - [x] Página de Configurações Gerais não mostra a barra lateral (PraiotelLayout)
 - [x] Página de Configurações Email não mostra a barra lateral (PraiotelLayout)
+
+## Bug Fix - Pesquisa de Clientes no Criar Ticket
+- [x] Investigar e corrigir pesquisa de clientes na página /tickets/new
+- [x] Melhorar a experiência de seleção de cliente (badge com nome/NIF/email + botão X para limpar)

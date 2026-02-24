@@ -42,6 +42,7 @@ export default function NewTicket() {
   const [useCustomEquipment, setUseCustomEquipment] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [selectedClientInfo, setSelectedClientInfo] = useState<{name: string; nif?: string; email?: string} | null>(null);
   const [equipmentSearchQuery, setEquipmentSearchQuery] = useState("");
   const [showEquipmentDropdown, setShowEquipmentDropdown] = useState(false);
   const [showNewEquipmentModal, setShowNewEquipmentModal] = useState(false);
@@ -69,13 +70,19 @@ export default function NewTicket() {
     { enabled: !useCustomClient }
   );
   
-  // Filtrar clientes localmente se houver query de pesquisa
-  const filteredClients = searchResults?.filter(client => 
-    clientSearchQuery.length === 0 || 
-    (client.designation && client.designation.toLowerCase().includes(clientSearchQuery.toLowerCase())) ||
-    (client.primaryEmail && client.primaryEmail.toLowerCase().includes(clientSearchQuery.toLowerCase())) ||
-    (client.nif && client.nif.includes(clientSearchQuery))
-  ) || [];
+  // Filtrar clientes localmente
+  const filteredClients = searchResults?.filter(client => {
+    if (!clientSearchQuery) return true;
+    const q = clientSearchQuery.toLowerCase();
+    return (
+      (client.designation && client.designation.toLowerCase().includes(q)) ||
+      (client.primaryEmail && client.primaryEmail.toLowerCase().includes(q)) ||
+      (client.nif && client.nif.includes(q))
+    );
+  }) || [];
+
+  // selectedClientInfo é guardado diretamente quando o utilizador seleciona um cliente
+
   const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
     { clientId: formData.clientId! },
     { enabled: !!formData.clientId && !useCustomClient }
@@ -160,7 +167,8 @@ export default function NewTicket() {
       setNewClientData({ name: "", email: "", phone: "", address: "" });
       // Selecionar o cliente recém-criado
       setFormData({ ...formData, clientId: data.id });
-      setClientSearchQuery(`${data.designation} - ${data.nif}`);
+      setSelectedClientInfo({ name: newClientData.name, email: newClientData.email || undefined });
+      setClientSearchQuery("");
     },
     onError: (error) => {
       toast.error(error.message);
@@ -313,32 +321,62 @@ export default function NewTicket() {
                 ) : (
                   <div className="space-y-2 relative">
                     <Label htmlFor="clientSearch">Selecionar Cliente *</Label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                      <Input
-                        id="clientSearch"
-                        type="text"
-                        value={clientSearchQuery}
-                        onChange={(e) => {
-                          setClientSearchQuery(e.target.value);
-                          setShowClientDropdown(true);
-                          if (!e.target.value) {
-                            setFormData({ ...formData, clientId: undefined });
-                          }
-                          if (validationErrors.clientId) {
-                            setValidationErrors({ ...validationErrors, clientId: "" });
-                          }
-                        }}
-                        onFocus={() => setShowClientDropdown(true)}
-                        placeholder="Pesquisar por nome, NIF ou email..."
-                        className="pl-10"
-                        required={!useCustomClient}
-                      />
-                    </div>
-                    {showClientDropdown && filteredClients && filteredClients.length > 0 && (
+                    {formData.clientId && selectedClientInfo ? (
+                      /* Cliente selecionado - mostrar badge */
+                      <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-md">
+                        <div className="w-8 h-8 rounded-full bg-[#F15A24] text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                          {(selectedClientInfo.name || "?").charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-gray-900 truncate">{selectedClientInfo.name}</div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {selectedClientInfo.nif ? `NIF: ${selectedClientInfo.nif}` : ""}
+                            {selectedClientInfo.nif && selectedClientInfo.email ? " | " : ""}
+                            {selectedClientInfo.email ? selectedClientInfo.email : ""}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, clientId: undefined, location: "" });
+                            setClientSearchQuery("");
+                            setSelectedClientInfo(null);
+                          }}
+                          className="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 p-1"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      /* Campo de pesquisa */
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Input
+                          id="clientSearch"
+                          type="text"
+                          value={clientSearchQuery}
+                          onChange={(e) => {
+                            setClientSearchQuery(e.target.value);
+                            setShowClientDropdown(true);
+                            if (validationErrors.clientId) {
+                              setValidationErrors({ ...validationErrors, clientId: "" });
+                            }
+                          }}
+                          onFocus={() => setShowClientDropdown(true)}
+                          onBlur={() => {
+                            setTimeout(() => setShowClientDropdown(false), 200);
+                          }}
+                          placeholder="Pesquisar por nome, NIF ou email..."
+                          className={`pl-10 ${validationErrors.clientId ? "border-red-500" : ""}`}
+                          autoComplete="off"
+                        />
+                      </div>
+                    )}
+                    {showClientDropdown && !formData.clientId && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                         <button
                           type="button"
+                          onMouseDown={(e) => e.preventDefault()}
                           onClick={() => {
                             setShowNewClientDialog(true);
                             setShowClientDropdown(false);
@@ -348,36 +386,46 @@ export default function NewTicket() {
                           <Plus className="h-4 w-4" />
                           Novo Cliente
                         </button>
-                        {filteredClients.map((client) => (
-                          <button
-                            key={client.id}
-                            type="button"
-                            onClick={() => {
-                              setFormData({ 
-                                ...formData, 
-                                clientId: client.id,
-                                location: client.address || formData.location
-                              });
-                              setClientSearchQuery(`${client.designation} - ${client.nif}`);
-                              setShowClientDropdown(false);
-                              if (validationErrors.clientId) {
-                                setValidationErrors({ ...validationErrors, clientId: "" });
-                              }
-                            }}
-                            className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                          >
-                            <div className="font-medium">{client.designation}</div>
-                            <div className="text-sm text-gray-500">
-                              NIF: {client.nif} | Email: {client.primaryEmail}
-                            </div>
-                          </button>
-                        ))}
+                        {filteredClients.length > 0 ? (
+                          filteredClients.map((client) => (
+                            <button
+                              key={client.id}
+                              type="button"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => {
+                                setFormData({ 
+                                  ...formData, 
+                                  clientId: client.id,
+                                  location: client.address || formData.location
+                                });
+                                setSelectedClientInfo({
+                                  name: client.designation || '',
+                                  nif: client.nif || undefined,
+                                  email: client.primaryEmail || undefined
+                                });
+                                setClientSearchQuery("");
+                                setShowClientDropdown(false);
+                                if (validationErrors.clientId) {
+                                  setValidationErrors({ ...validationErrors, clientId: "" });
+                                }
+                              }}
+                              className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                            >
+                              <div className="font-medium">{client.designation}</div>
+                              <div className="text-sm text-gray-500">
+                                {client.nif ? `NIF: ${client.nif}` : ""}{client.nif && client.primaryEmail ? " | " : ""}{client.primaryEmail ? `Email: ${client.primaryEmail}` : ""}
+                              </div>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="px-4 py-3 text-center text-gray-500 text-sm">
+                            Nenhum cliente encontrado
+                          </div>
+                        )}
                       </div>
                     )}
-                    {showClientDropdown && filteredClients && filteredClients.length === 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center text-gray-500">
-                        Nenhum cliente encontrado
-                      </div>
+                    {validationErrors.clientId && (
+                      <p className="text-sm text-red-500">{validationErrors.clientId}</p>
                     )}
                   </div>
                 )}
