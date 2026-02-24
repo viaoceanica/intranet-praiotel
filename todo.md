@@ -976,3 +976,10 @@
 - [x] Indicação do cliente atualmente a ser processado
 - [x] Impedir fechar o diálogo durante a importação
 - [x] Feedback em tempo real durante a importação
+
+## Integrar Clientes Comerciais na Criação de Tickets
+- [x] Backend: atualizar endpoint de pesquisa de clientes para incluir clientes comerciais
+- [x] Frontend: mostrar ambos os tipos no autocomplete com badge indicativo (Assistência/Comercial)
+- [x] Permitir criar tickets associados a clientes comerciais
+- [x] Atualizar schema de tickets para suportar referência a cliente comercial
+- [x] Testar pesquisa e criação de tickets com clientes comerciais

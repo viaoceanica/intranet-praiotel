@@ -28,6 +28,8 @@ export default function NewTicket() {
   const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     clientId: undefined as number | undefined,
+    commercialClientId: undefined as number | undefined,
+    clientType: "assistencia" as "assistencia" | "comercial",
     clientName: "",
     equipmentId: undefined as number | undefined,
     equipment: "",
@@ -42,7 +44,7 @@ export default function NewTicket() {
   const [useCustomEquipment, setUseCustomEquipment] = useState(false);
   const [clientSearchQuery, setClientSearchQuery] = useState("");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
-  const [selectedClientInfo, setSelectedClientInfo] = useState<{name: string; nif?: string; email?: string} | null>(null);
+  const [selectedClientInfo, setSelectedClientInfo] = useState<{name: string; nif?: string; email?: string; clientType?: string} | null>(null);
   const [equipmentSearchQuery, setEquipmentSearchQuery] = useState("");
   const [showEquipmentDropdown, setShowEquipmentDropdown] = useState(false);
   const [showNewEquipmentModal, setShowNewEquipmentModal] = useState(false);
@@ -65,21 +67,31 @@ export default function NewTicket() {
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
   const { data: priorities } = trpc.sla.list.useQuery();
-  const { data: searchResults } = trpc.clients.list.useQuery(
+  // Pesquisa unificada em ambas as tabelas (assistência + comercial)
+  const { data: unifiedSearchResults } = trpc.clients.searchAll.useQuery(
+    { query: clientSearchQuery },
+    { enabled: !useCustomClient && clientSearchQuery.length >= 2 }
+  );
+
+  // Quando não há pesquisa, carregar lista de clientes de assistência
+  const { data: allTechClients } = trpc.clients.list.useQuery(
     undefined,
-    { enabled: !useCustomClient }
+    { enabled: !useCustomClient && clientSearchQuery.length < 2 }
   );
   
-  // Filtrar clientes localmente
-  const filteredClients = searchResults?.filter(client => {
-    if (!clientSearchQuery) return true;
-    const q = clientSearchQuery.toLowerCase();
-    return (
-      (client.designation && client.designation.toLowerCase().includes(q)) ||
-      (client.primaryEmail && client.primaryEmail.toLowerCase().includes(q)) ||
-      (client.nif && client.nif.includes(q))
-    );
-  }) || [];
+  // Combinar resultados: se há pesquisa usa searchAll, senão mostra lista de assistência
+  const filteredClients = clientSearchQuery.length >= 2
+    ? (unifiedSearchResults || [])
+    : (allTechClients?.map(c => ({
+        id: c.id,
+        clientType: "assistencia" as const,
+        designation: c.designation,
+        nif: c.nif,
+        email: c.primaryEmail,
+        phone: null as string | null,
+        address: c.address,
+        locality: null as string | null,
+      })) || []);
 
   // selectedClientInfo é guardado diretamente quando o utilizador seleciona um cliente
 
@@ -190,7 +202,7 @@ export default function NewTicket() {
   const validateForm = () => {
     const errors: Record<string, string> = {};
     
-    if (!useCustomClient && !formData.clientId) {
+    if (!useCustomClient && !formData.clientId && !formData.commercialClientId) {
       errors.clientId = "Selecione um cliente";
     }
     if (useCustomClient && !formData.clientName.trim()) {
@@ -220,10 +232,19 @@ export default function NewTicket() {
     
     // Se usar cliente da lista, preencher clientName
     let finalData = { ...formData };
-    if (!useCustomClient && formData.clientId) {
-      const selectedClient = filteredClients?.find((c: any) => c.id === formData.clientId);
-      if (selectedClient) {
-        finalData.clientName = selectedClient.designation;
+    if (!useCustomClient && (formData.clientId || formData.commercialClientId)) {
+      // Se já temos clientName preenchido (cliente comercial), usar esse
+      if (!finalData.clientName && selectedClientInfo) {
+        finalData.clientName = selectedClientInfo.name;
+      }
+      // Para clientes de assistência, buscar da lista
+      if (formData.clientType === "assistencia" && formData.clientId) {
+        const selectedClient = filteredClients?.find((c: any) => c.id === formData.clientId && c.clientType === "assistencia");
+        if (selectedClient) {
+          finalData.clientName = selectedClient.designation;
+        } else if (selectedClientInfo) {
+          finalData.clientName = selectedClientInfo.name;
+        }
       }
     }
 
@@ -321,14 +342,25 @@ export default function NewTicket() {
                 ) : (
                   <div className="space-y-2 relative">
                     <Label htmlFor="clientSearch">Selecionar Cliente *</Label>
-                    {formData.clientId && selectedClientInfo ? (
+                    {(formData.clientId || formData.commercialClientId) && selectedClientInfo ? (
                       /* Cliente selecionado - mostrar badge */
                       <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-md">
-                        <div className="w-8 h-8 rounded-full bg-[#F15A24] text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+                        <div className={`w-8 h-8 rounded-full text-white flex items-center justify-center text-sm font-bold flex-shrink-0 ${
+                          selectedClientInfo.clientType === "comercial" ? "bg-blue-600" : "bg-[#F15A24]"
+                        }`}>
                           {(selectedClientInfo.name || "?").charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-sm text-gray-900 truncate">{selectedClientInfo.name}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm text-gray-900 truncate">{selectedClientInfo.name}</span>
+                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full flex-shrink-0 ${
+                              selectedClientInfo.clientType === "comercial" 
+                                ? "bg-blue-100 text-blue-700" 
+                                : "bg-green-100 text-green-700"
+                            }`}>
+                              {selectedClientInfo.clientType === "comercial" ? "Comercial" : "Assistência"}
+                            </span>
+                          </div>
                           <div className="text-xs text-gray-500 truncate">
                             {selectedClientInfo.nif ? `NIF: ${selectedClientInfo.nif}` : ""}
                             {selectedClientInfo.nif && selectedClientInfo.email ? " | " : ""}
@@ -338,7 +370,7 @@ export default function NewTicket() {
                         <button
                           type="button"
                           onClick={() => {
-                            setFormData({ ...formData, clientId: undefined, location: "" });
+                            setFormData({ ...formData, clientId: undefined, commercialClientId: undefined, clientType: "assistencia", clientName: "", location: "" });
                             setClientSearchQuery("");
                             setSelectedClientInfo(null);
                           }}
@@ -372,7 +404,7 @@ export default function NewTicket() {
                         />
                       </div>
                     )}
-                    {showClientDropdown && !formData.clientId && (
+                    {showClientDropdown && !formData.clientId && !formData.commercialClientId && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                         <button
                           type="button"
@@ -389,19 +421,33 @@ export default function NewTicket() {
                         {filteredClients.length > 0 ? (
                           filteredClients.map((client) => (
                             <button
-                              key={client.id}
+                              key={`${client.clientType}-${client.id}`}
                               type="button"
                               onMouseDown={(e) => e.preventDefault()}
                               onClick={() => {
-                                setFormData({ 
-                                  ...formData, 
-                                  clientId: client.id,
-                                  location: client.address || formData.location
-                                });
+                                if (client.clientType === "comercial") {
+                                  setFormData({ 
+                                    ...formData, 
+                                    clientId: undefined,
+                                    commercialClientId: client.id,
+                                    clientType: "comercial",
+                                    clientName: client.designation || '',
+                                    location: client.locality || client.address || formData.location
+                                  });
+                                } else {
+                                  setFormData({ 
+                                    ...formData, 
+                                    clientId: client.id,
+                                    commercialClientId: undefined,
+                                    clientType: "assistencia",
+                                    location: client.address || formData.location
+                                  });
+                                }
                                 setSelectedClientInfo({
                                   name: client.designation || '',
                                   nif: client.nif || undefined,
-                                  email: client.primaryEmail || undefined
+                                  email: client.email || undefined,
+                                  clientType: client.clientType,
                                 });
                                 setClientSearchQuery("");
                                 setShowClientDropdown(false);
@@ -411,15 +457,26 @@ export default function NewTicket() {
                               }}
                               className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                             >
-                              <div className="font-medium">{client.designation}</div>
+                              <div className="flex items-center gap-2">
+                                <div className="font-medium flex-1">{client.designation}</div>
+                                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                                  client.clientType === "comercial" 
+                                    ? "bg-blue-100 text-blue-700" 
+                                    : "bg-green-100 text-green-700"
+                                }`}>
+                                  {client.clientType === "comercial" ? "Comercial" : "Assistência"}
+                                </span>
+                              </div>
                               <div className="text-sm text-gray-500">
-                                {client.nif ? `NIF: ${client.nif}` : ""}{client.nif && client.primaryEmail ? " | " : ""}{client.primaryEmail ? `Email: ${client.primaryEmail}` : ""}
+                                {client.nif ? `NIF: ${client.nif}` : ""}{client.nif && client.email ? " | " : ""}{client.email ? `Email: ${client.email}` : ""}
+                                {client.phone ? ` | Tel: ${client.phone}` : ""}
+                                {client.locality ? ` | ${client.locality}` : ""}
                               </div>
                             </button>
                           ))
                         ) : (
                           <div className="px-4 py-3 text-center text-gray-500 text-sm">
-                            Nenhum cliente encontrado
+                            {clientSearchQuery.length < 2 ? "Digite pelo menos 2 caracteres para pesquisar..." : "Nenhum cliente encontrado"}
                           </div>
                         )}
                       </div>

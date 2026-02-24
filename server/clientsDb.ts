@@ -1,6 +1,6 @@
 import { eq, or, like, desc } from "drizzle-orm";
 import { getDb } from "./db";
-import { clients, clientEmails, InsertClient, InsertClientEmail } from "../drizzle/schema";
+import { clients, clientEmails, commercialClients, InsertClient, InsertClientEmail } from "../drizzle/schema";
 
 export async function createClient(client: InsertClient) {
   const db = await getDb();
@@ -44,6 +44,71 @@ export async function searchClients(query: string) {
     .orderBy(desc(clients.createdAt));
 
   return result;
+}
+
+/**
+ * Pesquisa unificada em ambas as tabelas de clientes (assistência técnica + comerciais)
+ * Retorna resultados com indicação do tipo de cliente
+ */
+export async function searchAllClients(query: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const searchPattern = `%${query}%`;
+
+  // Pesquisar clientes de assistência técnica
+  const techClients = await db
+    .select()
+    .from(clients)
+    .where(
+      or(
+        like(clients.designation, searchPattern),
+        like(clients.nif, searchPattern),
+        like(clients.primaryEmail, searchPattern)
+      )
+    )
+    .orderBy(desc(clients.createdAt))
+    .limit(20);
+
+  // Pesquisar clientes comerciais
+  const commClients = await db
+    .select()
+    .from(commercialClients)
+    .where(
+      or(
+        like(commercialClients.company, searchPattern),
+        like(commercialClients.nif, searchPattern),
+        like(commercialClients.email, searchPattern),
+        like(commercialClients.phone1, searchPattern)
+      )
+    )
+    .limit(20);
+
+  // Normalizar resultados para formato unificado
+  const results = [
+    ...techClients.map(c => ({
+      id: c.id,
+      clientType: "assistencia" as const,
+      designation: c.designation,
+      nif: c.nif,
+      email: c.primaryEmail,
+      phone: null as string | null,
+      address: c.address,
+      locality: null as string | null,
+    })),
+    ...commClients.map(c => ({
+      id: c.id,
+      clientType: "comercial" as const,
+      designation: c.company,
+      nif: c.nif,
+      email: c.email,
+      phone: c.phone1,
+      address: c.address ? (typeof c.address === 'string' ? c.address : null) : null,
+      locality: c.locality,
+    })),
+  ];
+
+  return results;
 }
 
 export async function updateClient(id: number, data: Partial<InsertClient>) {

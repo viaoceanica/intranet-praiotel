@@ -39,6 +39,8 @@ export const tickets = mysqlTable("tickets", {
   id: int("id").autoincrement().primaryKey(),
   ticketNumber: varchar("ticketNumber", { length: 20 }).notNull().unique(),
   clientId: int("clientId"),
+  commercialClientId: int("commercialClientId"),
+  clientType: mysqlEnum("clientType", ["assistencia", "comercial"]).default("assistencia").notNull(),
   clientName: varchar("clientName", { length: 255 }).notNull(),
   equipmentId: int("equipmentId"),
   equipment: varchar("equipment", { length: 255 }).notNull(),

@@ -514,6 +514,8 @@ export const appRouter = router({
     create: isAuthenticated
       .input(z.object({
         clientId: z.number().optional(),
+        commercialClientId: z.number().optional(),
+        clientType: z.enum(["assistencia", "comercial"]).default("assistencia"),
         clientName: z.string().min(1),
         equipment: z.string().min(1),
         problemType: z.string().min(1),
@@ -541,7 +543,9 @@ export const appRouter = router({
 
         const ticketData = {
           ticketNumber,
-          clientId: input.clientId,
+          clientId: input.clientType === "assistencia" ? input.clientId : undefined,
+          commercialClientId: input.clientType === "comercial" ? input.commercialClientId : undefined,
+          clientType: input.clientType,
           clientName: input.clientName,
           equipment: input.equipment,
           problemType: input.problemType,
@@ -801,6 +805,13 @@ export const appRouter = router({
       .input(z.object({ query: z.string() }))
       .query(async ({ input }) => {
         return await clientsDb.searchClients(input.query);
+      }),
+
+    // Pesquisa unificada em ambas as tabelas (assistência + comercial)
+    searchAll: isAuthenticated
+      .input(z.object({ query: z.string() }))
+      .query(async ({ input }) => {
+        return await clientsDb.searchAllClients(input.query);
       }),
 
     getById: isAuthenticated
