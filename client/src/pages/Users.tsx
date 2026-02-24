@@ -29,7 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { UserPlus, Pencil, Loader2, UserX, UserCheck, Filter } from "lucide-react";
+import { UserPlus, Pencil, Loader2, UserX, UserCheck, Filter, History } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Users() {
@@ -55,6 +55,7 @@ export default function Users() {
   const utils = trpc.useUtils();
   const { data: users, isLoading } = trpc.users.list.useQuery();
   const { data: availableRoles } = trpc.customRoles.listForSelect.useQuery();
+  const { data: auditLogs } = trpc.users.auditLog.useQuery();
 
   const createMutation = trpc.users.create.useMutation({
     onSuccess: () => {
@@ -321,6 +322,48 @@ export default function Users() {
               </TableBody>
             </Table>
           )}
+        </div>
+
+        {/* Histórico de Auditoria */}
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-4">
+            <History className="h-5 w-5 text-gray-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Histórico de Auditoria</h2>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200">
+            {!auditLogs || auditLogs.length === 0 ? (
+              <div className="p-8 text-center text-gray-500">
+                Nenhum registo de auditoria encontrado
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Ação</TableHead>
+                    <TableHead>Detalhes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {auditLogs.map((log: any) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="text-sm text-gray-600">
+                        {format(new Date(log.createdAt), "dd/MM/yyyy HH:mm")}
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={log.action === "reactivated" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                          {log.action === "reactivated" ? "Reativado" : "Desativado"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-gray-700">
+                        {log.details}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
         </div>
 
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>

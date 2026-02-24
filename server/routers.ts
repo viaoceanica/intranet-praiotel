@@ -448,8 +448,43 @@ export const appRouter = router({
         // Soft delete: alternar entre ativo e inativo
         const newStatus = user.active ? 0 : 1;
         await db.updateUser(input.id, { active: newStatus });
+
+        // Registar na auditoria
+        const { userAuditLog } = await import("../drizzle/schema");
+        const { getDb } = await import("./db");
+        const database = await getDb();
+        if (database) {
+          await database.insert(userAuditLog).values({
+            targetUserId: input.id,
+            performedByUserId: ctx.user.id,
+            action: newStatus === 1 ? "reactivated" : "deactivated",
+            details: `${ctx.user.name} ${newStatus === 1 ? "reativou" : "desativou"} o utilizador ${user.name}`,
+          });
+        }
+
         return { success: true, active: newStatus === 1 };
       }),
+
+    auditLog: isAdmin.query(async () => {
+      const { userAuditLog, users: usersTable } = await import("../drizzle/schema");
+      const { getDb } = await import("./db");
+      const database = await getDb();
+      if (!database) return [];
+      const { desc, eq } = await import("drizzle-orm");
+      const logs = await database
+        .select({
+          id: userAuditLog.id,
+          targetUserId: userAuditLog.targetUserId,
+          performedByUserId: userAuditLog.performedByUserId,
+          action: userAuditLog.action,
+          details: userAuditLog.details,
+          createdAt: userAuditLog.createdAt,
+        })
+        .from(userAuditLog)
+        .orderBy(desc(userAuditLog.createdAt))
+        .limit(100);
+      return logs;
+    }),
   }),
 
   tickets: router({
@@ -606,6 +641,9 @@ export const appRouter = router({
         // Registar atribuição inicial no histórico
         if (input.assignedToId) {
           const assignedUser = await db.getUserById(input.assignedToId);
+          if (assignedUser && !assignedUser.active) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Não é possível atribuir tickets a utilizadores inativos" });
+          }
           await ticketsDb.createTicketHistory({
             ticketId: createdTicket.id,
             userId: ctx.user.id,
@@ -708,6 +746,14 @@ export const appRouter = router({
             input.status,
             ctx.user.id
           );
+        }
+
+        // Validar que o utilizador atribuído está ativo
+        if (input.assignedToId !== undefined && input.assignedToId !== ticket.assignedToId && input.assignedToId) {
+          const targetUser = await db.getUserById(input.assignedToId);
+          if (targetUser && !targetUser.active) {
+            throw new TRPCError({ code: "BAD_REQUEST", message: "Não é possível atribuir tickets a utilizadores inativos" });
+          }
         }
 
         // Registar atribuição/reatribuição no histórico

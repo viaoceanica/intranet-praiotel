@@ -29,6 +29,18 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
 /**
+ * Registo de auditoria de alterações de estado de utilizadores
+ */
+export const userAuditLog = mysqlTable("user_audit_log", {
+  id: int("id").autoincrement().primaryKey(),
+  targetUserId: int("targetUserId").notNull(),
+  performedByUserId: int("performedByUserId").notNull(),
+  action: varchar("action", { length: 50 }).notNull(), // 'deactivated' | 'reactivated'
+  details: text("details"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+/**
  * Tokens de recuperação de password
  */
 export const passwordResetTokens = mysqlTable("password_reset_tokens", {

@@ -85,7 +85,7 @@ export default function Tickets() {
   const { data: users } = trpc.users.list.useQuery();
   const { data: clients } = trpc.clients.list.useQuery();
 
-  const technicians = users?.filter(u => u.role === 'tecnico' || u.role === 'admin') || [];
+  const technicians = users?.filter(u => (u.role === 'tecnico' || u.role === 'admin') && u.active) || [];
   
   const uniqueLocations = Array.from(new Set(tickets?.map(t => t.location).filter(Boolean))) as string[];
 

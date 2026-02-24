@@ -260,7 +260,7 @@ export default function NewTicket() {
   };
 
   const technicians = users?.filter(u => 
-    u.role === "tecnico" || u.role === "admin" || u.role === "gestor"
+    (u.role === "tecnico" || u.role === "admin" || u.role === "gestor") && u.active
   );
 
   const ilhas = [

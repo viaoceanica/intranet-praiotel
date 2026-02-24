@@ -1019,3 +1019,13 @@
 - [x] Filtrar utilizadores inativos da listagem principal (com opção de ver todos)
 - [x] Preservar histórico de tickets e ações de utilizadores desativados
 - [x] Atualizar frontend com botões desativar/ativar
+
+## Impedir Atribuição de Tickets a Utilizadores Inativos
+- [x] Filtrar utilizadores inativos do dropdown de atribuição no formulário de novo ticket
+- [x] Filtrar utilizadores inativos do dropdown de reatribuição no detalhe do ticket
+- [x] Validar no backend que não se pode atribuir a utilizador inativo
+
+## Registo de Auditoria de Desativação/Reativação de Utilizadores
+- [x] Criar tabela de auditoria de utilizadores no schema
+- [x] Registar quem desativou/reativou, quando e qual utilizador
+- [x] Mostrar histórico de auditoria na página de utilizadores
