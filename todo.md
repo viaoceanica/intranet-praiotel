@@ -968,3 +968,11 @@
 - [x] Tab "Gestão Comercial" com a listagem de clientes comerciais (importados do Excel)
 - [x] Remover sub-menu "Clientes Comerciais" do menu Clientes (fica tudo na mesma página)
 - [x] Manter funcionalidade de importação Excel no tab de Gestão Comercial
+
+## Progresso Visual na Importação de Clientes Comerciais
+- [x] Backend: endpoint SSE para enviar progresso em tempo real
+- [x] Frontend: barra de progresso visual com percentagem
+- [x] Contadores em tempo real (novos importados, atualizados, erros)
+- [x] Indicação do cliente atualmente a ser processado
+- [x] Impedir fechar o diálogo durante a importação
+- [x] Feedback em tempo real durante a importação

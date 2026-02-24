@@ -42,6 +42,27 @@ async function startServer() {
 
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+
+  // SSE endpoint para progresso de importação de clientes comerciais
+  const importProgressClients = new Map<string, any>();
+  (app as any).__importProgressClients = importProgressClients;
+
+  app.get("/api/import-progress/:jobId", (req, res) => {
+    const { jobId } = req.params;
+    res.writeHead(200, {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+      "X-Accel-Buffering": "no",
+    });
+    res.write("data: {\"type\":\"connected\"}\n\n");
+
+    importProgressClients.set(jobId, res);
+
+    req.on("close", () => {
+      importProgressClients.delete(jobId);
+    });
+  });
   // tRPC API
   app.use(
     "/api/trpc",

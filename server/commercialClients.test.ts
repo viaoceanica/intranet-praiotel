@@ -74,6 +74,7 @@ describe("commercialClients", () => {
     const result = await caller.commercialClients.import({
       fileBase64: base64Data,
       fileName: "test.csv",
+      jobId: "test-job-123",
     });
 
     expect(result).toHaveProperty("imported");

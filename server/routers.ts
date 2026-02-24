@@ -2888,8 +2888,9 @@ export const appRouter = router({
       .input(z.object({
         fileBase64: z.string(),
         fileName: z.string(),
+        jobId: z.string(),
       }))
-      .mutation(async ({ input }) => {
+      .mutation(async ({ input, ctx }) => {
         try {
           const buffer = Buffer.from(input.fileBase64, "base64");
           const workbook = XLSX.read(buffer, { type: "buffer" });
@@ -2945,7 +2946,29 @@ export const appRouter = router({
             };
           });
 
-          const result = await commercialClientsDb.importCommercialClients(clients as any);
+          // Obter o mapa de clientes SSE para enviar progresso (seguro em testes)
+          const app = ctx.req?.app;
+          const progressClients = app ? (app as any).__importProgressClients as Map<string, any> | undefined : undefined;
+          const sseRes = progressClients?.get(input.jobId);
+
+          // Enviar total inicial
+          if (sseRes) {
+            sseRes.write(`data: ${JSON.stringify({ type: "start", total: clients.length })}\n\n`);
+          }
+
+          const result = await commercialClientsDb.importCommercialClients(clients as any, (progress) => {
+            if (sseRes) {
+              sseRes.write(`data: ${JSON.stringify({ type: "progress", ...progress })}\n\n`);
+            }
+          });
+
+          // Enviar resultado final via SSE
+          if (sseRes) {
+            sseRes.write(`data: ${JSON.stringify({ type: "complete", ...result, errors: result.errors.length })}\n\n`);
+            sseRes.end();
+            progressClients?.delete(input.jobId);
+          }
+
           return result;
         } catch (err: any) {
           throw new TRPCError({

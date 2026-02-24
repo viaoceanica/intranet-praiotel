@@ -110,7 +110,8 @@ export default function CommercialClients() {
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const base64 = (ev.target?.result as string).split(",")[1];
-      importMutation.mutate({ fileBase64: base64, fileName: file.name });
+      const jobId = `import-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      importMutation.mutate({ fileBase64: base64, fileName: file.name, jobId });
     };
     reader.readAsDataURL(file);
 

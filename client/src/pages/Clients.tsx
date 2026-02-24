@@ -186,6 +186,14 @@ function GestaoComercialTab() {
   const [selectedClient, setSelectedClient] = useState<any>(null);
   const [importResult, setImportResult] = useState<any>(null);
   const [isImporting, setIsImporting] = useState(false);
+  const [importProgress, setImportProgress] = useState<{
+    processed: number;
+    total: number;
+    imported: number;
+    updated: number;
+    errors: number;
+    currentCompany: string;
+  } | null>(null);
   const [editForm, setEditForm] = useState<any>({});
 
   // Queries
@@ -207,6 +215,7 @@ function GestaoComercialTab() {
     onSuccess: (result) => {
       setImportResult(result);
       setIsImporting(false);
+      setImportProgress(null);
       utils.commercialClients.list.invalidate();
       utils.commercialClients.stats.invalidate();
       utils.commercialClients.zones.invalidate();
@@ -217,6 +226,7 @@ function GestaoComercialTab() {
     },
     onError: (err) => {
       setIsImporting(false);
+      setImportProgress(null);
       toast.error("Erro na importação", { description: err.message });
     },
   });
@@ -256,12 +266,48 @@ function GestaoComercialTab() {
 
     setIsImporting(true);
     setImportResult(null);
+    setImportProgress(null);
     setShowImportDialog(true);
+
+    // Gerar jobId único para esta importação
+    const jobId = `import-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    // Abrir conexão SSE para receber progresso
+    const eventSource = new EventSource(`/api/import-progress/${jobId}`);
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "progress") {
+          setImportProgress({
+            processed: data.processed,
+            total: data.total,
+            imported: data.imported,
+            updated: data.updated,
+            errors: data.errors,
+            currentCompany: data.currentCompany,
+          });
+        } else if (data.type === "start") {
+          setImportProgress({
+            processed: 0,
+            total: data.total,
+            imported: 0,
+            updated: 0,
+            errors: 0,
+            currentCompany: "A iniciar...",
+          });
+        } else if (data.type === "complete") {
+          eventSource.close();
+        }
+      } catch {}
+    };
+    eventSource.onerror = () => {
+      eventSource.close();
+    };
 
     const reader = new FileReader();
     reader.onload = async (ev) => {
       const base64 = (ev.target?.result as string).split(",")[1];
-      importMutation.mutate({ fileBase64: base64, fileName: file.name });
+      importMutation.mutate({ fileBase64: base64, fileName: file.name, jobId });
     };
     reader.readAsDataURL(file);
 
@@ -514,20 +560,72 @@ function GestaoComercialTab() {
       </Card>
 
       {/* Import Dialog */}
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <DialogContent className="max-w-md">
+      <Dialog open={showImportDialog} onOpenChange={(open) => { if (!isImporting) setShowImportDialog(open); }}>
+        <DialogContent className="max-w-lg" onInteractOutside={(e) => { if (isImporting) e.preventDefault(); }}>
           <DialogHeader>
             <DialogTitle>Importação de Clientes</DialogTitle>
-            <DialogDescription>Resultado da importação do ficheiro Excel</DialogDescription>
+            <DialogDescription>
+              {isImporting ? "A importar clientes do ficheiro Excel..." : "Resultado da importação do ficheiro Excel"}
+            </DialogDescription>
           </DialogHeader>
-          {isImporting ? (
+
+          {isImporting && importProgress ? (
+            <div className="space-y-5 py-2">
+              {/* Barra de progresso principal */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Progresso</span>
+                  <span className="font-medium text-[#F15A24]">
+                    {importProgress.processed} / {importProgress.total}
+                  </span>
+                </div>
+                <div className="h-3 bg-gray-100 rounded-full overflow-hidden border">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#F15A24] to-[#ff8a5c] rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${importProgress.total > 0 ? (importProgress.processed / importProgress.total) * 100 : 0}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  {importProgress.total > 0 ? Math.round((importProgress.processed / importProgress.total) * 100) : 0}% concluído
+                </p>
+              </div>
+
+              {/* Contadores em tempo real */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-center">
+                  <p className="text-xl font-bold text-green-700">{importProgress.imported}</p>
+                  <p className="text-xs text-green-600">Novos</p>
+                </div>
+                <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 text-center">
+                  <p className="text-xl font-bold text-blue-700">{importProgress.updated}</p>
+                  <p className="text-xs text-blue-600">Atualizados</p>
+                </div>
+                <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-center">
+                  <p className="text-xl font-bold text-red-700">{importProgress.errors}</p>
+                  <p className="text-xs text-red-600">Erros</p>
+                </div>
+              </div>
+
+              {/* Cliente atual */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground bg-gray-50 rounded-lg p-3">
+                <Loader2 className="h-4 w-4 animate-spin text-[#F15A24] shrink-0" />
+                <span className="truncate">A processar: <span className="font-medium text-gray-700">{importProgress.currentCompany}</span></span>
+              </div>
+            </div>
+          ) : isImporting && !importProgress ? (
             <div className="py-8 text-center">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#F15A24] mx-auto mb-4"></div>
-              <p className="text-muted-foreground">A importar clientes...</p>
-              <p className="text-xs text-muted-foreground mt-1">Isto pode demorar alguns minutos para ficheiros grandes</p>
+              <Loader2 className="h-10 w-10 animate-spin text-[#F15A24] mx-auto mb-4" />
+              <p className="text-muted-foreground">A preparar importação...</p>
+              <p className="text-xs text-muted-foreground mt-1">A ler o ficheiro Excel</p>
             </div>
           ) : importResult ? (
             <div className="space-y-4">
+              {/* Sucesso header */}
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <p className="text-sm font-medium text-green-700">Importação concluída com sucesso!</p>
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-lg bg-green-50 border border-green-200 text-center">
                   <p className="text-2xl font-bold text-green-700">{importResult.imported}</p>
@@ -556,9 +654,12 @@ function GestaoComercialTab() {
               )}
             </div>
           ) : null}
-          <DialogFooter>
-            <Button onClick={() => setShowImportDialog(false)}>Fechar</Button>
-          </DialogFooter>
+
+          {!isImporting && (
+            <DialogFooter>
+              <Button onClick={() => setShowImportDialog(false)}>Fechar</Button>
+            </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
 

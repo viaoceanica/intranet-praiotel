@@ -149,16 +149,27 @@ export async function getCommercialClientStats() {
 /**
  * Importar clientes comerciais a partir de dados parseados do Excel
  * Usa upsert baseado no externalId (N_ do ERP)
+ * Suporta callback de progresso para atualização em tempo real
  */
 export async function importCommercialClients(
-  clients: InsertCommercialClient[]
+  clients: InsertCommercialClient[],
+  onProgress?: (progress: {
+    processed: number;
+    total: number;
+    imported: number;
+    updated: number;
+    errors: number;
+    currentCompany: string;
+  }) => void
 ): Promise<{ imported: number; updated: number; errors: string[] }> {
   const db = getDb();
   let imported = 0;
   let updated = 0;
   const errors: string[] = [];
+  const total = clients.length;
 
-  for (const client of clients) {
+  for (let i = 0; i < clients.length; i++) {
+    const client = clients[i];
     try {
       // Filtrar emails @viaoceanica.com conforme regra
       if (client.email && client.email.toLowerCase().includes("@viaoceanica.com")) {
@@ -192,6 +203,18 @@ export async function importCommercialClients(
       }
     } catch (err: any) {
       errors.push(`Erro ao importar "${client.company}": ${err.message}`);
+    }
+
+    // Enviar progresso a cada registo
+    if (onProgress) {
+      onProgress({
+        processed: i + 1,
+        total,
+        imported,
+        updated,
+        errors: errors.length,
+        currentCompany: client.company || "Sem Nome",
+      });
     }
   }
 
