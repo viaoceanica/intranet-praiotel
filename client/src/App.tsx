@@ -45,6 +45,8 @@ import EmailTemplates from "./pages/crm/EmailTemplates";
 import Workflows from "./pages/crm/Workflows";
 import Duplicates from "./pages/crm/Duplicates";
 import RecuperarPassword from "./pages/RecuperarPassword";
+import GeneralSettings from "./pages/settings/GeneralSettings";
+import EmailSettings from "./pages/settings/EmailSettings";
 import { useAuth } from "./_core/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -114,6 +116,10 @@ function Router() {
       <Route path="/crm/email-templates" component={() => <ProtectedRoute component={EmailTemplates} />} />
       <Route path="/crm/workflows" component={() => <ProtectedRoute component={Workflows} />} />
       <Route path="/crm/duplicates" component={() => <ProtectedRoute component={Duplicates} />} />
+      
+      {/* Rotas Configurações */}
+      <Route path="/settings/general" component={() => <ProtectedRoute component={GeneralSettings} />} />
+      <Route path="/settings/email" component={() => <ProtectedRoute component={EmailSettings} />} />
       
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />

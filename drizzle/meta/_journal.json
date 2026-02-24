@@ -169,6 +169,13 @@
       "when": 1771945683040,
       "tag": "0023_safe_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1771949842581,
+      "tag": "0024_swift_bloodstrike",
+      "breakpoints": true
     }
   ]
 }

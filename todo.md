@@ -931,3 +931,11 @@
 - [x] Top 10 regras mais ativas com barra de progresso
 - [x] KPIs: execuções totais, sucesso, falhas, taxa de sucesso
 - [x] Integrado como nova tab "Performance" na página de Workflows
+
+## Reorganização Menu e Configurações
+- [x] Mover "Utilizadores" para o fim da listagem do menu lateral
+- [x] Adicionar ponto "Configurações" no menu lateral
+- [x] Criar página de Configurações com email de recuperação de password
+- [x] Adicionar outras configurações gerais necessárias (nome da empresa, NIF, morada, fuso horário, idioma, moeda, etc.)
+- [x] Backend: tabela e CRUD para configurações do sistema
+- [x] Escrever testes para as novas funcionalidades de configurações (8 testes - todos passaram)

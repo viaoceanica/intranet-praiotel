@@ -34,6 +34,7 @@ import * as crmLeadScoringDb from "./crmLeadScoringDb";
 import * as crmEmailTemplatesDb from "./crmEmailTemplatesDb";
 import * as crmWorkflowsDb from "./crmWorkflowsDb";
 import * as crmDuplicatesDb from "./crmDuplicatesDb";
+import * as systemSettingsDb from "./systemSettingsDb";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
 import { ENV } from "./_core/env";
@@ -2737,6 +2738,56 @@ export const appRouter = router({
 
     getStats: isAuthenticated.query(async () => {
       return await crmDuplicatesDb.getDuplicateStats();
+    }),
+  }),
+
+  systemSettings: router({
+    list: isAdmin.query(async () => {
+      return await systemSettingsDb.getAllSettings();
+    }),
+
+    getByCategory: isAdmin
+      .input(z.object({ category: z.string() }))
+      .query(async ({ input }) => {
+        return await systemSettingsDb.getSettingsByCategory(input.category);
+      }),
+
+    get: isAdmin
+      .input(z.object({ key: z.string() }))
+      .query(async ({ input }) => {
+        return await systemSettingsDb.getSetting(input.key);
+      }),
+
+    upsert: isAdmin
+      .input(z.object({
+        key: z.string(),
+        value: z.string().nullable(),
+        type: z.string().optional(),
+        category: z.string().optional(),
+        label: z.string().optional(),
+        description: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await systemSettingsDb.upsertSetting({
+          ...input,
+          updatedById: ctx.user.id,
+        });
+      }),
+
+    updateMultiple: isAdmin
+      .input(z.object({
+        settings: z.array(z.object({
+          key: z.string(),
+          value: z.string().nullable(),
+        })),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await systemSettingsDb.updateMultipleSettings(input.settings, ctx.user.id);
+      }),
+
+    initialize: isAdmin.mutation(async () => {
+      await systemSettingsDb.initializeDefaultSettings();
+      return { success: true };
     }),
   }),
 });

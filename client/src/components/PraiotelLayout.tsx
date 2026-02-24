@@ -64,6 +64,7 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
   const [usersExpanded, setUsersExpanded] = useState(false);
   const [crmExpanded, setCrmExpanded] = useState(false);
   const [internalManagementExpanded, setInternalManagementExpanded] = useState(false);
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
   
   // Expandir automaticamente o menu correto baseado na rota atual (apenas na montagem e mudança de rota)
   useEffect(() => {
@@ -77,6 +78,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       setCrmExpanded(true);
     } else if (location.startsWith('/internal-dashboard') || location.startsWith('/announcements') || location.startsWith('/bulletin-board') || location.startsWith('/documents') || location.startsWith('/knowledge-base') || location.startsWith('/favorites') || location.startsWith('/internal-management-analytics') || location.startsWith('/manage-document-categories') || location.startsWith('/manage-knowledge-categories') || location.startsWith('/manage-tags') || location.startsWith('/article/')) {
       setInternalManagementExpanded(true);
+    } else if (location.startsWith('/settings')) {
+      setSettingsExpanded(true);
     }
   }, [location]);
 
@@ -115,15 +118,6 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
       ]
     },
     { 
-      name: "Utilizadores", 
-      href: "/users", 
-      icon: Users, 
-      roles: ["admin"],
-      subItems: [
-        { name: "Roles", href: "/roles", icon: Settings, roles: ["admin"] },
-      ]
-    },
-    { 
       name: "CRM", 
       href: "/crm/dashboard", 
       icon: TrendingUp, 
@@ -155,6 +149,25 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
         { name: "Base de Conhecimento", href: "/knowledge-base", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
         { name: "Os Meus Favoritos", href: "/favorites", icon: Star, roles: ["admin", "gestor", "tecnico", "visualizador"] },
         { name: "Analytics", href: "/internal-management-analytics", icon: BarChart3, roles: ["admin", "gestor"] },
+      ]
+    },
+    { 
+      name: "Utilizadores", 
+      href: "/users", 
+      icon: Users, 
+      roles: ["admin"],
+      subItems: [
+        { name: "Roles", href: "/roles", icon: Settings, roles: ["admin"] },
+      ]
+    },
+    { 
+      name: "Configurações", 
+      href: "/settings/general", 
+      icon: Settings, 
+      roles: ["admin"],
+      subItems: [
+        { name: "Geral", href: "/settings/general", icon: Settings, roles: ["admin"] },
+        { name: "Email / SMTP", href: "/settings/email", icon: Mail, roles: ["admin"] },
       ]
     },
   ];
@@ -289,6 +302,8 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                             setCrmExpanded(!crmExpanded);
                           } else if (item.name === "Gestão Interna") {
                             setInternalManagementExpanded(!internalManagementExpanded);
+                          } else if (item.name === "Configurações") {
+                            setSettingsExpanded(!settingsExpanded);
                           }
                         }}
                         className={`
@@ -304,9 +319,9 @@ export default function PraiotelLayout({ children }: PraiotelLayoutProps) {
                           <item.icon className="h-5 w-5" />
                           {item.name}
                         </div>
-                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : item.name === "Configurações" ? settingsExpanded : false) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                       </button>
-                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : false) && (
+                      {(item.name === "Tickets" ? ticketsExpanded : item.name === "Clientes" ? clientsExpanded : item.name === "Utilizadores" ? usersExpanded : item.name === "CRM" ? crmExpanded : item.name === "Gestão Interna" ? internalManagementExpanded : item.name === "Configurações" ? settingsExpanded : false) && (
                         <div className="ml-8 mt-1 space-y-1">
                           {filteredSubItems.map((subItem) => {
                             const isSubActive = location === subItem.href;

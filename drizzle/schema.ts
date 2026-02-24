@@ -912,3 +912,21 @@ export const crmWorkflowLogs = mysqlTable("crm_workflow_logs", {
 
 export type CrmWorkflowLog = typeof crmWorkflowLogs.$inferSelect;
 export type InsertCrmWorkflowLog = typeof crmWorkflowLogs.$inferInsert;
+
+/**
+ * Configurações gerais do sistema
+ */
+export const systemSettings = mysqlTable("system_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  settingKey: varchar("setting_key", { length: 100 }).notNull().unique(),
+  settingValue: text("setting_value"),
+  settingType: varchar("setting_type", { length: 20 }).default("string").notNull(), // string, number, boolean, json
+  category: varchar("category", { length: 50 }).default("general").notNull(), // general, email, security, appearance
+  label: varchar("label", { length: 200 }),
+  description: text("description"),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedById: int("updated_by_id"),
+});
+
+export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertSystemSetting = typeof systemSettings.$inferInsert;
