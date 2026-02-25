@@ -1068,3 +1068,10 @@
 - [x] Integrar envio de email no fluxo de criação de ticket
 - [x] Integrar envio de email no fluxo de reatribuição de ticket
 - [x] Testar envio de emails no browser (funcionalidade implementada, requer configuração SMTP)
+
+## Simplificação do Fluxo de Recuperação de Password
+- [x] Analisar fluxo atual de recuperação de password
+- [x] Criar função de envio de email de recuperação de password
+- [x] Modificar backend para não mostrar código no ecrã
+- [x] Simplificar frontend para mostrar apenas mensagens claras
+- [x] Testar fluxo completo de recuperação

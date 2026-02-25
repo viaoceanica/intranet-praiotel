@@ -315,24 +315,36 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const user = await db.getUserByEmail(input.email);
         
-        // Sempre retornar sucesso para n\u00e3o revelar se o email existe
+        // Se o email não existe, informar claramente
         if (!user) {
-          return { success: true, message: "Se o email existir no sistema, receber\u00e1 instru\u00e7\u00f5es para recuperar a password." };
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Email não encontrado no sistema. Verifique se digitou corretamente."
+          });
         }
 
-        // Gerar token aleat\u00f3rio
+        // Gerar token aleatório
         const crypto = await import("crypto");
         const token = crypto.randomBytes(32).toString("hex");
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
 
         await db.createPasswordResetToken(user.id, token, expiresAt);
 
-        // Retornar o token (em produ\u00e7\u00e3o seria enviado por email)
+        // Enviar email de recuperação
+        const { sendPasswordResetEmail } = await import("./passwordResetEmail");
+        const emailSent = await sendPasswordResetEmail({
+          recipientEmail: user.email,
+          recipientName: user.name,
+          resetToken: token,
+        });
+
+        if (!emailSent) {
+          console.warn("[Password Reset] Email não foi enviado, mas token foi criado");
+        }
+
         return { 
           success: true, 
-          message: "Se o email existir no sistema, receber\u00e1 instru\u00e7\u00f5es para recuperar a password.",
-          // Em ambiente de desenvolvimento, retornar o token para facilitar testes
-          resetToken: token,
+          message: "Email enviado com sucesso! Verifique a sua caixa de entrada e também a pasta de spam.",
         };
       }),
 

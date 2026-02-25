@@ -23,12 +23,8 @@ export default function RecuperarPassword() {
 
   const requestResetMutation = trpc.auth.requestPasswordReset.useMutation({
     onSuccess: (data) => {
-      toast.success("Pedido de recuperação enviado!");
-      if (data.resetToken) {
-        setResetToken(data.resetToken);
-        setToken(data.resetToken);
-      }
-      setStep("token");
+      toast.success(data.message || "Email enviado com sucesso!");
+      setStep("success");
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao solicitar recuperação");
@@ -77,9 +73,7 @@ export default function RecuperarPassword() {
           </CardTitle>
           <CardDescription>
             {step === "email" && "Insira o seu email para receber instruções de recuperação"}
-            {step === "token" && "Insira o código de recuperação recebido"}
-            {step === "newPassword" && "Defina a sua nova password"}
-            {step === "success" && "A sua password foi alterada com sucesso"}
+            {step === "success" && "Email enviado com sucesso!"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -128,155 +122,32 @@ export default function RecuperarPassword() {
             </form>
           )}
 
-          {/* Step 2: Token */}
-          {step === "token" && (
-            <div className="space-y-4">
-              <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
-                <p className="mb-2">
-                  Se o email <strong className="text-foreground">{email}</strong> existir no sistema, 
-                  receberá instruções para recuperar a password.
-                </p>
-                {resetToken && (
-                  <div className="mt-3 p-3 bg-background rounded border">
-                    <p className="text-xs text-muted-foreground mb-1">Código de recuperação (ambiente de desenvolvimento):</p>
-                    <code className="text-xs break-all text-foreground">{resetToken}</code>
-                  </div>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="token">Código de Recuperação</Label>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="token"
-                    type="text"
-                    placeholder="Cole o código de recuperação"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    required
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-              <Button
-                type="button"
-                className="w-full bg-[#F15A24] hover:bg-[#D14A1A] text-white"
-                onClick={() => {
-                  if (!token.trim()) {
-                    toast.error("Insira o código de recuperação");
-                    return;
-                  }
-                  setStep("newPassword");
-                }}
-              >
-                Continuar
-              </Button>
-              <div className="flex justify-between">
-                <button
-                  type="button"
-                  onClick={() => setStep("email")}
-                  className="text-sm text-[#F15A24] hover:text-[#D14A1A] hover:underline inline-flex items-center gap-1"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  Voltar
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: New Password */}
-          {step === "newPassword" && (
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">Nova Password</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Digite a nova password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    disabled={resetPasswordMutation.isPending}
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar Nova Password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirme a nova password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength={6}
-                    disabled={resetPasswordMutation.isPending}
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-              </div>
-              <Button
-                type="submit"
-                className="w-full bg-[#F15A24] hover:bg-[#D14A1A] text-white"
-                disabled={resetPasswordMutation.isPending}
-              >
-                {resetPasswordMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    A alterar...
-                  </>
-                ) : (
-                  "Alterar Password"
-                )}
-              </Button>
-              <div className="flex justify-between">
-                <button
-                  type="button"
-                  onClick={() => setStep("token")}
-                  className="text-sm text-[#F15A24] hover:text-[#D14A1A] hover:underline inline-flex items-center gap-1"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  Voltar
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* Step 4: Success */}
+          {/* Step 2: Success */}
           {step === "success" && (
             <div className="space-y-4 text-center">
               <div className="flex justify-center">
                 <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
-              <p className="text-muted-foreground">
-                A sua password foi alterada com sucesso. Pode agora fazer login com a nova password.
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                <p className="text-sm text-green-800 dark:text-green-200 font-medium mb-2">
+                  ✅ Email enviado com sucesso!
+                </p>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Verifique a sua caixa de entrada em <strong>{email}</strong>
+                </p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                  📧 Não esqueça de verificar também a pasta de <strong>spam</strong>
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Clique no link recebido por email para definir a sua nova password.
               </p>
               <Button
                 type="button"
                 className="w-full bg-[#F15A24] hover:bg-[#D14A1A] text-white"
                 onClick={() => setLocation("/login")}
               >
-                Ir para o Login
+                Voltar ao Login
               </Button>
             </div>
           )}
