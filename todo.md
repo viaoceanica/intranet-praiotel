@@ -1047,3 +1047,16 @@
 - [x] Filtrar histórico para mostrar apenas mudanças de técnico nesta secção
 - [x] Manter notas e outros eventos no "Histórico e Notas" em baixo
 - [x] Testar nova organização visual no browser
+
+## Notificações de Reatribuição de Tickets
+- [x] Implementar envio de notificação quando ticket é atribuído a técnico (já implementado)
+- [x] Implementar envio de notificação quando ticket é reatribuído (já implementado)
+- [x] Testar notificações no browser
+
+## Dashboard de Estatísticas de Atribuições
+- [x] Criar endpoint para obter estatísticas de tickets por técnico (já implementado)
+- [x] Calcular total de tickets atribuídos por técnico (já implementado)
+- [x] Calcular tempo médio de resolução por técnico (já implementado)
+- [x] Criar página de dashboard com gráficos e tabelas (já implementado)
+- [x] Adicionar filtros por período de tempo (já implementado)
+- [x] Testar dashboard no browser

@@ -1,0 +1,32 @@
+{
+  "query": "SELECT n.*, u.name as user_name \nFROM notifications n\nJOIN users u ON n.userId = u.id\nWHERE u.name = 'Decio Toste 2'\nORDER BY n.createdAt DESC\nLIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT n.*, u.name as user_name \nFROM notifications n\nJOIN users u ON n.userId = u.id\nWHERE u.name = 'Decio Toste 2'\nORDER BY n.createdAt DESC\nLIMIT 5;",
+  "rows": [
+    {
+      "id": "90003",
+      "userId": "30002",
+      "type": "ticket_assigned",
+      "title": "🎫 Ticket atribuído",
+      "message": "O ticket TK2026-0007 foi atribuído a você",
+      "ticketId": "60045",
+      "isRead": "0",
+      "createdAt": "2026-02-25 13:54:38",
+      "user_name": "Decio Toste 2"
+    },
+    {
+      "id": "90001",
+      "userId": "30002",
+      "type": "ticket_assigned",
+      "title": "🎫 Ticket atribuído",
+      "message": "O ticket TK2026-0007 foi atribuído a você",
+      "ticketId": "60045",
+      "isRead": "0",
+      "createdAt": "2026-02-25 12:33:01",
+      "user_name": "Decio Toste 2"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tuserId\ttype\ttitle\tmessage\tticketId\tisRead\tcreatedAt\tuser_name\n90003\t30002\tticket_assigned\t🎫 Ticket atribuído\tO ticket TK2026-0007 foi atribuído a você\t60045\t0\t2026-02-25 13:54:38\tDecio Toste 2\n90001\t30002\tticket_assigned\t🎫 Ticket atribuído\tO ticket TK2026-0007 foi atribuído a você\t60045\t0\t2026-02-25 12:33:01\tDecio Toste 2\n",
+  "stderr": "",
+  "execution_time_ms": 103
+}
