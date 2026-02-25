@@ -42,6 +42,13 @@ export default function NewTicket() {
 
   const [useCustomClient, setUseCustomClient] = useState(false);
   const [useCustomEquipment, setUseCustomEquipment] = useState(false);
+  const [manualClientData, setManualClientData] = useState({
+    name: "",
+    nif: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
   const [clientSearchQuery, setClientSearchQuery] = useState("");
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [selectedClientInfo, setSelectedClientInfo] = useState<{name: string; nif?: string; email?: string; clientType?: string} | null>(null);
@@ -259,6 +266,10 @@ export default function NewTicket() {
     createMutation.mutate({
       ...finalData,
       isManualClient: useCustomClient,
+      manualClientNif: useCustomClient ? manualClientData.nif : undefined,
+      manualClientEmail: useCustomClient ? manualClientData.email : undefined,
+      manualClientPhone: useCustomClient ? manualClientData.phone : undefined,
+      manualClientAddress: useCustomClient ? manualClientData.address : undefined,
     });
   };
 
@@ -311,8 +322,10 @@ export default function NewTicket() {
                       setUseCustomClient(e.target.checked);
                       if (!e.target.checked) {
                         setFormData({ ...formData, clientName: "" });
+                        setManualClientData({ name: "", nif: "", email: "", phone: "", address: "" });
                       } else {
-                        setFormData({ ...formData, clientId: undefined });
+                        setFormData({ ...formData, clientId: undefined, commercialClientId: undefined });
+                        setSelectedClientInfo(null);
                       }
                     }}
                     className="w-4 h-4"
@@ -323,24 +336,77 @@ export default function NewTicket() {
                 </div>
 
                 {useCustomClient ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="clientName">Cliente / Empresa *</Label>
-                    <Input
-                      id="clientName"
-                      value={formData.clientName}
-                      onChange={(e) => {
-                        setFormData({ ...formData, clientName: e.target.value });
-                        if (validationErrors.clientName) {
-                          setValidationErrors({ ...validationErrors, clientName: "" });
-                        }
-                      }}
-                      required
-                      placeholder="Nome do cliente ou empresa"
-                      className={validationErrors.clientName ? "border-red-500" : ""}
-                    />
-                    {validationErrors.clientName && (
-                      <p className="text-sm text-red-500">{validationErrors.clientName}</p>
-                    )}
+                  <div className="space-y-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Plus className="h-4 w-4 text-orange-600" />
+                      <span className="text-sm font-semibold text-orange-800">Novo Cliente - Assistência Técnica</span>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="manualClientName">Nome / Empresa *</Label>
+                      <Input
+                        id="manualClientName"
+                        value={manualClientData.name}
+                        onChange={(e) => {
+                          setManualClientData({ ...manualClientData, name: e.target.value });
+                          setFormData({ ...formData, clientName: e.target.value });
+                          if (validationErrors.clientName) {
+                            setValidationErrors({ ...validationErrors, clientName: "" });
+                          }
+                        }}
+                        required
+                        placeholder="Nome do cliente ou empresa"
+                        className={`bg-white ${validationErrors.clientName ? "border-red-500" : ""}`}
+                      />
+                      {validationErrors.clientName && (
+                        <p className="text-sm text-red-500">{validationErrors.clientName}</p>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="manualClientNif">NIF</Label>
+                        <Input
+                          id="manualClientNif"
+                          value={manualClientData.nif}
+                          onChange={(e) => setManualClientData({ ...manualClientData, nif: e.target.value })}
+                          placeholder="Ex: 123456789"
+                          className="bg-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="manualClientEmail">Email</Label>
+                        <Input
+                          id="manualClientEmail"
+                          type="email"
+                          value={manualClientData.email}
+                          onChange={(e) => setManualClientData({ ...manualClientData, email: e.target.value })}
+                          placeholder="email@exemplo.com"
+                          className="bg-white"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="manualClientPhone">Telefone</Label>
+                        <Input
+                          id="manualClientPhone"
+                          value={manualClientData.phone}
+                          onChange={(e) => setManualClientData({ ...manualClientData, phone: e.target.value })}
+                          placeholder="+351 912 345 678"
+                          className="bg-white"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="manualClientAddress">Morada</Label>
+                        <Input
+                          id="manualClientAddress"
+                          value={manualClientData.address}
+                          onChange={(e) => setManualClientData({ ...manualClientData, address: e.target.value })}
+                          placeholder="Rua, Cidade"
+                          className="bg-white"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-xs text-orange-600">Este cliente será guardado na base de dados de Assistência Técnica.</p>
                   </div>
                 ) : (
                   <div className="space-y-2 relative">

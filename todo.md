@@ -1086,3 +1086,11 @@
 - [x] Criar página de visualização de logs para admins
 - [x] Adicionar filtros por tipo, status e período
 - [x] Testar sistema de logs no browser
+
+## Correção da Inserção Manual de Clientes
+- [x] Analisar código atual - cliente manual já era guardado na BD mas com dados temporários
+- [x] Garantir que cliente manual é inserido na tabela clients (Assistência Técnica) com dados reais
+- [x] Melhorar formulário para recolher dados completos (nome, NIF, email, telefone, morada)
+- [x] Manter separação clara: clientes Assistência Técnica vs clientes Gestão Comercial
+- [x] Tratar duplicados de NIF (verificar antes de criar, usar existente se duplicado)
+- [x] Testar fluxo completo no browser - Hotel Mar Azul criado com sucesso

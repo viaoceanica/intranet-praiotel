@@ -1,0 +1,19 @@
+{
+  "query": "SELECT id, designation, nif, primaryEmail, address, source, createdAt FROM clients WHERE designation LIKE '%Hotel Mar Azul%' OR nif = '987654321' ORDER BY createdAt DESC LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, designation, nif, primaryEmail, address, source, createdAt FROM clients WHERE designation LIKE '%Hotel Mar Azul%' OR nif = '987654321' ORDER BY createdAt DESC LIMIT 5;",
+  "rows": [
+    {
+      "id": "120002",
+      "designation": "Hotel Mar Azul",
+      "nif": "987654321",
+      "primaryEmail": "hotelmarazul@teste.pt",
+      "address": "Rua da Praia 50, Ponta Delgada",
+      "source": "direto",
+      "createdAt": "2026-02-25 14:56:12"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdesignation\tnif\tprimaryEmail\taddress\tsource\tcreatedAt\n120002\tHotel Mar Azul\t987654321\thotelmarazul@teste.pt\tRua da Praia 50, Ponta Delgada\tdireto\t2026-02-25 14:56:12\n",
+  "stderr": "",
+  "execution_time_ms": 90
+}

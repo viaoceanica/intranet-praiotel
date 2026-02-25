@@ -1,0 +1,28 @@
+{
+  "query": "SHOW CREATE TABLE clients;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SHOW CREATE TABLE clients;",
+  "rows": [
+    {
+      "Table": "clients",
+      "Create Table": "CREATE TABLE `clients` ("
+    }
+  ],
+  "messages": [
+    "  `id` int(11) NOT NULL AUTO_INCREMENT,",
+    "  `designation` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `address` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `primaryEmail` varchar(320) COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `nif` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `responsiblePerson` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,",
+    "  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,",
+    "  `source` enum('lead','direto','outro') COLLATE utf8mb4_unicode_ci DEFAULT 'direto',",
+    "  `leadId` int(11) DEFAULT NULL,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,",
+    "  UNIQUE KEY `clients_nif_unique` (`nif`)",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=150001"
+  ],
+  "stdout": "Table\tCreate Table\nclients\tCREATE TABLE `clients` (\n  `id` int(11) NOT NULL AUTO_INCREMENT,\n  `designation` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `address` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `primaryEmail` varchar(320) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `nif` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,\n  `responsiblePerson` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,\n  `createdAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  `updatedAt` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n  `source` enum('lead','direto','outro') COLLATE utf8mb4_unicode_ci DEFAULT 'direto',\n  `leadId` int(11) DEFAULT NULL,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,\n  UNIQUE KEY `clients_nif_unique` (`nif`)\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci AUTO_INCREMENT=150001\n",
+  "stderr": "",
+  "execution_time_ms": 58
+}

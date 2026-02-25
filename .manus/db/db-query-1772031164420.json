@@ -1,0 +1,16 @@
+{
+  "query": "SELECT id, designation, nif, primaryEmail FROM clients WHERE nif = '123456789';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, designation, nif, primaryEmail FROM clients WHERE nif = '123456789';",
+  "rows": [
+    {
+      "id": "1",
+      "designation": "Praiotel Lda",
+      "nif": "123456789",
+      "primaryEmail": "geral@praiotel.pt"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tdesignation\tnif\tprimaryEmail\n1\tPraiotel Lda\t123456789\tgeral@praiotel.pt\n",
+  "stderr": "",
+  "execution_time_ms": 55
+}

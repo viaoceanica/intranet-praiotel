@@ -611,22 +611,60 @@ export const appRouter = router({
         description: z.string().min(1),
         assignedToId: z.number().optional(),
         isManualClient: z.boolean().optional(),
+        manualClientNif: z.string().optional(),
+        manualClientEmail: z.string().optional(),
+        manualClientPhone: z.string().optional(),
+        manualClientAddress: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const ticketNumber = await ticketsDb.generateTicketNumber();
         
-        // Se é cliente manual de assistência técnica, criar o cliente
+        // Se é cliente manual de assistência técnica, criar o cliente na BD
         let finalClientId = input.clientId;
         if (input.isManualClient && input.clientType === "assistencia" && !input.clientId) {
-          // Criar cliente com dados mínimos
-          const newClient = await clientsDb.createClient({
-            designation: input.clientName,
-            address: "",
-            primaryEmail: `cliente_${Date.now()}@temp.praiotel.pt`, // Email temporário único
-            nif: `TEMP${Date.now()}`, // NIF temporário único
-            source: "direto",
-          });
-          finalClientId = Number(newClient[0].insertId);
+          const clientNif = input.manualClientNif?.trim() || `TEMP${Date.now()}`;
+          const clientEmail = input.manualClientEmail?.trim() || `cliente_${Date.now()}@temp.praiotel.pt`;
+          const clientAddress = input.manualClientAddress?.trim() || "";
+          const clientPhone = input.manualClientPhone?.trim() || "";
+          
+          // Verificar se já existe cliente com o mesmo NIF
+          const existingClients = await clientsDb.searchClients(clientNif);
+          const existingByNif = existingClients.find(c => c.nif === clientNif);
+          
+          if (existingByNif) {
+            // Usar cliente existente e atualizar dados se necessário
+            finalClientId = existingByNif.id;
+            await clientsDb.updateClient(existingByNif.id, {
+              designation: input.clientName || existingByNif.designation,
+              address: clientAddress || existingByNif.address,
+              primaryEmail: clientEmail.includes('@temp.praiotel.pt') ? existingByNif.primaryEmail : clientEmail,
+            });
+          } else {
+            // Criar novo cliente na tabela de Assistência Técnica
+            try {
+              const newClient = await clientsDb.createClient({
+                designation: input.clientName,
+                address: clientAddress,
+                primaryEmail: clientEmail,
+                nif: clientNif,
+                source: "direto",
+              });
+              finalClientId = Number(newClient[0].insertId);
+            } catch (err: any) {
+              // Se falhar por NIF duplicado, tentar encontrar o existente
+              if (err.message?.includes('Duplicate') || err.message?.includes('unique')) {
+                const retrySearch = await clientsDb.searchClients(clientNif);
+                const found = retrySearch.find(c => c.nif === clientNif);
+                if (found) {
+                  finalClientId = found.id;
+                } else {
+                  throw new Error(`Já existe um cliente com o NIF ${clientNif}. Por favor, pesquise o cliente existente.`);
+                }
+              } else {
+                throw err;
+              }
+            }
+          }
         }
         
         // Aplicar priorização automática
