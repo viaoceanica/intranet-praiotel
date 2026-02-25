@@ -462,57 +462,46 @@ export default function TicketDetail() {
                 </div>
 
                 <div className="border-t pt-4 space-y-3">
-                  {history && history.length > 0 ? (
-                    history.map((item) => {
-                      const itemUser = users?.find(u => u.id === item.userId);
-                      return (
-                        <div key={item.id} className="flex gap-3 pb-3 border-b last:border-0">
-                          <div className="flex-shrink-0">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${(item.action === "assignment" || item.action === "reassignment") ? "bg-blue-500" : "bg-[#F15A24]"}`}>
-                              {(item.action === "assignment" || item.action === "reassignment") ? (
-                                <UserCheck className="h-4 w-4 text-white" />
-                              ) : (
+                  {history && history.filter(item => item.action !== "assignment" && item.action !== "reassignment").length > 0 ? (
+                    history
+                      .filter(item => item.action !== "assignment" && item.action !== "reassignment")
+                      .map((item) => {
+                        const itemUser = users?.find(u => u.id === item.userId);
+                        return (
+                          <div key={item.id} className="flex gap-3 pb-3 border-b last:border-0">
+                            <div className="flex-shrink-0">
+                              <div className="w-8 h-8 rounded-full bg-[#F15A24] flex items-center justify-center">
                                 <User className="h-4 w-4 text-white" />
+                              </div>
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{itemUser?.name || "Utilizador"}</span>
+                                <span className="text-sm text-gray-500">
+                                  {actionLabels[item.action] || item.action}
+                                </span>
+                              </div>
+                              {item.action === "status_change" && (
+                                <p className="text-sm text-gray-600">
+                                  De <Badge className={statusColors[item.oldValue || ""]} variant="secondary">{statusLabels[item.oldValue || ""]}</Badge>
+                                  {" "}para <Badge className={statusColors[item.newValue || ""]} variant="secondary">{statusLabels[item.newValue || ""]}</Badge>
+                                </p>
                               )}
+                              {item.action === "note_added" && (
+                                <p className="text-sm text-gray-700 mt-1 bg-gray-50 p-2 rounded">
+                                  {item.newValue}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                                <Clock className="h-3 w-3" />
+                                {format(new Date(item.createdAt), "dd/MM/yyyy 'às' HH:mm")}
+                              </div>
                             </div>
                           </div>
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium">{itemUser?.name || "Utilizador"}</span>
-                              <span className="text-sm text-gray-500">
-                                {actionLabels[item.action] || item.action}
-                              </span>
-                            </div>
-                            {item.action === "status_change" && (
-                              <p className="text-sm text-gray-600">
-                                De <Badge className={statusColors[item.oldValue || ""]} variant="secondary">{statusLabels[item.oldValue || ""]}</Badge>
-                                {" "}para <Badge className={statusColors[item.newValue || ""]} variant="secondary">{statusLabels[item.newValue || ""]}</Badge>
-                              </p>
-                            )}
-                            {item.action === "note_added" && (
-                              <p className="text-sm text-gray-700 mt-1 bg-gray-50 p-2 rounded">
-                                {item.newValue}
-                              </p>
-                            )}
-                            {(item.action === "assignment" || item.action === "reassignment") && (
-                              <p className="text-sm text-gray-600">
-                                {item.action === "reassignment" ? (
-                                  <>De <Badge className="bg-gray-100 text-gray-700" variant="secondary">{item.oldValue}</Badge>{" "}para <Badge className="bg-blue-100 text-blue-800" variant="secondary">{item.newValue}</Badge></>
-                                ) : (
-                                  <>Atribuído a <Badge className="bg-blue-100 text-blue-800" variant="secondary">{item.newValue}</Badge></>
-                                )}
-                              </p>
-                            )}
-                            <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
-                              <Clock className="h-3 w-3" />
-                              {format(new Date(item.createdAt), "dd/MM/yyyy 'às' HH:mm")}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
+                        );
+                      })
                   ) : (
-                    <p className="text-center text-gray-500 py-4">Nenhum histórico</p>
+                    <p className="text-center text-gray-500 py-4">Nenhuma nota ou alteração de estado</p>
                   )}
                 </div>
               </CardContent>
@@ -690,6 +679,54 @@ export default function TicketDetail() {
                     </div>
                   </>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Histórico de Atribuições</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {history && history.filter(item => item.action === "assignment" || item.action === "reassignment").length > 0 ? (
+                    history
+                      .filter(item => item.action === "assignment" || item.action === "reassignment")
+                      .map((item) => {
+                        const itemUser = users?.find(u => u.id === item.userId);
+                        return (
+                          <div key={item.id} className="pb-3 border-b last:border-0">
+                            <div className="flex items-start gap-2">
+                              <div className="flex-shrink-0 mt-0.5">
+                                <div className="w-7 h-7 rounded-full bg-blue-500 flex items-center justify-center">
+                                  <UserCheck className="h-3.5 w-3.5 text-white" />
+                                </div>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900">
+                                  {itemUser?.name || "Utilizador"}
+                                </p>
+                                {item.action === "reassignment" ? (
+                                  <p className="text-xs text-gray-600 mt-0.5">
+                                    De <span className="font-medium">{item.oldValue}</span> para <span className="font-medium text-blue-600">{item.newValue}</span>
+                                  </p>
+                                ) : (
+                                  <p className="text-xs text-gray-600 mt-0.5">
+                                    Atribuído a <span className="font-medium text-blue-600">{item.newValue}</span>
+                                  </p>
+                                )}
+                                <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                                  <Clock className="h-3 w-3" />
+                                  {format(new Date(item.createdAt), "dd/MM/yyyy HH:mm")}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                  ) : (
+                    <p className="text-center text-gray-500 text-sm py-4">Sem atribuições</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

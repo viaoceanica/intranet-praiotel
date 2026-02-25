@@ -1035,3 +1035,15 @@
 - [x] Cliente criado manualmente aparece na listagem de Assistência Técnica
 - [x] Ticket fica ligado ao cliente criado (clientId preenchido)
 - [x] Testes automatizados criados e a passar (4/4)
+
+## Correção do Histórico de Técnicos Atribuídos
+- [x] Investigar por que mudanças de técnico não ficam registadas no histórico
+- [x] Verificado que sistema está a funcionar corretamente
+- [x] Testar atribuição de técnico e verificar histórico
+- [x] Histórico mostra "Reatribuiu o ticket De X para Y" com data e hora
+
+## Separação do Histórico de Atribuições de Técnicos
+- [x] Criar secção "Histórico de Atribuições" no painel direito do ticket
+- [x] Filtrar histórico para mostrar apenas mudanças de técnico nesta secção
+- [x] Manter notas e outros eventos no "Histórico e Notas" em baixo
+- [x] Testar nova organização visual no browser
