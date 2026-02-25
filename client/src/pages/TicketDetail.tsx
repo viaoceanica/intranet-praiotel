@@ -240,6 +240,7 @@ export default function TicketDetail() {
   );
 
   const assignedUser = users?.find(u => u.id === ticket.assignedToId);
+  const assignedToDisplay = ticket.assignedToId === -1 ? "Todos os Técnicos" : (assignedUser ? assignedUser.name : "Não atribuído");
 
   return (
     <PraiotelLayout>
@@ -564,11 +565,11 @@ export default function TicketDetail() {
                     <div className="space-y-2">
                       <Label>Atribuído a</Label>
                       <Select
-                        value={editData.assignedToId?.toString() || "none"}
+                        value={editData.assignedToId === -1 ? "-1" : (editData.assignedToId?.toString() || "none")}
                         onValueChange={(value) =>
                           setEditData({
                             ...editData,
-                            assignedToId: value === "none" ? undefined : parseInt(value),
+                            assignedToId: value === "none" ? undefined : (value === "-1" ? -1 : parseInt(value)),
                           })
                         }
                       >
@@ -577,6 +578,7 @@ export default function TicketDetail() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="none">Não atribuído</SelectItem>
+                          <SelectItem value="-1" className="font-semibold text-[#F15A24]">Todos os Técnicos</SelectItem>
                           {technicians?.map((tech) => (
                             <SelectItem key={tech.id} value={tech.id.toString()}>
                               {tech.name}
@@ -682,7 +684,7 @@ export default function TicketDetail() {
                     <div>
                       <Label className="text-gray-500">Atribuído a</Label>
                       <p className="mt-1 font-medium">
-                        {assignedUser ? assignedUser.name : "Não atribuído"}
+                        {assignedToDisplay}
                       </p>
                     </div>
                   </>

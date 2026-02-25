@@ -447,11 +447,11 @@ export default function Tickets() {
             <div className="space-y-2">
               <Label htmlFor="quickEditTechnician">Técnico Atribuído</Label>
               <Select
-                value={quickEditData.assignedToId?.toString() || "none"}
+                value={quickEditData.assignedToId === -1 ? "-1" : (quickEditData.assignedToId?.toString() || "none")}
                 onValueChange={(value) => 
                   setQuickEditData({ 
                     ...quickEditData, 
-                    assignedToId: value === "none" ? undefined : parseInt(value) 
+                    assignedToId: value === "none" ? undefined : (value === "-1" ? -1 : parseInt(value))
                   })
                 }
               >
@@ -460,6 +460,7 @@ export default function Tickets() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Não atribuído</SelectItem>
+                  <SelectItem value="-1" className="font-semibold text-[#F15A24]">Todos os Técnicos</SelectItem>
                   {technicians?.map((tech) => (
                     <SelectItem key={tech.id} value={tech.id.toString()}>
                       {tech.name}

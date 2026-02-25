@@ -708,25 +708,53 @@ export const appRouter = router({
 
         // Registar atribuição inicial no histórico
         if (input.assignedToId) {
-          const assignedUser = await dbHelpers.getUserById(input.assignedToId);
-          if (assignedUser && !assignedUser.active) {
-            throw new TRPCError({ code: "BAD_REQUEST", message: "Não é possível atribuir tickets a utilizadores inativos" });
-          }
-          await ticketsDb.createTicketHistory({
-            ticketId: createdTicket.id,
-            userId: ctx.user.id,
-            action: "assignment",
-            fieldChanged: "assignedToId",
-            oldValue: "Não atribuído",
-            newValue: assignedUser ? assignedUser.name : "Desconhecido",
-          });
+          // Se assignedToId = -1, significa "Todos os Técnicos"
+          if (input.assignedToId === -1) {
+            await ticketsDb.createTicketHistory({
+              ticketId: createdTicket.id,
+              userId: ctx.user.id,
+              action: "assignment",
+              fieldChanged: "assignedToId",
+              oldValue: "Não atribuído",
+              newValue: "Todos os Técnicos",
+            });
 
-          // Notificar técnico
-          await notificationHelpers.notifyTicketAssigned(
-            createdTicket.id,
-            ticketNumber,
-            input.assignedToId
-          );
+            // Notificar todos os técnicos ativos
+            const allUsers = await dbHelpers.getAllUsers();
+            const technicians = allUsers.filter(u => 
+              u.active && 
+              (u.role === 'tecnico' || u.role === 'admin' || u.role === 'administrador')
+            );
+            
+            for (const tech of technicians) {
+              await notificationHelpers.notifyTicketAssigned(
+                createdTicket.id,
+                ticketNumber,
+                tech.id
+              );
+            }
+          } else {
+            // Atribuição normal a um técnico específico
+            const assignedUser = await dbHelpers.getUserById(input.assignedToId);
+            if (assignedUser && !assignedUser.active) {
+              throw new TRPCError({ code: "BAD_REQUEST", message: "Não é possível atribuir tickets a utilizadores inativos" });
+            }
+            await ticketsDb.createTicketHistory({
+              ticketId: createdTicket.id,
+              userId: ctx.user.id,
+              action: "assignment",
+              fieldChanged: "assignedToId",
+              oldValue: "Não atribuído",
+              newValue: assignedUser ? assignedUser.name : "Desconhecido",
+            });
+
+            // Notificar técnico
+            await notificationHelpers.notifyTicketAssigned(
+              createdTicket.id,
+              ticketNumber,
+              input.assignedToId
+            );
+          }
         }
 
         // Registar alteração de prioridade se foi automática
@@ -752,15 +780,35 @@ export const appRouter = router({
           }
         }
 
-        // Notificar técnico atribuído
+        // Notificar técnico(s) atribuído(s)
         if (input.assignedToId) {
-          await notificationsDb.createNotification({
-            userId: input.assignedToId,
-            type: "ticket_assigned",
-            title: "Novo ticket atribuído",
-            message: `O ticket ${ticketNumber} foi-lhe atribuído: ${input.clientName} - ${input.equipment}`,
-            ticketId: undefined, // Será preenchido após obter o ID
-          });
+          if (input.assignedToId === -1) {
+            // Notificar todos os técnicos
+            const allUsers = await dbHelpers.getAllUsers();
+            const technicians = allUsers.filter(u => 
+              u.active && 
+              (u.role === 'tecnico' || u.role === 'admin' || u.role === 'administrador')
+            );
+            
+            for (const tech of technicians) {
+              await notificationsDb.createNotification({
+                userId: tech.id,
+                type: "ticket_assigned",
+                title: "Novo ticket atribuído",
+                message: `O ticket ${ticketNumber} foi atribuído a todos os técnicos: ${input.clientName} - ${input.equipment}`,
+                ticketId: createdTicket.id,
+              });
+            }
+          } else {
+            // Notificar técnico específico
+            await notificationsDb.createNotification({
+              userId: input.assignedToId,
+              type: "ticket_assigned",
+              title: "Novo ticket atribuído",
+              message: `O ticket ${ticketNumber} foi-lhe atribuído: ${input.clientName} - ${input.equipment}`,
+              ticketId: createdTicket.id,
+            });
+          }
         }
 
         return { success: true, ticketNumber };
@@ -826,25 +874,59 @@ export const appRouter = router({
 
         // Registar atribuição/reatribuição no histórico
         if (input.assignedToId !== undefined && input.assignedToId !== ticket.assignedToId) {
-          const oldAssignedUser = ticket.assignedToId ? await dbHelpers.getUserById(ticket.assignedToId) : null;
-          const newAssignedUser = input.assignedToId ? await dbHelpers.getUserById(input.assignedToId) : null;
+          let oldValueText = "Não atribuído";
+          let newValueText = "Não atribuído";
+          
+          // Determinar valor antigo
+          if (ticket.assignedToId === -1) {
+            oldValueText = "Todos os Técnicos";
+          } else if (ticket.assignedToId) {
+            const oldAssignedUser = await dbHelpers.getUserById(ticket.assignedToId);
+            oldValueText = oldAssignedUser ? oldAssignedUser.name : "Desconhecido";
+          }
+          
+          // Determinar valor novo
+          if (input.assignedToId === -1) {
+            newValueText = "Todos os Técnicos";
+          } else if (input.assignedToId) {
+            const newAssignedUser = await dbHelpers.getUserById(input.assignedToId);
+            newValueText = newAssignedUser ? newAssignedUser.name : "Desconhecido";
+          }
           
           await ticketsDb.createTicketHistory({
             ticketId: id,
             userId: ctx.user.id,
             action: ticket.assignedToId ? "reassignment" : "assignment",
             fieldChanged: "assignedToId",
-            oldValue: oldAssignedUser ? oldAssignedUser.name : "Não atribuído",
-            newValue: newAssignedUser ? newAssignedUser.name : "Não atribuído",
+            oldValue: oldValueText,
+            newValue: newValueText,
           });
 
           // Notificar sobre nova atribuição
           if (input.assignedToId) {
-            await notificationHelpers.notifyTicketAssigned(
-              id,
-              ticket.ticketNumber,
-              input.assignedToId
-            );
+            if (input.assignedToId === -1) {
+              // Notificar todos os técnicos
+              const allUsers = await dbHelpers.getAllUsers();
+              const technicians = allUsers.filter(u => 
+                u.active && 
+                (u.role === 'tecnico' || u.role === 'admin' || u.role === 'administrador')
+              );
+              
+              for (const tech of technicians) {
+                await notificationHelpers.notifyTicketAssigned(
+                  id,
+                  ticket.ticketNumber,
+                  tech.id
+                );
+              }
+            } else {
+              // Notificar técnico específico
+              await notificationHelpers.notifyTicketAssigned(
+                id,
+                ticket.ticketNumber,
+                input.assignedToId
+              );
+            }
           }
         }
 

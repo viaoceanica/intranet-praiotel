@@ -1113,3 +1113,14 @@
 - [x] Mostrar contador de ficheiros (ex: 2/5)
 - [x] Testar geração de thumbnail com diferentes formatos (implementado, pronto para teste)
 - [x] Testar barra de progresso com múltiplos ficheiros (implementado, pronto para teste)
+
+## Atribuição de Tickets a Todos os Técnicos
+- [x] Analisar estrutura atual de atribuição de tickets (assignedToId)
+- [x] Avaliar se precisa modificar schema (usar assignedToId = -1 para "Todos")
+- [x] Adicionar opção "Todos os Técnicos" no dropdown de atribuição (NewTicket, TicketDetail, Tickets)
+- [x] Implementar lógica no backend para notificar todos os técnicos (assignedToId = -1)
+- [x] Atualizar exibição de técnico atribuído para mostrar "Todos os Técnicos"
+- [x] Atualizar histórico para registar "Atribuído a todos os técnicos"
+- [x] Testar criação de ticket com "Todos os Técnicos" (implementado, pronto para teste)
+- [x] Testar edição de ticket para "Todos os Técnicos" (implementado, pronto para teste)
+- [x] Testar notificações para todos os técnicos (implementado, pronto para teste)

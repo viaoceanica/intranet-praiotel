@@ -791,11 +791,11 @@ export default function NewTicket() {
                 <div className="space-y-2">
                   <Label htmlFor="assignedTo">Atribuir a (opcional)</Label>
                   <Select
-                    value={formData.assignedToId?.toString() || "none"}
+                    value={formData.assignedToId === -1 ? "-1" : (formData.assignedToId?.toString() || "none")}
                     onValueChange={(value) => 
                       setFormData({ 
                         ...formData, 
-                        assignedToId: value === "none" ? undefined : parseInt(value) 
+                        assignedToId: value === "none" ? undefined : (value === "-1" ? -1 : parseInt(value))
                       })
                     }
                   >
@@ -804,6 +804,7 @@ export default function NewTicket() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="none">Não atribuído</SelectItem>
+                      <SelectItem value="-1" className="font-semibold text-[#F15A24]">Todos os Técnicos</SelectItem>
                       {technicians?.map((tech) => (
                         <SelectItem key={tech.id} value={tech.id.toString()}>
                           {tech.name}
