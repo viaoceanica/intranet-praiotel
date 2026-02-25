@@ -993,3 +993,21 @@ export const commercialClients = mysqlTable("commercial_clients", {
 
 export type CommercialClient = typeof commercialClients.$inferSelect;
 export type InsertCommercialClient = typeof commercialClients.$inferInsert;
+
+/**
+ * Log de emails enviados pelo sistema
+ * Registo de auditoria de todos os emails enviados
+ */
+export const emailLogs = mysqlTable("email_logs", {
+  id: int("id").autoincrement().primaryKey(),
+  type: varchar("type", { length: 50 }).notNull(), // 'ticket_assignment' | 'password_reset' | 'notification' | 'campaign'
+  recipient: varchar("recipient", { length: 320 }).notNull(),
+  subject: text("subject").notNull(),
+  status: varchar("status", { length: 20 }).notNull(), // 'sent' | 'failed' | 'pending'
+  errorMessage: text("error_message"),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  metadata: text("metadata"), // JSON com informações adicionais (ticketId, userId, etc.)
+});
+
+export type EmailLog = typeof emailLogs.$inferSelect;
+export type InsertEmailLog = typeof emailLogs.$inferInsert;

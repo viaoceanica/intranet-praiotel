@@ -204,6 +204,13 @@
       "when": 1771971091279,
       "tag": "0028_shallow_millenium_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1772029762237,
+      "tag": "0029_legal_hex",
+      "breakpoints": true
     }
   ]
 }

@@ -20,6 +20,7 @@ import EquipmentForm from "./pages/EquipmentForm";
 import EquipmentHistory from "./pages/EquipmentHistory";
 import PrioritizationRules from "./pages/PrioritizationRules";
 import TechnicianStats from "./pages/TechnicianStats";
+import EmailLogs from "./pages/EmailLogs";
 import { ResponseTemplates } from "./pages/ResponseTemplates";
 import Roles from "./pages/Roles";
 import { InternalDashboard } from "./pages/InternalDashboard";
@@ -94,6 +95,7 @@ function Router() {
       <Route path="/equipment/:id/history" component={() => <ProtectedRoute component={EquipmentHistory} />} />
       <Route path="/prioritization" component={() => <ProtectedRoute component={PrioritizationRules} />} />
       <Route path="/technician-stats" component={() => <ProtectedRoute component={TechnicianStats} />} />
+      <Route path="/email-logs" component={() => <ProtectedRoute component={EmailLogs} />} />
       <Route path="/response-templates" component={() => <ProtectedRoute component={ResponseTemplates} />} />
       <Route path="/roles" component={() => <ProtectedRoute component={Roles} />} />
       <Route path="/internal-dashboard" component={() => <ProtectedRoute component={InternalDashboard} />} />

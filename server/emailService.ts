@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import * as systemSettingsDb from "./systemSettingsDb";
+import { getDb } from "./db";
+import { emailLogs } from "../drizzle/schema";
 
 /**
  * Configurar transporter do nodemailer com as definições do sistema
@@ -244,10 +246,50 @@ Esta é uma notificação automática do sistema Intranet Praiotel.
     });
 
     console.log(`[Email] Notificação enviada para ${params.recipientEmail} (Ticket ${params.ticketNumber})`);
+    
+    // Registar log de sucesso
+    const db = await getDb();
+    if (db) {
+      await db.insert(emailLogs).values({
+      type: "ticket_assignment",
+      recipient: params.recipientEmail,
+      subject: `🎫 Novo Ticket: ${params.ticketNumber} - ${params.clientName}`,
+      status: "sent",
+      errorMessage: null,
+      metadata: JSON.stringify({
+        ticketId: params.ticketId,
+        ticketNumber: params.ticketNumber,
+        recipientName: params.recipientName,
+      }),
+      });
+    }
+    
     return true;
 
   } catch (error) {
     console.error("[Email] Erro ao enviar notificação de atribuição:", error);
+    
+    // Registar log de falha
+    try {
+      const db = await getDb();
+      if (db) {
+        await db.insert(emailLogs).values({
+        type: "ticket_assignment",
+        recipient: params.recipientEmail,
+        subject: `🎫 Novo Ticket: ${params.ticketNumber} - ${params.clientName}`,
+        status: "failed",
+        errorMessage: error instanceof Error ? error.message : String(error),
+        metadata: JSON.stringify({
+          ticketId: params.ticketId,
+          ticketNumber: params.ticketNumber,
+          recipientName: params.recipientName,
+        }),
+        });
+      }
+    } catch (logError) {
+      console.error("[Email] Erro ao registar log de falha:", logError);
+    }
+    
     return false;
   }
 }

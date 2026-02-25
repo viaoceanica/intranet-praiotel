@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import * as systemSettingsDb from "./systemSettingsDb";
+import { getDb } from "./db";
+import { emailLogs } from "../drizzle/schema";
 
 /**
  * Configurar transporter do nodemailer com as definições do sistema
@@ -180,10 +182,46 @@ Esta é uma notificação automática do sistema Intranet Praiotel.
     });
 
     console.log(`[Email] Email de recuperação de password enviado para ${params.recipientEmail}`);
+    
+    // Registar log de sucesso
+    const db = await getDb();
+    if (db) {
+      await db.insert(emailLogs).values({
+        type: "password_reset",
+        recipient: params.recipientEmail,
+        subject: `🔐 Recuperar Password - Intranet Praiotel`,
+        status: "sent",
+        errorMessage: null,
+        metadata: JSON.stringify({
+          recipientName: params.recipientName,
+        }),
+      });
+    }
+    
     return true;
 
   } catch (error) {
     console.error("[Email] Erro ao enviar email de recuperação de password:", error);
+    
+    // Registar log de falha
+    try {
+      const db = await getDb();
+      if (db) {
+        await db.insert(emailLogs).values({
+          type: "password_reset",
+          recipient: params.recipientEmail,
+          subject: `🔐 Recuperar Password - Intranet Praiotel`,
+          status: "failed",
+          errorMessage: error instanceof Error ? error.message : String(error),
+          metadata: JSON.stringify({
+            recipientName: params.recipientName,
+          }),
+        });
+      }
+    } catch (logError) {
+      console.error("[Email] Erro ao registar log de falha:", logError);
+    }
+    
     return false;
   }
 }

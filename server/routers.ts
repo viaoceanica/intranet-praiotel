@@ -1,11 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import bcrypt from "bcryptjs";
+import { eq, and, desc, sql } from "drizzle-orm";
+import { emailLogs } from "../drizzle/schema";
+import { getDb } from "./db";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
-import * as db from "./db";
+import * as dbHelpers from "./db";
 import * as ticketsDb from "./ticketsDb";
 import * as notificationsDb from "./notificationsDb";
 import * as clientsDb from "./clientsDb";
@@ -154,7 +157,7 @@ export const appRouter = router({
     technicianRanking: isAuthenticated.query(async () => {
       const ranking = await ticketsDb.getTechnicianSlaRanking();
       // Preencher nomes dos técnicos
-      const users = await db.getAllUsers();
+      const users = await dbHelpers.getAllUsers();
       return ranking.map(r => ({
         ...r,
         name: users.find(u => u.id === r.technicianId)?.name || 'Desconhecido',
@@ -238,7 +241,7 @@ export const appRouter = router({
         password: z.string().min(1),
       }))
       .mutation(async ({ input, ctx }) => {
-        const user = await db.getUserByEmail(input.email);
+        const user = await dbHelpers.getUserByEmail(input.email);
         
         if (!user || !user.active) {
           throw new TRPCError({ 
@@ -257,7 +260,7 @@ export const appRouter = router({
         }
 
         // Atualizar último login
-        await db.updateUser(user.id, { lastSignedIn: new Date() });
+        await dbHelpers.updateUser(user.id, { lastSignedIn: new Date() });
 
         // Criar JWT token
         const token = await new SignJWT({ userId: user.id })
@@ -292,7 +295,7 @@ export const appRouter = router({
         newPassword: z.string().min(6, "A nova password deve ter pelo menos 6 caracteres"),
       }))
       .mutation(async ({ input, ctx }) => {
-        const user = await db.getUserById(ctx.user.id);
+        const user = await dbHelpers.getUserById(ctx.user.id);
         if (!user) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Utilizador n\u00e3o encontrado" });
         }
@@ -303,7 +306,7 @@ export const appRouter = router({
         }
 
         const newHash = await bcrypt.hash(input.newPassword, 10);
-        await db.updateUser(user.id, { passwordHash: newHash });
+        await dbHelpers.updateUser(user.id, { passwordHash: newHash });
 
         return { success: true };
       }),
@@ -313,7 +316,7 @@ export const appRouter = router({
         email: z.string().email(),
       }))
       .mutation(async ({ input }) => {
-        const user = await db.getUserByEmail(input.email);
+        const user = await dbHelpers.getUserByEmail(input.email);
         
         // Se o email não existe, informar claramente
         if (!user) {
@@ -328,7 +331,7 @@ export const appRouter = router({
         const token = crypto.randomBytes(32).toString("hex");
         const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
 
-        await db.createPasswordResetToken(user.id, token, expiresAt);
+        await dbHelpers.createPasswordResetToken(user.id, token, expiresAt);
 
         // Enviar email de recuperação
         const { sendPasswordResetEmail } = await import("./passwordResetEmail");
@@ -354,7 +357,7 @@ export const appRouter = router({
         newPassword: z.string().min(6, "A nova password deve ter pelo menos 6 caracteres"),
       }))
       .mutation(async ({ input }) => {
-        const resetToken = await db.getValidPasswordResetToken(input.token);
+        const resetToken = await dbHelpers.getValidPasswordResetToken(input.token);
         
         if (!resetToken) {
           throw new TRPCError({ 
@@ -364,8 +367,8 @@ export const appRouter = router({
         }
 
         const newHash = await bcrypt.hash(input.newPassword, 10);
-        await db.updateUser(resetToken.userId, { passwordHash: newHash });
-        await db.markPasswordResetTokenUsed(input.token);
+        await dbHelpers.updateUser(resetToken.userId, { passwordHash: newHash });
+        await dbHelpers.markPasswordResetTokenUsed(input.token);
 
         return { success: true };
       }),
@@ -379,7 +382,7 @@ export const appRouter = router({
 
   users: router({
     list: isAuthenticated.query(async () => {
-      const users = await db.getAllUsers();
+      const users = await dbHelpers.getAllUsers();
       return users.map(u => ({
         id: u.id,
         email: u.email,
@@ -399,7 +402,7 @@ export const appRouter = router({
         role: z.enum(["admin", "gestor", "tecnico", "visualizador"]),
       }))
       .mutation(async ({ input }) => {
-        const existing = await db.getUserByEmail(input.email);
+        const existing = await dbHelpers.getUserByEmail(input.email);
         if (existing) {
           throw new TRPCError({ 
             code: "CONFLICT", 
@@ -409,7 +412,7 @@ export const appRouter = router({
 
         const passwordHash = await bcrypt.hash(input.password, 10);
         
-        await db.createUser({
+        await dbHelpers.createUser({
           email: input.email,
           passwordHash,
           name: input.name,
@@ -438,7 +441,7 @@ export const appRouter = router({
           dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
         }
 
-        await db.updateUser(id, dataToUpdate);
+        await dbHelpers.updateUser(id, dataToUpdate);
         return { success: true };
       }),
 
@@ -452,14 +455,14 @@ export const appRouter = router({
           });
         }
 
-        const user = await db.getUserById(input.id);
+        const user = await dbHelpers.getUserById(input.id);
         if (!user) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Utilizador não encontrado" });
         }
 
         // Soft delete: alternar entre ativo e inativo
         const newStatus = user.active ? 0 : 1;
-        await db.updateUser(input.id, { active: newStatus });
+        await dbHelpers.updateUser(input.id, { active: newStatus });
 
         // Registar na auditoria
         const { userAuditLog } = await import("../drizzle/schema");
@@ -667,7 +670,7 @@ export const appRouter = router({
 
         // Registar atribuição inicial no histórico
         if (input.assignedToId) {
-          const assignedUser = await db.getUserById(input.assignedToId);
+          const assignedUser = await dbHelpers.getUserById(input.assignedToId);
           if (assignedUser && !assignedUser.active) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "Não é possível atribuir tickets a utilizadores inativos" });
           }
@@ -777,7 +780,7 @@ export const appRouter = router({
 
         // Validar que o utilizador atribuído está ativo
         if (input.assignedToId !== undefined && input.assignedToId !== ticket.assignedToId && input.assignedToId) {
-          const targetUser = await db.getUserById(input.assignedToId);
+          const targetUser = await dbHelpers.getUserById(input.assignedToId);
           if (targetUser && !targetUser.active) {
             throw new TRPCError({ code: "BAD_REQUEST", message: "Não é possível atribuir tickets a utilizadores inativos" });
           }
@@ -785,8 +788,8 @@ export const appRouter = router({
 
         // Registar atribuição/reatribuição no histórico
         if (input.assignedToId !== undefined && input.assignedToId !== ticket.assignedToId) {
-          const oldAssignedUser = ticket.assignedToId ? await db.getUserById(ticket.assignedToId) : null;
-          const newAssignedUser = input.assignedToId ? await db.getUserById(input.assignedToId) : null;
+          const oldAssignedUser = ticket.assignedToId ? await dbHelpers.getUserById(ticket.assignedToId) : null;
+          const newAssignedUser = input.assignedToId ? await dbHelpers.getUserById(input.assignedToId) : null;
           
           await ticketsDb.createTicketHistory({
             ticketId: id,
@@ -1351,7 +1354,7 @@ export const appRouter = router({
 
         // Se for urgente, notificar todos os utilizadores
         if (input.priority === "urgente") {
-          const allUsers = await db.getAllUsers();
+          const allUsers = await dbHelpers.getAllUsers();
           const userIds = allUsers.map(u => u.id);
           await notificationHelpers.notifyUrgentAnnouncement(id, input.title, userIds);
         }
@@ -3125,6 +3128,85 @@ export const appRouter = router({
           });
         }
       }),
+  }),
+
+  // ============================================================================
+  // EMAIL LOGS - Logs de emails enviados
+  // ============================================================================
+  emailLogs: router({
+    list: isAdmin
+      .input(
+        z.object({
+          type: z.enum(["all", "ticket_assignment", "password_reset", "notification", "campaign"]).optional(),
+          status: z.enum(["all", "sent", "failed", "pending"]).optional(),
+          limit: z.number().min(1).max(100).default(50),
+          offset: z.number().min(0).default(0),
+        })
+      )
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+        // Construir query com filtros
+        let query = db.select().from(emailLogs);
+
+        // Aplicar filtros
+        const conditions = [];
+        if (input.type && input.type !== "all") {
+          conditions.push(eq(emailLogs.type, input.type));
+        }
+        if (input.status && input.status !== "all") {
+          conditions.push(eq(emailLogs.status, input.status));
+        }
+
+        if (conditions.length > 0) {
+          query = query.where(and(...conditions)) as any;
+        }
+
+        // Ordenar por data (mais recentes primeiro) e aplicar paginação
+        const logs = await query
+          .orderBy(desc(emailLogs.sentAt))
+          .limit(input.limit)
+          .offset(input.offset);
+
+        // Contar total de logs (para paginação)
+        let countQuery = db.select({ count: sql<number>`count(*)` }).from(emailLogs);
+        if (conditions.length > 0) {
+          countQuery = countQuery.where(and(...conditions)) as any;
+        }
+        const [{ count }] = await countQuery;
+
+        return {
+          logs,
+          total: Number(count),
+          hasMore: input.offset + input.limit < Number(count),
+        };
+      }),
+
+    stats: isAdmin.query(async () => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+      // Estatísticas gerais
+      const [totalSent] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(emailLogs)
+        .where(eq(emailLogs.status, "sent"));
+
+      const [totalFailed] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(emailLogs)
+        .where(eq(emailLogs.status, "failed"));
+
+      const [total] = await db.select({ count: sql<number>`count(*)` }).from(emailLogs);
+
+      return {
+        totalSent: Number(totalSent.count),
+        totalFailed: Number(totalFailed.count),
+        total: Number(total.count),
+        successRate: Number(total.count) > 0 ? (Number(totalSent.count) / Number(total.count)) * 100 : 0,
+      };
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;

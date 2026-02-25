@@ -1075,3 +1075,14 @@
 - [x] Modificar backend para não mostrar código no ecrã
 - [x] Simplificar frontend para mostrar apenas mensagens claras
 - [x] Testar fluxo completo de recuperação
+
+## Sistema de Log de Emails Enviados
+- [x] Criar tabela email_logs no schema do Drizzle
+- [x] Adicionar campos: tipo, destinatário, assunto, status, data, erro
+- [x] Implementar função de registo de log no emailService
+- [x] Integrar logs em sendTicketAssignmentEmail
+- [x] Integrar logs em sendPasswordResetEmail
+- [x] Criar endpoint tRPC para listar logs de emails
+- [x] Criar página de visualização de logs para admins
+- [x] Adicionar filtros por tipo, status e período
+- [x] Testar sistema de logs no browser
