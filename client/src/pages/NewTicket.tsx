@@ -820,24 +820,26 @@ export default function NewTicket() {
 
               {/* Upload de Anexos */}
               <div className="space-y-2">
-                <Label>Anexos (Imagens e Documentos)</Label>
+                <Label>Anexos (Imagens, Vídeos e Documentos)</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#F15A24] transition-colors">
                   <input
                     type="file"
                     id="fileUpload"
                     multiple
-                    accept="image/*,.pdf,.doc,.docx"
+                    accept="image/*,video/*,.pdf,.doc,.docx"
                     onChange={(e) => {
                       const files = Array.from(e.target.files || []);
                       files.forEach(file => {
-                        // Validar tamanho (max 10MB)
-                        if (file.size > 10 * 1024 * 1024) {
-                          toast.error(`${file.name} excede o tamanho máximo de 10MB`);
+                        // Validar tamanho (max 50MB para vídeos, 10MB para outros)
+                        const maxSize = file.type.startsWith('video/') ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                        if (file.size > maxSize) {
+                          const maxSizeMB = file.type.startsWith('video/') ? '50MB' : '10MB';
+                          toast.error(`${file.name} excede o tamanho máximo de ${maxSizeMB}`);
                           return;
                         }
                         
-                        // Criar preview para imagens
-                        if (file.type.startsWith('image/')) {
+                        // Criar preview para imagens e vídeos
+                        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
                           const reader = new FileReader();
                           reader.onload = (e) => {
                             setAttachments(prev => [...prev, { file, preview: e.target?.result as string }]);
@@ -855,7 +857,7 @@ export default function NewTicket() {
                   <label htmlFor="fileUpload" className="cursor-pointer">
                     <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                     <p className="text-sm text-gray-600">Clique para selecionar ficheiros</p>
-                    <p className="text-xs text-gray-400 mt-1">Imagens, PDF, Word (máx. 10MB cada)</p>
+                    <p className="text-xs text-gray-400 mt-1">Imagens, Vídeos (máx. 50MB), PDF, Word (máx. 10MB)</p>
                   </label>
                 </div>
                 
@@ -865,7 +867,11 @@ export default function NewTicket() {
                     {attachments.map((attachment, index) => (
                       <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                         {attachment.preview ? (
-                          <img src={attachment.preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
+                          attachment.file.type.startsWith('video/') ? (
+                            <video src={attachment.preview} className="w-12 h-12 object-cover rounded" />
+                          ) : (
+                            <img src={attachment.preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
+                          )
                         ) : (
                           <FileIcon className="h-12 w-12 text-gray-400" />
                         )}

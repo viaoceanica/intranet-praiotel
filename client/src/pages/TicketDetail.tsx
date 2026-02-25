@@ -158,8 +158,10 @@ export default function TicketDetail() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Ficheiro demasiado grande (máximo 10MB)");
+    const maxSize = file.type.startsWith('video/') ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    const maxSizeMB = file.type.startsWith('video/') ? '50MB' : '10MB';
+    if (file.size > maxSize) {
+      toast.error(`Ficheiro demasiado grande (máximo ${maxSizeMB})`);
       return;
     }
 
@@ -334,14 +336,14 @@ export default function TicketDetail() {
                     <DialogHeader>
                       <DialogTitle>Carregar Anexo</DialogTitle>
                       <DialogDescription>
-                        Selecione uma imagem ou ficheiro (máximo 10MB)
+                        Selecione uma imagem, vídeo ou ficheiro (máx. 50MB para vídeos, 10MB para outros)
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*"
+                        accept="image/*,video/*,.pdf,.doc,.docx"
                         onChange={handleFileUpload}
                         disabled={uploadMutation.isPending}
                       />
@@ -370,6 +372,12 @@ export default function TicketDetail() {
                             <img
                               src={attachment.fileUrl}
                               alt={attachment.fileName}
+                              className="w-full h-32 object-cover rounded-lg border"
+                            />
+                          ) : attachment.mimeType.startsWith('video/') ? (
+                            <video
+                              src={attachment.fileUrl}
+                              controls
                               className="w-full h-32 object-cover rounded-lg border"
                             />
                           ) : (

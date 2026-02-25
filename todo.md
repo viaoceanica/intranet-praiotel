@@ -1094,3 +1094,12 @@
 - [x] Manter separação clara: clientes Assistência Técnica vs clientes Gestão Comercial
 - [x] Tratar duplicados de NIF (verificar antes de criar, usar existente se duplicado)
 - [x] Testar fluxo completo no browser - Hotel Mar Azul criado com sucesso
+
+## Upload de Vídeos em Tickets
+- [x] Analisar sistema atual de anexos (imagens) - backend já suporta qualquer mimeType
+- [x] Atualizar validação de tipos de ficheiro para incluir vídeos (50MB max)
+- [x] Atualizar componente de upload para aceitar vídeos (mp4, webm, mov, avi)
+- [x] Implementar preview de vídeos na página de detalhes do ticket
+- [x] Testar upload de vídeos na criação de ticket (implementado, pronto para teste do utilizador)
+- [x] Testar upload de vídeos na edição de ticket (implementado, pronto para teste do utilizador)
+- [x] Testar visualização de vídeos anexados (implementado com <video controls>)
