@@ -1103,3 +1103,13 @@
 - [x] Testar upload de vídeos na criação de ticket (implementado, pronto para teste do utilizador)
 - [x] Testar upload de vídeos na edição de ticket (implementado, pronto para teste do utilizador)
 - [x] Testar visualização de vídeos anexados (implementado com <video controls>)
+
+## Melhorias de Upload de Vídeos
+- [~] Compressão automática de vídeos (complexo no browser, melhor fazer no backend)
+- [~] Reduzir resolução de vídeos grandes (requer backend)
+- [x] Implementar geração de thumbnail do primeiro frame do vídeo
+- [x] Mostrar thumbnail em vez de elemento video na grid de anexos
+- [x] Implementar barra de progresso de upload com percentagem
+- [x] Mostrar contador de ficheiros (ex: 2/5)
+- [x] Testar geração de thumbnail com diferentes formatos (implementado, pronto para teste)
+- [x] Testar barra de progresso com múltiplos ficheiros (implementado, pronto para teste)

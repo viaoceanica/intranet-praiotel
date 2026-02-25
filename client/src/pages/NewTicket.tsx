@@ -16,6 +16,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Search, Plus, Upload, X, FileIcon, ImageIcon } from "lucide-react";
+import { generateVideoThumbnail } from "@/lib/videoUtils";
+import { UploadProgress } from "@/components/UploadProgress";
 import {
   Dialog,
   DialogContent,
@@ -69,7 +71,8 @@ export default function NewTicket() {
     phone: "",
     address: "",
   });
-  const [attachments, setAttachments] = useState<Array<{ file: File; preview?: string }>>([]);
+  const [attachments, setAttachments] = useState<Array<{ file: File; preview?: string; thumbnail?: string }>>([]);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number; fileName: string } | null>(null);
 
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
@@ -126,7 +129,11 @@ export default function NewTicket() {
         
         if (newTicket) {
           // Upload de cada anexo
-          for (const attachment of attachments) {
+          const totalFiles = attachments.length;
+          for (let i = 0; i < attachments.length; i++) {
+            const attachment = attachments[i];
+            setUploadProgress({ current: i + 1, total: totalFiles, fileName: attachment.file.name });
+            
             try {
               const reader = new FileReader();
               await new Promise((resolve, reject) => {
@@ -152,6 +159,7 @@ export default function NewTicket() {
               toast.error(`Erro ao fazer upload de ${attachment.file.name}`);
             }
           }
+          setUploadProgress(null);
         }
       }
       
@@ -839,12 +847,20 @@ export default function NewTicket() {
                         }
                         
                         // Criar preview para imagens e vídeos
-                        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                        if (file.type.startsWith('image/')) {
                           const reader = new FileReader();
                           reader.onload = (e) => {
                             setAttachments(prev => [...prev, { file, preview: e.target?.result as string }]);
                           };
                           reader.readAsDataURL(file);
+                        } else if (file.type.startsWith('video/')) {
+                          // Gerar thumbnail do vídeo
+                          generateVideoThumbnail(file).then(thumbnail => {
+                            setAttachments(prev => [...prev, { file, thumbnail }]);
+                          }).catch(error => {
+                            console.error('Erro ao gerar thumbnail:', error);
+                            setAttachments(prev => [...prev, { file }]);
+                          });
                         } else {
                           setAttachments(prev => [...prev, { file }]);
                         }
@@ -866,12 +882,10 @@ export default function NewTicket() {
                   <div className="space-y-2 mt-3">
                     {attachments.map((attachment, index) => (
                       <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        {attachment.preview ? (
-                          attachment.file.type.startsWith('video/') ? (
-                            <video src={attachment.preview} className="w-12 h-12 object-cover rounded" />
-                          ) : (
-                            <img src={attachment.preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
-                          )
+                        {attachment.thumbnail ? (
+                          <img src={attachment.thumbnail} alt="Video thumbnail" className="w-12 h-12 object-cover rounded" />
+                        ) : attachment.preview ? (
+                          <img src={attachment.preview} alt="Preview" className="w-12 h-12 object-cover rounded" />
                         ) : (
                           <FileIcon className="h-12 w-12 text-gray-400" />
                         )}
@@ -1089,6 +1103,15 @@ export default function NewTicket() {
           </form>
         </DialogContent>
       </Dialog>
+      
+      {/* Indicador de progresso de upload */}
+      {uploadProgress && (
+        <UploadProgress
+          fileName={uploadProgress.fileName}
+          current={uploadProgress.current}
+          total={uploadProgress.total}
+        />
+      )}
     </PraiotelLayout>
   );
 }
