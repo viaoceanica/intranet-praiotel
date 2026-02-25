@@ -1,9 +1,13 @@
 import { createNotification } from "./notificationsDb";
+import { sendTicketAssignmentEmail } from "./emailService";
+import * as db from "./db";
+import * as ticketsDb from "./ticketsDb";
 
 /**
  * Envia notificação quando um ticket é atribuído a um técnico
  */
 export async function notifyTicketAssigned(ticketId: number, ticketNumber: string, assignedToId: number) {
+  // Criar notificação in-app
   await createNotification({
     userId: assignedToId,
     type: "ticket_assigned",
@@ -11,6 +15,29 @@ export async function notifyTicketAssigned(ticketId: number, ticketNumber: strin
     message: `O ticket ${ticketNumber} foi atribuído a você`,
     ticketId,
   });
+
+  // Enviar email de notificação
+  try {
+    const user = await db.getUserById(assignedToId);
+    const ticket = await ticketsDb.getTicketById(ticketId);
+    
+    if (user && user.email && ticket) {
+      await sendTicketAssignmentEmail({
+        recipientEmail: user.email,
+        recipientName: user.name,
+        ticketNumber,
+        ticketId,
+        clientName: ticket.clientName || "Cliente não especificado",
+        equipment: ticket.equipment || "Equipamento não especificado",
+        priority: ticket.priority || "media",
+        location: ticket.location || "Localização não especificada",
+        description: ticket.description || "Sem descrição",
+      });
+    }
+  } catch (error) {
+    console.error("[notifyTicketAssigned] Erro ao enviar email:", error);
+    // Não falhar a operação se o email falhar
+  }
 }
 
 /**

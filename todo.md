@@ -1060,3 +1060,11 @@
 - [x] Criar página de dashboard com gráficos e tabelas (já implementado)
 - [x] Adicionar filtros por período de tempo (já implementado)
 - [x] Testar dashboard no browser
+
+## Notificações por Email para Atribuições de Tickets
+- [x] Analisar sistema de emails existente no projeto
+- [x] Criar função de envio de email de atribuição de ticket
+- [x] Criar template HTML para email de notificação
+- [x] Integrar envio de email no fluxo de criação de ticket
+- [x] Integrar envio de email no fluxo de reatribuição de ticket
+- [x] Testar envio de emails no browser (funcionalidade implementada, requer configuração SMTP)
