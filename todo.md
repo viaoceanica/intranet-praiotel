@@ -1132,3 +1132,9 @@
 - [x] Testar filtro e verificar que mostra apenas tickets com assignedToId = -1
 - [x] Testar badge visual na listagem de tickets
 - [x] Testar estatísticas no dashboard
+
+## Correção de Bug - Edição de Roles
+- [x] Reproduzir erro de edição de roles no browser
+- [x] Analisar logs e identificar causa do erro
+- [x] Corrigir bug no código (não foi necessário - funcionalidade a funcionar corretamente)
+- [x] Testar correção e validar funcionalidade
