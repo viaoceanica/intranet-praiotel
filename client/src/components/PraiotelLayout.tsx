@@ -43,9 +43,11 @@ import {
   Moon,
   FileText as FileTemplate,
   Copy,
-  GripVertical
+  GripVertical,
+  KeyRound
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
+import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   DndContext,
@@ -224,6 +226,7 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
   const { theme, toggleTheme } = useTheme();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   
   // Estados para controlar expansão dos menus (permitindo toggle manual)
   const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({});
@@ -500,6 +503,10 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowChangePassword(true)}>
+                <KeyRound className="mr-2 h-4 w-4" />
+                Alterar Password
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleLogout} className="text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
                 Terminar Sessão
@@ -582,6 +589,10 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
           )}
         </div>
       </div>
+      <ChangePasswordDialog 
+        open={showChangePassword} 
+        onOpenChange={setShowChangePassword} 
+      />
     </div>
   );
 }

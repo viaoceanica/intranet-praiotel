@@ -1138,3 +1138,10 @@
 - [x] Analisar logs e identificar causa do erro
 - [x] Corrigir bug no código (não foi necessário - funcionalidade a funcionar corretamente)
 - [x] Testar correção e validar funcionalidade
+
+## Alteração de Password pelo Utilizador
+- [x] Criar endpoint tRPC protegido para alteração de password (validar password atual)
+- [x] Criar componente de UI com formulário de alteração de password
+- [x] Integrar componente no menu de perfil do utilizador
+- [x] Adicionar validações (password atual, nova password, confirmação)
+- [x] Testar fluxo completo de alteração de password

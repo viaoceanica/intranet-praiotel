@@ -21,10 +21,11 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, KeyRound } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
+import { ChangePasswordDialog } from './ChangePasswordDialog';
 import { Button } from "./ui/button";
 
 const menuItems = [
@@ -111,6 +112,7 @@ function DashboardLayoutContent({
   const { state, toggleSidebar } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
@@ -222,6 +224,13 @@ function DashboardLayoutContent({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
+                  onClick={() => setShowChangePassword(true)}
+                  className="cursor-pointer"
+                >
+                  <KeyRound className="mr-2 h-4 w-4" />
+                  <span>Alterar Password</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={logout}
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
@@ -270,6 +279,10 @@ function DashboardLayoutContent({
           </footer>
         </div>
       </SidebarInset>
+      <ChangePasswordDialog 
+        open={showChangePassword} 
+        onOpenChange={setShowChangePassword} 
+      />
     </>
   );
 }
