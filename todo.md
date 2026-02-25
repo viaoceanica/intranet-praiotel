@@ -1145,3 +1145,12 @@
 - [x] Integrar componente no menu de perfil do utilizador
 - [x] Adicionar validações (password atual, nova password, confirmação)
 - [x] Testar fluxo completo de alteração de password
+
+## Política de Passwords Fortes
+- [x] Criar função de validação de password forte no backend (mínimo 8 caracteres, maiúsculas, minúsculas, números, caracteres especiais)
+- [x] Atualizar endpoint de criação de utilizador com validação
+- [x] Atualizar endpoint de alteração de password com validação
+- [x] Criar componente de feedback visual de requisitos de password
+- [x] Integrar componente em ChangePasswordDialog
+- [x] Integrar componente em formulário de criação de utilizador
+- [x] Testar validação em todos os fluxos

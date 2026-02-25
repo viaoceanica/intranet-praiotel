@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { Eye, EyeOff, Lock } from "lucide-react";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 
 interface ChangePasswordDialogProps {
   open: boolean;
@@ -56,8 +57,8 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
       return;
     }
 
-    if (newPassword.length < 6) {
-      alert("A nova password deve ter no mínimo 6 caracteres");
+    if (newPassword.length < 8) {
+      alert("A nova password deve ter no mínimo 8 caracteres");
       return;
     }
 
@@ -126,9 +127,9 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
                   type={showNewPassword ? "text" : "password"}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Digite a nova password (mínimo 6 caracteres)"
+                  placeholder="Digite a nova password (mínimo 8 caracteres)"
                   required
-                  minLength={6}
+                  minLength={8}
                 />
                 <Button
                   type="button"
@@ -144,6 +145,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
                   )}
                 </Button>
               </div>
+              <PasswordStrengthIndicator password={newPassword} />
             </div>
 
             <div className="grid gap-2">

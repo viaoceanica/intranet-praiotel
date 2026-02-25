@@ -39,6 +39,7 @@ import * as crmWorkflowsDb from "./crmWorkflowsDb";
 import * as crmDuplicatesDb from "./crmDuplicatesDb";
 import * as systemSettingsDb from "./systemSettingsDb";
 import * as commercialClientsDb from "./commercialClientsDb";
+import { validatePasswordStrength } from "./passwordValidation";
 import * as XLSX from "xlsx";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
@@ -292,17 +293,26 @@ export const appRouter = router({
     changePassword: isAuthenticated
       .input(z.object({
         currentPassword: z.string().min(1),
-        newPassword: z.string().min(6, "A nova password deve ter pelo menos 6 caracteres"),
+        newPassword: z.string().min(8, "A nova password deve ter pelo menos 8 caracteres"),
       }))
       .mutation(async ({ input, ctx }) => {
         const user = await dbHelpers.getUserById(ctx.user.id);
         if (!user) {
-          throw new TRPCError({ code: "NOT_FOUND", message: "Utilizador n\u00e3o encontrado" });
+          throw new TRPCError({ code: "NOT_FOUND", message: "Utilizador não encontrado" });
         }
 
         const validPassword = await bcrypt.compare(input.currentPassword, user.passwordHash);
         if (!validPassword) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "Password atual incorreta" });
+        }
+
+        // Validar força da nova password
+        const validation = validatePasswordStrength(input.newPassword);
+        if (!validation.isValid) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: validation.errors.join("; ") 
+          });
         }
 
         const newHash = await bcrypt.hash(input.newPassword, 10);
@@ -354,7 +364,7 @@ export const appRouter = router({
     resetPassword: publicProcedure
       .input(z.object({
         token: z.string().min(1),
-        newPassword: z.string().min(6, "A nova password deve ter pelo menos 6 caracteres"),
+        newPassword: z.string().min(8, "A nova password deve ter pelo menos 8 caracteres"),
       }))
       .mutation(async ({ input }) => {
         const resetToken = await dbHelpers.getValidPasswordResetToken(input.token);
@@ -362,7 +372,16 @@ export const appRouter = router({
         if (!resetToken) {
           throw new TRPCError({ 
             code: "BAD_REQUEST", 
-            message: "Token inv\u00e1lido ou expirado. Solicite uma nova recupera\u00e7\u00e3o de password." 
+            message: "Token inválido ou expirado. Solicite uma nova recuperação de password." 
+          });
+        }
+
+        // Validar força da nova password
+        const validation = validatePasswordStrength(input.newPassword);
+        if (!validation.isValid) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: validation.errors.join("; ") 
           });
         }
 
@@ -397,7 +416,7 @@ export const appRouter = router({
     create: isAdmin
       .input(z.object({
         email: z.string().email(),
-        password: z.string().min(6),
+        password: z.string().min(8),
         name: z.string().min(1),
         role: z.enum(["admin", "gestor", "tecnico", "visualizador"]),
       }))
@@ -407,6 +426,15 @@ export const appRouter = router({
           throw new TRPCError({ 
             code: "CONFLICT", 
             message: "Email já existe" 
+          });
+        }
+
+        // Validar força da password
+        const validation = validatePasswordStrength(input.password);
+        if (!validation.isValid) {
+          throw new TRPCError({ 
+            code: "BAD_REQUEST", 
+            message: validation.errors.join("; ") 
           });
         }
 
@@ -430,7 +458,7 @@ export const appRouter = router({
         email: z.string().email().optional(),
         role: z.enum(["admin", "gestor", "tecnico", "visualizador"]).optional(),
         active: z.boolean().optional(),
-        password: z.string().min(6).optional(),
+        password: z.string().min(8).optional(),
       }))
       .mutation(async ({ input }) => {
         const { id, password, ...updateData } = input;
@@ -438,6 +466,14 @@ export const appRouter = router({
         const dataToUpdate: any = { ...updateData };
         
         if (password) {
+          // Validar força da password
+          const validation = validatePasswordStrength(password);
+          if (!validation.isValid) {
+            throw new TRPCError({ 
+              code: "BAD_REQUEST", 
+              message: validation.errors.join("; ") 
+            });
+          }
           dataToUpdate.passwordHash = await bcrypt.hash(password, 10);
         }
 

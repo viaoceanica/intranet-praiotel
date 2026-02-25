@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { UserPlus, Pencil, Loader2, UserX, UserCheck, Filter, History } from "lucide-react";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
 import { format } from "date-fns";
 
 export default function Users() {
@@ -200,8 +201,9 @@ export default function Users() {
                     value={newUser.password}
                     onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
                     required
-                    minLength={6}
+                    minLength={8}
                   />
+                  <PasswordStrengthIndicator password={newUser.password} />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="create-role">Role</Label>
