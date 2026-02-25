@@ -126,6 +126,7 @@ export default function Tickets() {
     const matchesStatus = statusFilter === "all" || ticket.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || ticket.priority === priorityFilter;
     const matchesTechnician = technicianFilter === "all" || 
+      (technicianFilter === "-1" && ticket.assignedToId === -1) ||
       (ticket.assignedToId && ticket.assignedToId.toString() === technicianFilter);
     const matchesClient = clientFilter === "all" || 
       (ticket.clientId && ticket.clientId.toString() === clientFilter);
@@ -238,6 +239,7 @@ export default function Tickets() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos os técnicos</SelectItem>
+                  <SelectItem value="-1" className="font-semibold text-[#F15A24]">👥 Atribuído a Todos</SelectItem>
                   {technicians.map((tech) => (
                     <SelectItem key={tech.id} value={tech.id.toString()}>
                       {tech.name}
@@ -318,6 +320,7 @@ export default function Tickets() {
                   <TableHead>Localização</TableHead>
                   <TableHead>Prioridade</TableHead>
                   <TableHead>Estado</TableHead>
+                  <TableHead>Técnico</TableHead>
                   <TableHead>SLA</TableHead>
                   <TableHead>Data</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -358,6 +361,19 @@ export default function Tickets() {
                       <Badge className={statusColors[ticket.status]}>
                         {statusLabels[ticket.status]}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {ticket.assignedToId === -1 ? (
+                        <Badge className="bg-[#F15A24] hover:bg-[#D14A1F] text-white">
+                          👥 Todos
+                        </Badge>
+                      ) : ticket.assignedToId ? (
+                        <span className="text-sm">
+                          {technicians.find(t => t.id === ticket.assignedToId)?.name || 'N/A'}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-gray-400">Não atribuído</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <SlaIndicator

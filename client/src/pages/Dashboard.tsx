@@ -226,6 +226,76 @@ export default function Dashboard() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
+                  <p className="text-sm text-gray-500">Tickets a Todos</p>
+                  <p className="text-3xl font-bold text-[#F15A24]">
+                    {stats.ticketsAtribuidosATodos || 0}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {stats.total > 0 
+                      ? `${Math.round(((stats.ticketsAtribuidosATodos || 0) / stats.total) * 100)}% do total`
+                      : '0% do total'
+                    }
+                  </p>
+                </div>
+                <div className="w-12 h-12 bg-[#F15A24] bg-opacity-10 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-[#F15A24]" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Estatísticas de Atribuição */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Atribuídos a Todos</p>
+                  <p className="text-2xl font-bold text-[#F15A24]">{stats.ticketsAtribuidosATodos || 0}</p>
+                </div>
+                <div className="w-10 h-10 bg-[#F15A24] bg-opacity-10 rounded-full flex items-center justify-center">
+                  <Users className="h-5 w-5 text-[#F15A24]" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Atribuídos Individualmente</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.ticketsAtribuidosIndividualmente || 0}</p>
+                </div>
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="h-5 w-5 text-blue-600" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Não Atribuídos</p>
+                  <p className="text-2xl font-bold text-gray-500">{stats.ticketsNaoAtribuidos || 0}</p>
+                </div>
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle className="h-5 w-5 text-gray-500" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Continuar com resto do dashboard */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
                   <p className="text-sm text-gray-500">Clientes Ativos</p>
                   <p className="text-3xl font-bold text-gray-900">{stats.topClientes.length}</p>
                 </div>

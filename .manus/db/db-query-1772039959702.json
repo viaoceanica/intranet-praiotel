@@ -1,0 +1,87 @@
+{
+  "query": "SELECT id, name, email, role, active FROM users;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, name, email, role, active FROM users;",
+  "rows": [
+    {
+      "id": "3",
+      "name": "Administrador",
+      "email": "admin@praiotel.pt",
+      "role": "admin",
+      "active": "0"
+    },
+    {
+      "id": "30001",
+      "name": "Tony Dias",
+      "email": "tony@viaoceanica.com",
+      "role": "admin",
+      "active": "0"
+    },
+    {
+      "id": "30002",
+      "name": "Decio Toste 2",
+      "email": "decio.toste@gmail.com",
+      "role": "tecnico",
+      "active": "0"
+    },
+    {
+      "id": "60041",
+      "name": "Test Inactive User",
+      "email": "test-inactive-1771972035989@test.com",
+      "role": "tecnico",
+      "active": "0"
+    },
+    {
+      "id": "60042",
+      "name": "Técnico Teste",
+      "email": "test-tech@praiotel.pt",
+      "role": "tecnico",
+      "active": "0"
+    },
+    {
+      "id": "60044",
+      "name": "Test Inactive User",
+      "email": "test-inactive-1771972073038@test.com",
+      "role": "tecnico",
+      "active": "0"
+    },
+    {
+      "id": "90001",
+      "name": "Via Oceanica - SUPORTE VO",
+      "email": "suporte@viaoceanica.com",
+      "role": "admin",
+      "active": "1"
+    },
+    {
+      "id": "90002",
+      "name": "Natacha Borges",
+      "email": "natacha.praiotel@gmail.com",
+      "role": "admin",
+      "active": "1"
+    },
+    {
+      "id": "90003",
+      "name": "Silvana Borges",
+      "email": "silvanapraiotel@gmail.com",
+      "role": "admin",
+      "active": "1"
+    },
+    {
+      "id": "90004",
+      "name": "Tecnico 1 - Teste",
+      "email": "tecnico1@praiotel.pt",
+      "role": "tecnico",
+      "active": "1"
+    },
+    {
+      "id": "90005",
+      "name": "Julia Duarte",
+      "email": "julia.praiotel@gmail.com",
+      "role": "admin",
+      "active": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tactive\n3\tAdministrador\tadmin@praiotel.pt\tadmin\t0\n30001\tTony Dias\ttony@viaoceanica.com\tadmin\t0\n30002\tDecio Toste 2\tdecio.toste@gmail.com\ttecnico\t0\n60041\tTest Inactive User\ttest-inactive-1771972035989@test.com\ttecnico\t0\n60042\tTécnico Teste\ttest-tech@praiotel.pt\ttecnico\t0\n60044\tTest Inactive User\ttest-inactive-1771972073038@test.com\ttecnico\t0\n90001\tVia Oceanica - SUPORTE VO\tsuporte@viaoceanica.com\tadmin\t1\n90002\tNatacha Borges\tnatacha.praiotel@gmail.com\tadmin\t1\n90003\tSilvana Borges\tsilvanapraiotel@gmail.com\tadmin\t1\n90004\tTecnico 1 - Teste\ttecnico1@praiotel.pt\ttecnico\t1\n90005\tJulia Duarte\tjulia.praiotel@gmail.com\tadmin\t1\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

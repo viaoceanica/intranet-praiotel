@@ -579,12 +579,20 @@ export const appRouter = router({
         avgResolutionTime = totalTime / resolvedTickets.length;
       }
 
+      // Estatísticas de atribuição
+      const ticketsAtribuidosATodos = allTickets.filter(t => t.assignedToId === -1).length;
+      const ticketsAtribuidosIndividualmente = allTickets.filter(t => t.assignedToId && t.assignedToId !== -1).length;
+      const ticketsNaoAtribuidos = allTickets.filter(t => !t.assignedToId || t.assignedToId === 0).length;
+
       return {
         total,
         porEstado,
         porPrioridade,
         topClientes,
         avgResolutionTimeMs: avgResolutionTime,
+        ticketsAtribuidosATodos,
+        ticketsAtribuidosIndividualmente,
+        ticketsNaoAtribuidos,
       };
     }),
 

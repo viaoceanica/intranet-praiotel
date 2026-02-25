@@ -1124,3 +1124,11 @@
 - [x] Testar criação de ticket com "Todos os Técnicos" (implementado, pronto para teste)
 - [x] Testar edição de ticket para "Todos os Técnicos" (implementado, pronto para teste)
 - [x] Testar notificações para todos os técnicos (implementado, pronto para teste)
+
+## Melhorias Visuais para Tickets Atribuídos a Todos os Técnicos
+- [x] Adicionar filtro "Atribuído a Todos" no dropdown de filtro de técnico
+- [x] Adicionar badge visual "👥 Todos" na listagem de tickets
+- [x] Adicionar estatísticas de atribuição no dashboard (todos vs. individuais)
+- [x] Testar filtro e verificar que mostra apenas tickets com assignedToId = -1
+- [x] Testar badge visual na listagem de tickets
+- [x] Testar estatísticas no dashboard
