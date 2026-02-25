@@ -1154,3 +1154,14 @@
 - [x] Integrar componente em ChangePasswordDialog
 - [x] Integrar componente em formulário de criação de utilizador
 - [x] Testar validação em todos os fluxos
+
+## Tipos de Assistência em Tickets
+- [x] Criar tabela serviceTypes no schema (id, name, active, createdAt)
+- [x] Inserir tipos iniciais: certificações, manutenções periódicas, reparações
+- [x] Adicionar campo serviceTypeId à tabela tickets
+- [x] Criar endpoints de gestão: list, create, update, delete
+- [x] Criar página de gestão de tipos de assistência para administradores
+- [x] Atualizar formulário de criação de ticket com dropdown de tipos
+- [x] Atualizar formulário de edição de ticket com dropdown de tipos
+- [x] Atualizar listagem de tickets para mostrar tipo de assistência
+- [x] Testar fluxo completo de gestão e utilização

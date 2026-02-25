@@ -1,6 +1,6 @@
 import { eq, and, gt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, passwordResetTokens } from "../drizzle/schema";
+import { InsertUser, users, passwordResetTokens, serviceTypes, InsertServiceType } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -106,4 +106,52 @@ export async function markPasswordResetTokenUsed(token: string) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   await db.update(passwordResetTokens).set({ used: 1 }).where(eq(passwordResetTokens.token, token));
+}
+
+// --- Service Types ---
+
+export async function getAllServiceTypes() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get service types: database not available");
+    return [];
+  }
+  const result = await db.select().from(serviceTypes);
+  return result;
+}
+
+export async function getActiveServiceTypes() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get service types: database not available");
+    return [];
+  }
+  const result = await db.select().from(serviceTypes).where(eq(serviceTypes.active, 1));
+  return result;
+}
+
+export async function getServiceTypeById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(serviceTypes).where(eq(serviceTypes.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createServiceType(data: InsertServiceType) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(serviceTypes).values(data);
+  return result;
+}
+
+export async function updateServiceType(id: number, data: Partial<InsertServiceType>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(serviceTypes).set(data).where(eq(serviceTypes.id, id));
+}
+
+export async function deleteServiceType(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(serviceTypes).where(eq(serviceTypes.id, id));
 }

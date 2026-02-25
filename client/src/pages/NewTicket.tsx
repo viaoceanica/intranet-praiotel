@@ -40,6 +40,7 @@ export default function NewTicket() {
     location: "",
     description: "",
     assignedToId: undefined as number | undefined,
+    serviceTypeId: undefined as number | undefined,
   });
 
   const [useCustomClient, setUseCustomClient] = useState(false);
@@ -77,6 +78,7 @@ export default function NewTicket() {
   const utils = trpc.useUtils();
   const { data: users } = trpc.users.list.useQuery();
   const { data: priorities } = trpc.sla.list.useQuery();
+  const { data: serviceTypes } = trpc.serviceTypes.listActive.useQuery();
   // Pesquisa unificada em ambas as tabelas (assistência + comercial)
   const { data: unifiedSearchResults } = trpc.clients.searchAll.useQuery(
     { query: clientSearchQuery },
@@ -788,6 +790,27 @@ export default function NewTicket() {
                   </Select>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="serviceType">Tipo de Assistência *</Label>
+                  <Select
+                    value={formData.serviceTypeId?.toString() || ""}
+                    onValueChange={(value) => setFormData({ ...formData, serviceTypeId: value ? parseInt(value) : undefined })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {serviceTypes?.map((type) => (
+                        <SelectItem key={type.id} value={type.id.toString()}>
+                          {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="assignedTo">Atribuir a (opcional)</Label>
                   <Select

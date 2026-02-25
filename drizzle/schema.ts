@@ -55,6 +55,20 @@ export const passwordResetTokens = mysqlTable("password_reset_tokens", {
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 
 /**
+ * Tipos de assistência (certificações, manutenções, reparações, etc.)
+ */
+export const serviceTypes = mysqlTable("serviceTypes", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  active: int("active").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ServiceType = typeof serviceTypes.$inferSelect;
+export type InsertServiceType = typeof serviceTypes.$inferInsert;
+
+/**
  * Tickets de assistência técnica
  */
 export const tickets = mysqlTable("tickets", {
@@ -70,6 +84,7 @@ export const tickets = mysqlTable("tickets", {
   priority: varchar("priority", { length: 50 }).default("media").notNull(), // Alterado para varchar
   status: mysqlEnum("status", ["aberto", "em_progresso", "resolvido", "fechado"]).default("aberto").notNull(),
   assignedToId: int("assignedToId"),
+  serviceTypeId: int("serviceTypeId"),
   location: varchar("location", { length: 100 }).notNull(),
   description: text("description").notNull(),
   notes: text("notes"),

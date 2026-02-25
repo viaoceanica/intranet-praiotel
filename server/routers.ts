@@ -3372,5 +3372,48 @@ export const appRouter = router({
       };
     }),
   }),
+
+  // ============================================================================
+  // SERVICE TYPES - Tipos de Assistência
+  // ============================================================================
+  serviceTypes: router({
+    list: isAuthenticated.query(async () => {
+      const types = await dbHelpers.getAllServiceTypes();
+      return types;
+    }),
+
+    listActive: publicProcedure.query(async () => {
+      const types = await dbHelpers.getActiveServiceTypes();
+      return types;
+    }),
+
+    create: isAdmin
+      .input(z.object({
+        name: z.string().min(1, "Nome é obrigatório"),
+      }))
+      .mutation(async ({ input }) => {
+        await dbHelpers.createServiceType({ name: input.name, active: 1 });
+        return { success: true };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        name: z.string().min(1).optional(),
+        active: z.number().min(0).max(1).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await dbHelpers.updateServiceType(id, data);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await dbHelpers.deleteServiceType(input.id);
+        return { success: true };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;

@@ -211,6 +211,13 @@
       "when": 1772029762237,
       "tag": "0029_legal_hex",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1772044700729,
+      "tag": "0030_striped_genesis",
+      "breakpoints": true
     }
   ]
 }

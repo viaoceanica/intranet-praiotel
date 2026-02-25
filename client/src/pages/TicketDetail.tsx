@@ -60,6 +60,7 @@ export default function TicketDetail() {
   const { data: history } = trpc.tickets.getHistory.useQuery({ ticketId });
   const { data: users } = trpc.users.list.useQuery();
   const { data: priorities } = trpc.sla.list.useQuery();
+  const { data: serviceTypes } = trpc.serviceTypes.listActive.useQuery();
   const { data: clientEquipment } = trpc.equipment.getByClient.useQuery(
     { clientId: ticket?.clientId || 0 },
     { enabled: !!ticket?.clientId }
@@ -72,6 +73,7 @@ export default function TicketDetail() {
     equipmentId: undefined as number | undefined,
     equipment: "",
     notes: "",
+    serviceTypeId: undefined as number | undefined,
   });
 
   const updateMutation = trpc.tickets.update.useMutation({
@@ -128,6 +130,7 @@ export default function TicketDetail() {
         equipmentId: ticket.equipmentId || undefined,
         equipment: ticket.equipment || "",
         notes: ticket.notes || "",
+        serviceTypeId: ticket.serviceTypeId || undefined,
       });
       setUseCustomEquipment(!ticket.equipmentId && !!ticket.equipment);
       setEditMode(true);
@@ -556,6 +559,25 @@ export default function TicketDetail() {
                           {priorities?.map((p) => (
                             <SelectItem key={p.priority} value={p.priority}>
                               {p.displayName}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Tipo de Assistência</Label>
+                      <Select
+                        value={editData.serviceTypeId?.toString() || ""}
+                        onValueChange={(value) => setEditData({ ...editData, serviceTypeId: value ? parseInt(value) : undefined })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o tipo" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {serviceTypes?.map((type) => (
+                            <SelectItem key={type.id} value={type.id.toString()}>
+                              {type.name}
                             </SelectItem>
                           ))}
                         </SelectContent>

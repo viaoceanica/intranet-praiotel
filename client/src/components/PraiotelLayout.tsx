@@ -338,6 +338,7 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
       roles: ["admin"],
       subItems: [
         { name: "Roles", href: "/roles", icon: Settings, roles: ["admin"] },
+        { name: "Tipos de Assistência", href: "/service-types", icon: Wrench, roles: ["admin"] },
       ]
     },
     { 
