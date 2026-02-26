@@ -1199,3 +1199,8 @@
 - [x] Corrigir validação z.enum no endpoint de atualização de utilizador para aceitar roles personalizados
 - [x] Corrigir badge de role para mostrar nome correto com fallback para roles personalizados
 - [x] Testar alteração de role para "Administrativa" no browser
+
+## Bug: Erro de Password ao Mudar Apenas o Role
+- [x] Corrigir validação para não exigir password ao alterar apenas o role
+- [x] Adicionar PasswordStrengthIndicator ao formulário de edição
+- [x] Testar mudança de role sem alterar password

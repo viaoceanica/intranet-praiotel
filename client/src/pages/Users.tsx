@@ -110,8 +110,8 @@ export default function Users() {
       active: editUser.active,
     };
 
-    if (editUser.password) {
-      updateData.password = editUser.password;
+    if (editUser.password && editUser.password.trim().length > 0) {
+      updateData.password = editUser.password.trim();
     }
 
     updateMutation.mutate(updateData);
@@ -404,8 +404,8 @@ export default function Users() {
                   value={editUser.password}
                   onChange={(e) => setEditUser({ ...editUser, password: e.target.value })}
                   placeholder="Deixe em branco para manter a atual"
-                  minLength={6}
                 />
+                {editUser.password && <PasswordStrengthIndicator password={editUser.password} />}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="edit-role">Role</Label>
