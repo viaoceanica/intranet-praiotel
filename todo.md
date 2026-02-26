@@ -1204,3 +1204,9 @@
 - [x] Corrigir validação para não exigir password ao alterar apenas o role
 - [x] Adicionar PasswordStrengthIndicator ao formulário de edição
 - [x] Testar mudança de role sem alterar password
+
+## Bug: Edição de Role Continua a Exigir Password
+- [x] Reproduzir e testar no servidor de desenvolvimento (funciona sem erro)
+- [x] Verificar código frontend e backend - ambos corretos
+- [x] Testar mudança de role sem preencher password (sucesso no dev)
+- Nota: Problema pode persistir na versão publicada até novo publish
