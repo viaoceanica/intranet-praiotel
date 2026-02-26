@@ -275,27 +275,27 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
   };
 
   const navigation: NavItem[] = [
-    { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+    { name: "Dashboard", href: "/", icon: LayoutDashboard, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
     { 
       name: "Tickets", 
       href: "/tickets", 
       icon: Ticket, 
-      roles: ["admin", "gestor", "tecnico", "visualizador"],
+      roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"],
       subItems: [
         { name: "Configuração SLA", href: "/sla-config", icon: Settings, roles: ["admin"] },
         { name: "Priorização Automática", href: "/prioritization", icon: Zap, roles: ["admin"] },
         { name: "Estatísticas", href: "/technician-stats", icon: BarChart3, roles: ["admin", "gestor"] },
         { name: "Templates", href: "/response-templates", icon: FileText, roles: ["admin", "gestor"] },
-        { name: "Manual de Tickets", href: "/tickets/manual", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Manual de Tickets", href: "/tickets/manual", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
       ]
     },
     { 
       name: "Clientes", 
       href: "/clients", 
       icon: Building2, 
-      roles: ["admin", "gestor", "tecnico", "visualizador"],
+      roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"],
       subItems: [
-        { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Equipamentos", href: "/equipment", icon: Wrench, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
       ]
     },
     { 
@@ -321,14 +321,14 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
       name: "Gestão Interna", 
       href: "/internal-dashboard", 
       icon: Briefcase, 
-      roles: ["admin", "gestor", "tecnico", "visualizador"],
+      roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"],
       subItems: [
-        { name: "Painel Inicial", href: "/internal-dashboard", icon: Home, roles: ["admin", "gestor", "tecnico", "visualizador"] },
-        { name: "Anúncios Gerais", href: "/announcements", icon: Megaphone, roles: ["admin", "gestor", "tecnico", "visualizador"] },
-        { name: "Mural de Mensagens", href: "/bulletin-board", icon: MessageSquare, roles: ["admin", "gestor", "tecnico", "visualizador"] },
-        { name: "Gestão de Documentos", href: "/documents", icon: FolderOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
-        { name: "Base de Conhecimento", href: "/knowledge-base", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador"] },
-        { name: "Os Meus Favoritos", href: "/favorites", icon: Star, roles: ["admin", "gestor", "tecnico", "visualizador"] },
+        { name: "Painel Inicial", href: "/internal-dashboard", icon: Home, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
+        { name: "Anúncios Gerais", href: "/announcements", icon: Megaphone, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
+        { name: "Mural de Mensagens", href: "/bulletin-board", icon: MessageSquare, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
+        { name: "Gestão de Documentos", href: "/documents", icon: FolderOpen, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
+        { name: "Base de Conhecimento", href: "/knowledge-base", icon: BookOpen, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
+        { name: "Os Meus Favoritos", href: "/favorites", icon: Star, roles: ["admin", "gestor", "tecnico", "visualizador", "Administrativa"] },
         { name: "Analytics", href: "/internal-management-analytics", icon: BarChart3, roles: ["admin", "gestor"] },
       ]
     },

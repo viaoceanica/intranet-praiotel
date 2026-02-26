@@ -1,0 +1,10 @@
+{
+  "query": "INSERT INTO users (name, email, role, passwordHash, active, createdAt, updatedAt)\nVALUES ('Administrador', 'admin@praiotel.pt', 'admin', '$2b$10$YQiiz.PH9V8nV3.5vF5bYeKxKHjK0RLGwY3pXFZ5mKxPZQH5mKxPZ', true, NOW(), NOW())\nON CONFLICT (email) DO UPDATE\nSET passwordHash = '$2b$10$YQiiz.PH9V8nV3.5vF5bYeKxKHjK0RLGwY3pXFZ5mKxPZQH5mKxPZ', active = true, updatedAt = NOW()\nRETURNING id, name, email, role;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute INSERT INTO users (name, email, role, passwordHash, active, createdAt, updatedAt)\nVALUES ('Administrador', 'admin@praiotel.pt', 'admin', '$2b$10$YQiiz.PH9V8nV3.5vF5bYeKxKHjK0RLGwY3pXFZ5mKxPZQH5mKxPZ', true, NOW(), NOW())\nON CONFLICT (email) DO UPDATE\nSET passwordHash = '$2b$10$YQiiz.PH9V8nV3.5vF5bYeKxKHjK0RLGwY3pXFZ5mKxPZQH5mKxPZ', active = true, updatedAt = NOW()\nRETURNING id, name, email, role;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 3 column 12 near \"CONFLICT (email) DO UPDATE",
+    "SET passwordHash = '$2b$10$YQiiz.PH9V8nV3.5vF5bYeKxKHjK0RLGwY3pXFZ5mKxPZQH5mKxPZ', active = true, updatedAt = NOW()",
+    "RETURNING id, name, email, role\""
+  ]
+}

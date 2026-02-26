@@ -1210,3 +1210,15 @@
 - [x] Verificar código frontend e backend - ambos corretos
 - [x] Testar mudança de role sem preencher password (sucesso no dev)
 - Nota: Problema pode persistir na versão publicada até novo publish
+
+## Permissões de Tickets para Role Administrativa
+- [ ] Verificar permissões do role "Administrativa" na base de dados
+- [ ] Adicionar permissões de visualização e criação de tickets
+- [ ] Verificar visibilidade do menu de tickets no frontend
+- [ ] Testar criação de ticket com utilizador Administrativa (Julia Duarte)
+
+## Correção de Permissões para Role "Administrativa"
+- [x] Adicionar role "Administrativa" às permissões do menu Tickets no PraiotelLayout
+- [x] Adicionar role "Administrativa" aos submenus de Tickets (Novo, Listar, etc.)
+- [x] Adicionar role "Administrativa" ao menu Clientes
+- [x] Testar acesso com utilizadora Julia Duarte (role: Administrativa)

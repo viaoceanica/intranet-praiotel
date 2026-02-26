@@ -1,0 +1,17 @@
+{
+  "query": "SELECT id, name, email, role, passwordHash FROM users WHERE email = 'admin@praiotel.pt';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id, name, email, role, passwordHash FROM users WHERE email = 'admin@praiotel.pt';",
+  "rows": [
+    {
+      "id": "3",
+      "name": "Administrador",
+      "email": "admin@praiotel.pt",
+      "role": "admin",
+      "passwordHash": "$2b$10$NJsvut36jZVhFqiBaPuED.fic9W3f3Skkl2Pnq4ZwVgDzX5LUqjgK"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\tname\temail\trole\tpasswordHash\n3\tAdministrador\tadmin@praiotel.pt\tadmin\t$2b$10$NJsvut36jZVhFqiBaPuED.fic9W3f3Skkl2Pnq4ZwVgDzX5LUqjgK\n",
+  "stderr": "",
+  "execution_time_ms": 57
+}

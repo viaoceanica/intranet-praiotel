@@ -1,0 +1,9 @@
+{
+  "query": "UPDATE users SET passwordHash = '$2b$10$U6HYy0RjhoBpDeKiHGkRNe.J3TVI4r9xkFFk43PrriPkq2AdQX14u' WHERE email = 'julia.duarte@praiotel.pt';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute UPDATE users SET passwordHash = '$2b$10$U6HYy0RjhoBpDeKiHGkRNe.J3TVI4r9xkFFk43PrriPkq2AdQX14u' WHERE email = 'julia.duarte@praiotel.pt';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 56
+}

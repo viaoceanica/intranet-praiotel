@@ -1,40 +1,40 @@
-import { drizzle } from "drizzle-orm/mysql2";
-import bcrypt from "bcryptjs";
-import { users } from "./drizzle/schema.ts";
-import dotenv from "dotenv";
+import bcrypt from 'bcrypt';
+import pg from 'pg';
 
-dotenv.config();
+const { Client } = pg;
 
-const db = drizzle(process.env.DATABASE_URL);
+// Obter DATABASE_URL do ambiente
+const DATABASE_URL = process.env.DATABASE_URL;
 
-async function createAdmin() {
-  const username = "admin";
-  const password = "admin123";
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  try {
-    await db.insert(users).values({
-      username,
-      passwordHash,
-      name: "Administrador",
-      email: "admin@praiotel.pt",
-      role: "admin",
-      active: 1,
-    });
-
-    console.log("✓ Utilizador admin criado com sucesso!");
-    console.log("  Username: admin");
-    console.log("  Password: admin123");
-    console.log("\n⚠️  IMPORTANTE: Altere a password após o primeiro login!");
-  } catch (error) {
-    if (error.code === "ER_DUP_ENTRY") {
-      console.log("✓ Utilizador admin já existe");
-    } else {
-      console.error("Erro ao criar admin:", error);
-    }
-  }
-
-  process.exit(0);
+if (!DATABASE_URL) {
+  console.error('DATABASE_URL não encontrada');
+  process.exit(1);
 }
 
-createAdmin();
+const client = new Client({
+  connectionString: DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+try {
+  await client.connect();
+  
+  // Gerar hash para Admin@2024
+  const passwordHash = await bcrypt.hash('Admin@2024', 10);
+  
+  // Atualizar ou inserir admin
+  const result = await client.query(`
+    INSERT INTO users (name, email, role, "passwordHash", active, "createdAt", "updatedAt")
+    VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+    ON CONFLICT (email) DO UPDATE
+    SET "passwordHash" = $4, active = $5, "updatedAt" = NOW()
+    RETURNING id, name, email, role
+  `, ['Administrador', 'admin@praiotel.pt', 'admin', passwordHash, true]);
+  
+  console.log('Utilizador criado/atualizado:', result.rows[0]);
+  
+} catch (error) {
+  console.error('Erro:', error.message);
+} finally {
+  await client.end();
+}

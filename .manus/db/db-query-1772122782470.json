@@ -1,0 +1,16 @@
+{
+  "query": "SELECT email, name, role, active FROM users WHERE name LIKE '%Julia%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT email, name, role, active FROM users WHERE name LIKE '%Julia%';",
+  "rows": [
+    {
+      "email": "julia.praiotel@gmail.com",
+      "name": "Julia Duarte",
+      "role": "Administrativa",
+      "active": "1"
+    }
+  ],
+  "messages": [],
+  "stdout": "email\tname\trole\tactive\njulia.praiotel@gmail.com\tJulia Duarte\tAdministrativa\t1\n",
+  "stderr": "",
+  "execution_time_ms": 124
+}
