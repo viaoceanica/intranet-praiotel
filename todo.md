@@ -1243,3 +1243,6 @@
 - [x] Identificar filtros ou restrições aplicadas
 - [x] Corrigir para mostrar todos os utilizadores ativos
 - [x] Testar com utilizadora Julia Duarte
+
+## Localização Padrão em Criar Ticket
+- [x] Definir "Terceira" como valor padrão do campo localização no NewTicket.tsx

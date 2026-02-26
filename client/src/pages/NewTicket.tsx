@@ -37,7 +37,7 @@ export default function NewTicket() {
     equipment: "",
     problemType: "",
     priority: "media" as "baixa" | "media" | "alta" | "urgente",
-    location: "",
+    location: "Terceira",
     description: "",
     assignedToId: undefined as number | undefined,
     serviceTypeId: undefined as number | undefined,
