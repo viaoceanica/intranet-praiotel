@@ -317,12 +317,13 @@ export default function NewTicket() {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Informações do Ticket</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* ── SECÇÃO 1: CLIENTE ── */}
               <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
+                  <span className="text-sm font-semibold text-[#F15A24] uppercase tracking-wider">1. Cliente</span>
+                </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -611,8 +612,12 @@ export default function NewTicket() {
                 </Card>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+              {/* ── SECÇÃO 2: DETALHES TÉCNICOS ── */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
+                  <span className="text-sm font-semibold text-[#F15A24] uppercase tracking-wider">2. Detalhes Técnicos</span>
+                </div>
+              <div className="space-y-2">
                   <Label htmlFor="equipment">Equipamento *</Label>
                   {!useCustomClient && formData.clientId ? (
                     clientEquipment && clientEquipment.length > 0 ? (
@@ -739,6 +744,7 @@ export default function NewTicket() {
                   )}
                 </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="problemType">Tipo de Problema *</Label>
                   <Input
@@ -769,8 +775,14 @@ export default function NewTicket() {
                   </Select>
                 </div>
               </div>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* ── SECÇÃO 3: CLASSIFICAÇÃO ── */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
+                  <span className="text-sm font-semibold text-[#F15A24] uppercase tracking-wider">3. Classificação e Atribuição</span>
+                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="priority">Prioridade *</Label>
                   <Select
@@ -808,9 +820,7 @@ export default function NewTicket() {
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="assignedTo">Atribuir a (opcional)</Label>
                   <Select
@@ -837,7 +847,13 @@ export default function NewTicket() {
                   </Select>
                 </div>
               </div>
+              </div>
 
+              {/* ── SECÇÃO 4: DESCRIÇÃO E ANEXOS ── */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-gray-200 pb-2 mb-4">
+                  <span className="text-sm font-semibold text-[#F15A24] uppercase tracking-wider">4. Descrição e Documentação</span>
+                </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Descrição do Problema *</Label>
                 <Textarea
@@ -850,7 +866,6 @@ export default function NewTicket() {
                 />
               </div>
 
-              {/* Upload de Anexos */}
               <div className="space-y-2">
                 <Label>Anexos (Imagens, Vídeos e Documentos)</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-[#F15A24] transition-colors">
@@ -934,8 +949,10 @@ export default function NewTicket() {
                   </div>
                 )}
               </div>
+              </div>
 
-              <div className="flex gap-3">
+              {/* ── BOTÕES ── */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <Button
                   type="button"
                   variant="outline"

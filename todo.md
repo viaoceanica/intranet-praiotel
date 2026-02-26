@@ -1184,3 +1184,9 @@
 - [x] Criar componente de alertas para dashboard
 - [x] Desenvolver interface de configuração de alertas
 - [x] Testar sistema completo de alertas
+
+## Reorganização do Formulário Novo Ticket
+- [x] Reorganizar layout do formulário para melhor aproveitamento do espaço
+- [x] Agrupar campos logicamente (cliente, detalhes técnicos, atribuição, descrição)
+- [x] Alinhar campos em grid consistente
+- [x] Testar novo layout
