@@ -289,38 +289,57 @@ export default function TicketDetail() {
               <CardHeader>
                 <CardTitle>Informações do Ticket</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+              <CardContent className="space-y-5">
+                {/* 1. Cliente */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                    <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">Cliente</span>
+                  </div>
                   <div>
-                    <Label className="text-gray-500">Cliente / Empresa</Label>
+                    <Label className="text-gray-500 text-xs">Cliente / Empresa</Label>
                     <p className="font-medium">{ticket.clientName}</p>
                   </div>
+                </div>
+
+                {/* 2. Detalhes Técnicos */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                    <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">Detalhes Técnicos</span>
+                  </div>
                   <div>
-                    <Label className="text-gray-500">Equipamento</Label>
+                    <Label className="text-gray-500 text-xs">Equipamento</Label>
                     <p className="font-medium">{ticket.equipment}</p>
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-gray-500 text-xs">Tipo de Problema</Label>
+                      <p className="font-medium">{ticket.problemType}</p>
+                    </div>
+                    <div>
+                      <Label className="text-gray-500 text-xs">Localização</Label>
+                      <p className="font-medium">{ticket.location}</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="text-gray-500">Tipo de Problema</Label>
-                    <p className="font-medium">{ticket.problemType}</p>
+                {/* 3. Descrição */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                    <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">Descrição</span>
                   </div>
                   <div>
-                    <Label className="text-gray-500">Localização</Label>
-                    <p className="font-medium">{ticket.location}</p>
+                    <p className="text-gray-700 whitespace-pre-wrap">{ticket.description}</p>
                   </div>
-                </div>
-
-                <div>
-                  <Label className="text-gray-500">Descrição</Label>
-                  <p className="mt-1 text-gray-700 whitespace-pre-wrap">{ticket.description}</p>
                 </div>
 
                 {ticket.notes && (
-                  <div>
-                    <Label className="text-gray-500">Notas</Label>
-                    <p className="mt-1 text-gray-700 whitespace-pre-wrap">{ticket.notes}</p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                      <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">Notas</span>
+                    </div>
+                    <div>
+                      <p className="text-gray-700 whitespace-pre-wrap">{ticket.notes}</p>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -525,141 +544,157 @@ export default function TicketDetail() {
               <CardHeader>
                 <CardTitle>Estado e Prioridade</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-5">
                 {editMode ? (
                   <>
-                    <div className="space-y-2">
-                      <Label>Estado</Label>
-                      <Select
-                        value={editData.status}
-                        onValueChange={(value: any) => setEditData({ ...editData, status: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="aberto">Aberto</SelectItem>
-                          <SelectItem value="em_progresso">Em Progresso</SelectItem>
-                          <SelectItem value="resolvido">Resolvido</SelectItem>
-                          <SelectItem value="fechado">Fechado</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    {/* 1. Estado e Classificação */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">1. Estado e Classificação</span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Estado</Label>
+                        <Select
+                          value={editData.status}
+                          onValueChange={(value: any) => setEditData({ ...editData, status: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="aberto">Aberto</SelectItem>
+                            <SelectItem value="em_progresso">Em Progresso</SelectItem>
+                            <SelectItem value="resolvido">Resolvido</SelectItem>
+                            <SelectItem value="fechado">Fechado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Prioridade</Label>
+                        <Select
+                          value={editData.priority}
+                          onValueChange={(value: any) => setEditData({ ...editData, priority: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {priorities?.map((p) => (
+                              <SelectItem key={p.priority} value={p.priority}>
+                                {p.displayName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Tipo de Assistência</Label>
+                        <Select
+                          value={editData.serviceTypeId?.toString() || ""}
+                          onValueChange={(value) => setEditData({ ...editData, serviceTypeId: value ? parseInt(value) : undefined })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {serviceTypes?.map((type) => (
+                              <SelectItem key={type.id} value={type.id.toString()}>
+                                {type.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Prioridade</Label>
-                      <Select
-                        value={editData.priority}
-                        onValueChange={(value: any) => setEditData({ ...editData, priority: value })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {priorities?.map((p) => (
-                            <SelectItem key={p.priority} value={p.priority}>
-                              {p.displayName}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    {/* 2. Atribuição */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">2. Atribuição</span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Atribuído a</Label>
+                        <Select
+                          value={editData.assignedToId === -1 ? "-1" : (editData.assignedToId?.toString() || "none")}
+                          onValueChange={(value) =>
+                            setEditData({
+                              ...editData,
+                              assignedToId: value === "none" ? undefined : (value === "-1" ? -1 : parseInt(value)),
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Não atribuído</SelectItem>
+                            <SelectItem value="-1" className="font-semibold text-[#F15A24]">Todos os Técnicos</SelectItem>
+                            {technicians?.map((tech) => (
+                              <SelectItem key={tech.id} value={tech.id.toString()}>
+                                {tech.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Tipo de Assistência</Label>
-                      <Select
-                        value={editData.serviceTypeId?.toString() || ""}
-                        onValueChange={(value) => setEditData({ ...editData, serviceTypeId: value ? parseInt(value) : undefined })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {serviceTypes?.map((type) => (
-                            <SelectItem key={type.id} value={type.id.toString()}>
-                              {type.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    {/* 3. Equipamento */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">3. Equipamento</span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Equipamento</Label>
+                        {ticket?.clientId && clientEquipment && clientEquipment.length > 0 ? (
+                          <div className="space-y-2">
+                            <Select
+                              value={useCustomEquipment ? "custom" : editData.equipmentId?.toString() || "none"}
+                              onValueChange={(value) => {
+                                if (value === "custom") {
+                                  setUseCustomEquipment(true);
+                                  setEditData({ ...editData, equipmentId: undefined, equipment: "" });
+                                } else if (value === "none") {
+                                  setUseCustomEquipment(false);
+                                  setEditData({ ...editData, equipmentId: undefined, equipment: "" });
+                                } else {
+                                  setUseCustomEquipment(false);
+                                  setEditData({ ...editData, equipmentId: parseInt(value), equipment: "" });
+                                }
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecionar equipamento" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="none">Nenhum</SelectItem>
+                                {clientEquipment.map((eq) => (
+                                  <SelectItem key={eq.id} value={eq.id.toString()}>
+                                    {eq.brand} {eq.model} (N/S: {eq.serialNumber})
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="custom">Inserir manualmente</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {useCustomEquipment && (
+                              <Input
+                                value={editData.equipment}
+                                onChange={(e) => setEditData({ ...editData, equipment: e.target.value })}
+                                placeholder="Ex: Máquina de café, Frigorífico..."
+                              />
+                            )}
+                          </div>
+                        ) : (
+                          <Input
+                            value={editData.equipment}
+                            onChange={(e) => setEditData({ ...editData, equipment: e.target.value })}
+                            placeholder="Ex: Máquina de café, Frigorífico..."
+                          />
+                        )}
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Atribuído a</Label>
-                      <Select
-                        value={editData.assignedToId === -1 ? "-1" : (editData.assignedToId?.toString() || "none")}
-                        onValueChange={(value) =>
-                          setEditData({
-                            ...editData,
-                            assignedToId: value === "none" ? undefined : (value === "-1" ? -1 : parseInt(value)),
-                          })
-                        }
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Não atribuído</SelectItem>
-                          <SelectItem value="-1" className="font-semibold text-[#F15A24]">Todos os Técnicos</SelectItem>
-                          {technicians?.map((tech) => (
-                            <SelectItem key={tech.id} value={tech.id.toString()}>
-                              {tech.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Equipamento</Label>
-                      {ticket?.clientId && clientEquipment && clientEquipment.length > 0 ? (
-                        <div className="space-y-2">
-                          <Select
-                            value={useCustomEquipment ? "custom" : editData.equipmentId?.toString() || "none"}
-                            onValueChange={(value) => {
-                              if (value === "custom") {
-                                setUseCustomEquipment(true);
-                                setEditData({ ...editData, equipmentId: undefined, equipment: "" });
-                              } else if (value === "none") {
-                                setUseCustomEquipment(false);
-                                setEditData({ ...editData, equipmentId: undefined, equipment: "" });
-                              } else {
-                                setUseCustomEquipment(false);
-                                setEditData({ ...editData, equipmentId: parseInt(value), equipment: "" });
-                              }
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecionar equipamento" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">Nenhum</SelectItem>
-                              {clientEquipment.map((eq) => (
-                                <SelectItem key={eq.id} value={eq.id.toString()}>
-                                  {eq.brand} {eq.model} (N/S: {eq.serialNumber})
-                                </SelectItem>
-                              ))}
-                              <SelectItem value="custom">Inserir manualmente</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {useCustomEquipment && (
-                            <Input
-                              value={editData.equipment}
-                              onChange={(e) => setEditData({ ...editData, equipment: e.target.value })}
-                              placeholder="Ex: Máquina de café, Frigorífico..."
-                            />
-                          )}
-                        </div>
-                      ) : (
-                        <Input
-                          value={editData.equipment}
-                          onChange={(e) => setEditData({ ...editData, equipment: e.target.value })}
-                          placeholder="Ex: Máquina de café, Frigorífico..."
-                        />
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 pt-4">
+                    <div className="flex gap-2 pt-4 border-t border-gray-200">
                       <Button
                         variant="outline"
                         onClick={() => setEditMode(false)}
@@ -685,29 +720,41 @@ export default function TicketDetail() {
                   </>
                 ) : (
                   <>
-                    <div>
-                      <Label className="text-gray-500">Estado</Label>
-                      <div className="mt-1">
-                        <Badge className={statusColors[ticket.status]}>
-                          {statusLabels[ticket.status]}
-                        </Badge>
+                    {/* Vista de leitura organizada */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">Estado e Classificação</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label className="text-gray-500 text-xs">Estado</Label>
+                          <div className="mt-1">
+                            <Badge className={statusColors[ticket.status]}>
+                              {statusLabels[ticket.status]}
+                            </Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-gray-500 text-xs">Prioridade</Label>
+                          <div className="mt-1">
+                            <Badge className={priorityColors[ticket.priority]}>
+                              {priorityLabels[ticket.priority]}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <Label className="text-gray-500">Prioridade</Label>
-                      <div className="mt-1">
-                        <Badge className={priorityColors[ticket.priority]}>
-                          {priorityLabels[ticket.priority]}
-                        </Badge>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                        <span className="text-xs font-semibold text-[#F15A24] uppercase tracking-wider">Atribuição</span>
                       </div>
-                    </div>
-
-                    <div>
-                      <Label className="text-gray-500">Atribuído a</Label>
-                      <p className="mt-1 font-medium">
-                        {assignedToDisplay}
-                      </p>
+                      <div>
+                        <Label className="text-gray-500 text-xs">Atribuído a</Label>
+                        <p className="mt-1 font-medium">
+                          {assignedToDisplay}
+                        </p>
+                      </div>
                     </div>
                   </>
                 )}

@@ -1190,3 +1190,7 @@
 - [x] Agrupar campos logicamente (cliente, detalhes técnicos, atribuição, descrição)
 - [x] Alinhar campos em grid consistente
 - [x] Testar novo layout
+
+## Reorganização do Formulário de Edição de Ticket
+- [x] Aplicar mesma organização em secções visuais ao TicketDetail (leitura e edição)
+- [x] Testar novo layout no browser

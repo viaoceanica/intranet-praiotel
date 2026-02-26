@@ -1,0 +1,25 @@
+{
+  "query": "SELECT id FROM tickets LIMIT 5;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT id FROM tickets LIMIT 5;",
+  "rows": [
+    {
+      "id": "2"
+    },
+    {
+      "id": "60041"
+    },
+    {
+      "id": "30001"
+    },
+    {
+      "id": "30002"
+    },
+    {
+      "id": "30003"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\n2\n60041\n30001\n30002\n30003\n",
+  "stderr": "",
+  "execution_time_ms": 53
+}
