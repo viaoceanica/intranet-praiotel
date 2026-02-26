@@ -1222,3 +1222,10 @@
 - [x] Adicionar role "Administrativa" aos submenus de Tickets (Novo, Listar, etc.)
 - [x] Adicionar role "Administrativa" ao menu Clientes
 - [x] Testar acesso com utilizadora Julia Duarte (role: Administrativa)
+
+## Melhoria Visual da Área de Filtros
+- [x] Reorganizar layout dos filtros para melhor hierarquia visual
+- [x] Melhorar espaçamento e agrupamento de campos relacionados
+- [x] Adicionar ícones aos labels dos filtros
+- [x] Melhorar contraste e legibilidade
+- [x] Testar responsividade dos filtros reorganizados
