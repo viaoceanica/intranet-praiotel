@@ -620,6 +620,14 @@ export const appRouter = router({
       const ticketsAtribuidosIndividualmente = allTickets.filter(t => t.assignedToId && t.assignedToId !== -1).length;
       const ticketsNaoAtribuidos = allTickets.filter(t => !t.assignedToId || t.assignedToId === 0).length;
 
+      // Estatísticas por tipo de assistência
+      const porTipoAssistencia: Record<number, number> = {};
+      allTickets.forEach(t => {
+        if (t.serviceTypeId) {
+          porTipoAssistencia[t.serviceTypeId] = (porTipoAssistencia[t.serviceTypeId] || 0) + 1;
+        }
+      });
+
       return {
         total,
         porEstado,
@@ -629,6 +637,7 @@ export const appRouter = router({
         ticketsAtribuidosATodos,
         ticketsAtribuidosIndividualmente,
         ticketsNaoAtribuidos,
+        porTipoAssistencia,
       };
     }),
 

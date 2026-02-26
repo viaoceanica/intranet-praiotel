@@ -34,6 +34,7 @@ export default function Tickets() {
   const [technicianFilter, setTechnicianFilter] = useState<string>("all");
   const [clientFilter, setClientFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [serviceTypeFilter, setServiceTypeFilter] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
   const [showQuickEditModal, setShowQuickEditModal] = useState(false);
@@ -48,6 +49,7 @@ export default function Tickets() {
 
   const { data: tickets, isLoading } = trpc.tickets.list.useQuery();
   const { data: priorities } = trpc.sla.list.useQuery();
+  const { data: serviceTypes } = trpc.serviceTypes.listActive.useQuery();
 
   const quickEditMutation = trpc.tickets.update.useMutation({
     onSuccess: () => {
@@ -131,13 +133,15 @@ export default function Tickets() {
     const matchesClient = clientFilter === "all" || 
       (ticket.clientId && ticket.clientId.toString() === clientFilter);
     const matchesLocation = locationFilter === "all" || ticket.location === locationFilter;
+    const matchesServiceType = serviceTypeFilter === "all" || 
+      (ticket.serviceTypeId && ticket.serviceTypeId.toString() === serviceTypeFilter);
     
     const ticketDate = new Date(ticket.createdAt);
     const matchesDateFrom = !dateFrom || ticketDate >= new Date(dateFrom);
     const matchesDateTo = !dateTo || ticketDate <= new Date(dateTo + 'T23:59:59');
 
     return matchesSearch && matchesStatus && matchesPriority && matchesTechnician && 
-           matchesClient && matchesLocation && matchesDateFrom && matchesDateTo;
+           matchesClient && matchesLocation && matchesServiceType && matchesDateFrom && matchesDateTo;
   });
 
   const clearFilters = () => {
@@ -147,6 +151,7 @@ export default function Tickets() {
     setTechnicianFilter("all");
     setClientFilter("all");
     setLocationFilter("all");
+    setServiceTypeFilter("all");
     setDateFrom("");
     setDateTo("");
   };
@@ -250,6 +255,23 @@ export default function Tickets() {
             </div>
 
             <div>
+              <Label className="text-sm text-gray-600 mb-2">Tipo de Assistência</Label>
+              <Select value={serviceTypeFilter} onValueChange={setServiceTypeFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Todos os tipos" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos os tipos</SelectItem>
+                  {serviceTypes?.map((type) => (
+                    <SelectItem key={type.id} value={type.id.toString()}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
               <Label className="text-sm text-gray-600 mb-2">Cliente</Label>
               <Select value={clientFilter} onValueChange={setClientFilter}>
                 <SelectTrigger>
@@ -319,6 +341,7 @@ export default function Tickets() {
                   <TableHead>Equipamento</TableHead>
                   <TableHead>Localização</TableHead>
                   <TableHead>Prioridade</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Técnico</TableHead>
                   <TableHead>SLA</TableHead>
@@ -356,6 +379,15 @@ export default function Tickets() {
                       <Badge className={priorityColors[ticket.priority]}>
                         {priorityLabels[ticket.priority]}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {ticket.serviceTypeId ? (
+                        <Badge className="bg-purple-100 text-purple-800">
+                          {serviceTypes?.find(st => st.id === ticket.serviceTypeId)?.name || 'N/A'}
+                        </Badge>
+                      ) : (
+                        <span className="text-sm text-gray-400">-</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       <Badge className={statusColors[ticket.status]}>

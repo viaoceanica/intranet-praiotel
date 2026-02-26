@@ -30,6 +30,7 @@ export default function Dashboard() {
   const { data: myTickets } = trpc.tickets.myTickets.useQuery(undefined, {
     enabled: user?.role === "tecnico",
   });
+  const { data: serviceTypes } = trpc.serviceTypes.listActive.useQuery();
 
   // Vista simplificada para técnicos
   if (user?.role === "tecnico") {
@@ -161,6 +162,11 @@ export default function Dashboard() {
     { name: "Alta", value: stats.porPrioridade.alta },
     { name: "Urgente", value: stats.porPrioridade.urgente },
   ];
+
+  const tipoAssistenciaData = serviceTypes?.map(type => ({
+    name: type.name,
+    value: stats.porTipoAssistencia?.[type.id] || 0,
+  })) || [];
 
   const avgDays = stats.avgResolutionTimeMs > 0
     ? Math.round(stats.avgResolutionTimeMs / (1000 * 60 * 60 * 24))
@@ -348,6 +354,23 @@ export default function Dashboard() {
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="value" fill="#F15A24" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Tickets por Tipo de Assistência</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={tipoAssistenciaData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill="#9333EA" />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

@@ -1165,3 +1165,9 @@
 - [x] Atualizar formulário de edição de ticket com dropdown de tipos
 - [x] Atualizar listagem de tickets para mostrar tipo de assistência
 - [x] Testar fluxo completo de gestão e utilização
+
+## Melhorias de Tipos de Assistência
+- [x] Adicionar coluna de tipo de assistência na listagem de tickets com badge colorido
+- [x] Implementar filtro por tipo de assistência no topo da listagem
+- [x] Criar card de estatísticas por tipo no dashboard com gráfico
+- [x] Testar todas as funcionalidades implementadas

@@ -46,6 +46,7 @@ export async function getAllTickets() {
       assignedToId: tickets.assignedToId,
       location: tickets.location,
       description: tickets.description,
+      serviceTypeId: tickets.serviceTypeId,
       createdAt: tickets.createdAt,
       updatedAt: tickets.updatedAt,
       resolvedAt: tickets.resolvedAt,
