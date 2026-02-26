@@ -1171,3 +1171,16 @@
 - [x] Implementar filtro por tipo de assistência no topo da listagem
 - [x] Criar card de estatísticas por tipo no dashboard com gráfico
 - [x] Testar todas as funcionalidades implementadas
+
+## Relatório de Desempenho por Tipo de Assistência
+- [x] Criar endpoint de estatísticas detalhadas por tipo (tempo médio resolução, taxa resolução, volume)
+- [x] Desenvolver página de relatório com tabela e gráficos comparativos
+- [x] Integrar no menu de relatórios
+- [x] Testar relatório completo
+
+## Sistema de Alertas de Volume por Tipo
+- [x] Criar tabela de configuração de thresholds por tipo
+- [x] Implementar verificação automática de volumes
+- [x] Criar componente de alertas para dashboard
+- [x] Desenvolver interface de configuração de alertas
+- [x] Testar sistema completo de alertas

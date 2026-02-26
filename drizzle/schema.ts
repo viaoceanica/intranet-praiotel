@@ -69,6 +69,21 @@ export type ServiceType = typeof serviceTypes.$inferSelect;
 export type InsertServiceType = typeof serviceTypes.$inferInsert;
 
 /**
+ * Thresholds de alertas de volume por tipo de assistência
+ */
+export const serviceTypeAlertThresholds = mysqlTable("serviceTypeAlertThresholds", {
+  id: int("id").autoincrement().primaryKey(),
+  serviceTypeId: int("serviceTypeId").notNull(),
+  threshold: int("threshold").notNull(), // Número de tickets pendentes que dispara alerta
+  active: int("active").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ServiceTypeAlertThreshold = typeof serviceTypeAlertThresholds.$inferSelect;
+export type InsertServiceTypeAlertThreshold = typeof serviceTypeAlertThresholds.$inferInsert;
+
+/**
  * Tickets de assistência técnica
  */
 export const tickets = mysqlTable("tickets", {

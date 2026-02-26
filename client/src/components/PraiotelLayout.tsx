@@ -44,7 +44,8 @@ import {
   FileText as FileTemplate,
   Copy,
   GripVertical,
-  KeyRound
+  KeyRound,
+  AlertTriangle
 } from "lucide-react";
 import NotificationsDropdown from "@/components/NotificationsDropdown";
 import { ChangePasswordDialog } from "@/components/ChangePasswordDialog";
@@ -339,6 +340,8 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
       subItems: [
         { name: "Roles", href: "/roles", icon: Settings, roles: ["admin"] },
         { name: "Tipos de Assistência", href: "/service-types", icon: Wrench, roles: ["admin"] },
+        { name: "Relatório de Desempenho", href: "/service-type-performance", icon: BarChart3, roles: ["admin"] },
+        { name: "Configuração de Alertas", href: "/alert-thresholds", icon: AlertTriangle, roles: ["admin"] },
       ]
     },
     { 

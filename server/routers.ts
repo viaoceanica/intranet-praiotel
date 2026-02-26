@@ -641,6 +641,51 @@ export const appRouter = router({
       };
     }),
 
+    serviceTypePerformance: isAuthenticated.query(async () => {
+      const allTickets = await ticketsDb.getAllTickets();
+      const serviceTypes = await dbHelpers.getAllServiceTypes();
+      
+      const performance = serviceTypes.map(type => {
+        const typeTickets = allTickets.filter(t => t.serviceTypeId === type.id);
+        const total = typeTickets.length;
+        const resolved = typeTickets.filter(t => t.status === 'resolvido' || t.status === 'fechado');
+        
+        // Tempo médio de resolução
+        let avgResolutionTime = 0;
+        if (resolved.length > 0) {
+          const totalTime = resolved.reduce((sum, ticket) => {
+            const created = new Date(ticket.createdAt).getTime();
+            const resolvedAt = new Date(ticket.resolvedAt || ticket.updatedAt).getTime();
+            return sum + (resolvedAt - created);
+          }, 0);
+          avgResolutionTime = totalTime / resolved.length;
+        }
+        
+        // Taxa de resolução
+        const resolutionRate = total > 0 ? (resolved.length / total) * 100 : 0;
+        
+        // Distribuição por estado
+        const byStatus = {
+          aberto: typeTickets.filter(t => t.status === 'aberto').length,
+          em_progresso: typeTickets.filter(t => t.status === 'em_progresso').length,
+          resolvido: typeTickets.filter(t => t.status === 'resolvido').length,
+          fechado: typeTickets.filter(t => t.status === 'fechado').length,
+        };
+        
+        return {
+          serviceTypeId: type.id,
+          serviceTypeName: type.name,
+          total,
+          resolved: resolved.length,
+          avgResolutionTimeMs: avgResolutionTime,
+          resolutionRate,
+          byStatus,
+        };
+      });
+      
+      return performance;
+    }),
+
     getById: isAuthenticated
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
@@ -3423,6 +3468,75 @@ export const appRouter = router({
         await dbHelpers.deleteServiceType(input.id);
         return { success: true };
       }),
+  }),
+
+  // ============================================================================
+  // ALERT THRESHOLDS - Thresholds de Alertas de Volume
+  // ============================================================================
+  alertThresholds: router({
+    list: isAdmin.query(async () => {
+      const thresholds = await dbHelpers.getAllAlertThresholds();
+      return thresholds;
+    }),
+
+    create: isAdmin
+      .input(z.object({
+        serviceTypeId: z.number(),
+        threshold: z.number().min(1, "Threshold deve ser maior que 0"),
+      }))
+      .mutation(async ({ input }) => {
+        await dbHelpers.createAlertThreshold({ ...input, active: 1 });
+        return { success: true };
+      }),
+
+    update: isAdmin
+      .input(z.object({
+        id: z.number(),
+        threshold: z.number().min(1).optional(),
+        active: z.number().min(0).max(1).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await dbHelpers.updateAlertThreshold(id, data);
+        return { success: true };
+      }),
+
+    delete: isAdmin
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await dbHelpers.deleteAlertThreshold(input.id);
+        return { success: true };
+      }),
+
+    checkAlerts: isAdmin.query(async () => {
+      const allTickets = await ticketsDb.getAllTickets();
+      const thresholds = await dbHelpers.getAllAlertThresholds();
+      const serviceTypes = await dbHelpers.getAllServiceTypes();
+      
+      const alerts = [];
+      
+      for (const threshold of thresholds.filter(t => t.active === 1)) {
+        const serviceType = serviceTypes.find(st => st.id === threshold.serviceTypeId);
+        if (!serviceType) continue;
+        
+        const pendingTickets = allTickets.filter(t => 
+          t.serviceTypeId === threshold.serviceTypeId &&
+          (t.status === 'aberto' || t.status === 'em_progresso')
+        );
+        
+        if (pendingTickets.length >= threshold.threshold) {
+          alerts.push({
+            serviceTypeId: threshold.serviceTypeId,
+            serviceTypeName: serviceType.name,
+            threshold: threshold.threshold,
+            currentCount: pendingTickets.length,
+            exceeded: pendingTickets.length - threshold.threshold,
+          });
+        }
+      }
+      
+      return alerts;
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;

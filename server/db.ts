@@ -1,6 +1,6 @@
 import { eq, and, gt } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, passwordResetTokens, serviceTypes, InsertServiceType } from "../drizzle/schema";
+import { InsertUser, users, passwordResetTokens, serviceTypes, InsertServiceType, serviceTypeAlertThresholds, InsertServiceTypeAlertThreshold } from "../drizzle/schema";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -155,3 +155,60 @@ export async function deleteServiceType(id: number) {
   if (!db) throw new Error("Database not available");
   await db.delete(serviceTypes).where(eq(serviceTypes.id, id));
 }
+
+// --- Service Type Alert Thresholds ---
+
+export async function getAllAlertThresholds() {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot get alert thresholds: database not available");
+    return [];
+  }
+  const result = await db.select().from(serviceTypeAlertThresholds);
+  return result;
+}
+
+export async function getAlertThresholdByServiceType(serviceTypeId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(serviceTypeAlertThresholds)
+    .where(and(
+      eq(serviceTypeAlertThresholds.serviceTypeId, serviceTypeId),
+      eq(serviceTypeAlertThresholds.active, 1)
+    ))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createAlertThreshold(data: InsertServiceTypeAlertThreshold) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(serviceTypeAlertThresholds).values(data);
+  return result;
+}
+
+export async function updateAlertThreshold(id: number, data: Partial<InsertServiceTypeAlertThreshold>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(serviceTypeAlertThresholds).set(data).where(eq(serviceTypeAlertThresholds.id, id));
+}
+
+export async function deleteAlertThreshold(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(serviceTypeAlertThresholds).where(eq(serviceTypeAlertThresholds.id, id));
+}
+
+export const dbHelpers = {
+  getAllServiceTypes,
+  getActiveServiceTypes,
+  getServiceTypeById,
+  createServiceType,
+  updateServiceType,
+  deleteServiceType,
+  getAllAlertThresholds,
+  getAlertThresholdByServiceType,
+  createAlertThreshold,
+  updateAlertThreshold,
+  deleteAlertThreshold,
+};

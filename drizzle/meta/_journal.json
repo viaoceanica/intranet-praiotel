@@ -218,6 +218,13 @@
       "when": 1772044700729,
       "tag": "0030_striped_genesis",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1772117381033,
+      "tag": "0031_faithful_sleepwalker",
+      "breakpoints": true
     }
   ]
 }

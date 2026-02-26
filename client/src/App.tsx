@@ -24,6 +24,8 @@ import EmailLogs from "./pages/EmailLogs";
 import { ResponseTemplates } from "./pages/ResponseTemplates";
 import Roles from "./pages/Roles";
 import ServiceTypes from "./pages/ServiceTypes";
+import ServiceTypePerformance from "./pages/ServiceTypePerformance";
+import AlertThresholds from "./pages/AlertThresholds";
 import { InternalDashboard } from "./pages/InternalDashboard";
 import { Announcements } from "./pages/Announcements";
 import { BulletinBoard } from "./pages/BulletinBoard";
@@ -100,6 +102,8 @@ function Router() {
       <Route path="/response-templates" component={() => <ProtectedRoute component={ResponseTemplates} />} />
       <Route path="/roles" component={() => <ProtectedRoute component={Roles} />} />
       <Route path="/service-types" component={() => <ProtectedRoute component={ServiceTypes} />} />
+      <Route path="/service-type-performance" component={() => <ProtectedRoute component={ServiceTypePerformance} />} />
+      <Route path="/alert-thresholds" component={() => <ProtectedRoute component={AlertThresholds} />} />
       <Route path="/internal-dashboard" component={() => <ProtectedRoute component={InternalDashboard} />} />
       <Route path="/announcements" component={() => <ProtectedRoute component={Announcements} />} />
       <Route path="/bulletin-board" component={() => <ProtectedRoute component={BulletinBoard} />} />
