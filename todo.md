@@ -1194,3 +1194,8 @@
 ## Reorganização do Formulário de Edição de Ticket
 - [x] Aplicar mesma organização em secções visuais ao TicketDetail (leitura e edição)
 - [x] Testar novo layout no browser
+
+## Bug: Validação de Roles Rejeita Roles Personalizados
+- [x] Corrigir validação z.enum no endpoint de atualização de utilizador para aceitar roles personalizados
+- [x] Corrigir badge de role para mostrar nome correto com fallback para roles personalizados
+- [x] Testar alteração de role para "Administrativa" no browser

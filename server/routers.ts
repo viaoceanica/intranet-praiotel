@@ -418,7 +418,7 @@ export const appRouter = router({
         email: z.string().email(),
         password: z.string().min(8),
         name: z.string().min(1),
-        role: z.enum(["admin", "gestor", "tecnico", "visualizador"]),
+        role: z.string().min(1),
       }))
       .mutation(async ({ input }) => {
         const existing = await dbHelpers.getUserByEmail(input.email);
@@ -456,7 +456,7 @@ export const appRouter = router({
         id: z.number(),
         name: z.string().min(1).optional(),
         email: z.string().email().optional(),
-        role: z.enum(["admin", "gestor", "tecnico", "visualizador"]).optional(),
+        role: z.string().min(1).optional(),
         active: z.boolean().optional(),
         password: z.string().min(8).optional(),
       }))

@@ -285,8 +285,8 @@ export default function Users() {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
-                      <Badge className={roleBadgeColors[user.role]}>
-                        {roleLabels[user.role]}
+                      <Badge className={roleBadgeColors[user.role] || "bg-purple-100 text-purple-800"}>
+                        {roleLabels[user.role] || user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                       </Badge>
                     </TableCell>
                     <TableCell>
