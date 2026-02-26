@@ -1252,3 +1252,10 @@
 - [x] Identificar problema no componente de tema
 - [x] Corrigir funcionalidade de alternância
 - [x] Verificar persistência da preferência do utilizador
+
+## Correção de Recuperar Password
+- [x] Testar funcionalidade de recuperar password no browser
+- [x] Identificar problema no fluxo de recuperação
+- [x] Corrigir backend e/ou frontend
+- [x] Verificar envio de email de recuperação
+- [x] Testar fluxo completo de reset de password
