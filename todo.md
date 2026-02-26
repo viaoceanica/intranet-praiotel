@@ -1246,3 +1246,9 @@
 
 ## Localização Padrão em Criar Ticket
 - [x] Definir "Terceira" como valor padrão do campo localização no NewTicket.tsx
+
+## Correção do Botão Dia/Noite
+- [x] Testar funcionalidade de alternância de tema no browser
+- [x] Identificar problema no componente de tema
+- [x] Corrigir funcionalidade de alternância
+- [x] Verificar persistência da preferência do utilizador

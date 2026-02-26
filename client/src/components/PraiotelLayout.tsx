@@ -477,6 +477,7 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
               size="icon"
               onClick={toggleTheme}
               className="h-9 w-9"
+              title={theme === "light" ? "Mudar para modo escuro" : "Mudar para modo claro"}
             >
               {theme === "light" ? (
                 <Moon className="h-5 w-5" />
