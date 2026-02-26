@@ -1236,3 +1236,10 @@
 - [x] Reduzir padding do container
 - [x] Remover labels com ícones para ganhar espaço
 - [x] Testar usabilidade da versão compacta
+
+## Investigação de Utilizadores na Atribuição de Tickets
+- [x] Analisar código do formulário NewTicket.tsx
+- [x] Verificar query de utilizadores no backend
+- [x] Identificar filtros ou restrições aplicadas
+- [x] Corrigir para mostrar todos os utilizadores ativos
+- [x] Testar com utilizadora Julia Duarte
