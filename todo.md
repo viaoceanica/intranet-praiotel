@@ -1278,3 +1278,10 @@
 - [x] Remover/substituir referências no backend (routers, db helpers)
 - [x] Remover do schema da base de dados
 - [x] Atualizar tickets existentes com estado "fechado" para "resolvido"
+
+## Bug: Desatribuição de Tickets Não Funciona
+- [x] Analisar código de atribuição/desatribuição no TicketDetail.tsx
+- [x] Verificar lógica no backend (routers.ts) para assignedToId = null
+- [x] Corrigir para limpar assignedToId ao selecionar "Todos os Técnicos"
+- [x] Testar fluxo completo de atribuição e desatribuição
+- [x] Nota: BD confirma assignedToId=-1 correto; problema apenas na versão publicada (desatualizada)
