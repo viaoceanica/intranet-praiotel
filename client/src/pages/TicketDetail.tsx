@@ -563,7 +563,6 @@ export default function TicketDetail() {
                             <SelectItem value="aberto">Aberto</SelectItem>
                             <SelectItem value="em_progresso">Em Progresso</SelectItem>
                             <SelectItem value="resolvido">Resolvido</SelectItem>
-                            <SelectItem value="fechado">Fechado</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>

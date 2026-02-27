@@ -1259,3 +1259,15 @@
 - [x] Corrigir backend e/ou frontend
 - [x] Verificar envio de email de recuperação
 - [x] Testar fluxo completo de reset de password
+
+## Correção Ilha Terceira Padrão para Administrativo
+- [x] Verificar comportamento no browser ao criar ticket como administrativo
+- [x] Identificar porque Terceira não aparece como padrão
+- [x] Corrigir código para garantir Terceira como padrão
+- [x] Testar correção
+
+## Remoção do Estado "Fechado" dos Formulários
+- [x] Identificar onde o estado "Fechado" aparece nos formulários
+- [x] Remover opção "Fechado" do formulário de criar ticket
+- [x] Remover opção "Fechado" do formulário de editar ticket
+- [x] Testar que outros estados continuam a funcionar
