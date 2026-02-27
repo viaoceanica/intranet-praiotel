@@ -67,7 +67,7 @@ export default function TicketDetail() {
   );
 
   const [editData, setEditData] = useState({
-    status: "" as "aberto" | "em_progresso" | "resolvido" | "fechado" | "",
+    status: "" as "aberto" | "em_progresso" | "resolvido" | "",
     priority: "" as string,
     assignedToId: undefined as number | undefined,
     equipmentId: undefined as number | undefined,
@@ -124,7 +124,7 @@ export default function TicketDetail() {
   const handleEdit = () => {
     if (ticket) {
       setEditData({
-        status: ticket.status,
+        status: ticket.status as "aberto" | "em_progresso" | "resolvido",
         priority: ticket.priority,
         assignedToId: ticket.assignedToId || undefined,
         equipmentId: ticket.equipmentId || undefined,
@@ -187,14 +187,12 @@ export default function TicketDetail() {
     aberto: "Aberto",
     em_progresso: "Em Progresso",
     resolvido: "Resolvido",
-    fechado: "Fechado",
   };
 
   const statusColors: Record<string, string> = {
     aberto: "bg-blue-100 text-blue-800",
     em_progresso: "bg-yellow-100 text-yellow-800",
     resolvido: "bg-green-100 text-green-800",
-    fechado: "bg-gray-100 text-gray-800",
   };
 
   const priorityLabels: Record<string, string> = {
@@ -821,12 +819,7 @@ export default function TicketDetail() {
                     <p>{format(new Date(ticket.resolvedAt), "dd/MM/yyyy HH:mm")}</p>
                   </div>
                 )}
-                {ticket.closedAt && (
-                  <div>
-                    <Label className="text-gray-500">Fechado</Label>
-                    <p>{format(new Date(ticket.closedAt), "dd/MM/yyyy HH:mm")}</p>
-                  </div>
-                )}
+
               </CardContent>
             </Card>
           </div>

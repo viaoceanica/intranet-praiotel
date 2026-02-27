@@ -97,7 +97,7 @@ export default function ClientTickets() {
               <CardContent className="p-4">
                 <div className="text-sm text-gray-500">Resolvidos</div>
                 <div className="text-2xl font-bold text-green-600">
-                  {clientStats.resolvidos + clientStats.fechados}
+                  {clientStats.resolvidos + (clientStats.fechados || 0)}
                 </div>
               </CardContent>
             </Card>

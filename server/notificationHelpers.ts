@@ -75,7 +75,6 @@ export async function notifyTicketStatusChanged(
     aberto: "Aberto",
     em_progresso: "Em Progresso",
     resolvido: "Resolvido",
-    fechado: "Fechado",
   };
 
   // Notificar o técnico atribuído (se não for ele próprio quem alterou)

@@ -1271,3 +1271,10 @@
 - [x] Remover opção "Fechado" do formulário de criar ticket
 - [x] Remover opção "Fechado" do formulário de editar ticket
 - [x] Testar que outros estados continuam a funcionar
+
+## Eliminação Completa do Estado "Fechado"
+- [x] Identificar todas as referências ao estado "fechado" no frontend e backend
+- [x] Remover/substituir referências no frontend (páginas, componentes, filtros)
+- [x] Remover/substituir referências no backend (routers, db helpers)
+- [x] Remover do schema da base de dados
+- [x] Atualizar tickets existentes com estado "fechado" para "resolvido"

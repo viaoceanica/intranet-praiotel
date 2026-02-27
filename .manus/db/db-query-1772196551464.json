@@ -1,0 +1,16 @@
+{
+  "query": "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tickets' AND COLUMN_NAME LIKE '%resolv%' OR TABLE_NAME = 'tickets' AND COLUMN_NAME LIKE '%close%';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3cVh5zkX4ywvzHG.ac4e076b265a --database Ws6J3kt3aUuWjo2DPX89FU --execute SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'tickets' AND COLUMN_NAME LIKE '%resolv%' OR TABLE_NAME = 'tickets' AND COLUMN_NAME LIKE '%close%';",
+  "rows": [
+    {
+      "COLUMN_NAME": "resolvedAt"
+    },
+    {
+      "COLUMN_NAME": "closedAt"
+    }
+  ],
+  "messages": [],
+  "stdout": "COLUMN_NAME\nresolvedAt\nclosedAt\n",
+  "stderr": "",
+  "execution_time_ms": 70
+}

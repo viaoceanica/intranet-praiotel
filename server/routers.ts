@@ -576,7 +576,7 @@ export const appRouter = router({
         aberto: allTickets.filter(t => t.status === 'aberto').length,
         em_progresso: allTickets.filter(t => t.status === 'em_progresso').length,
         resolvido: allTickets.filter(t => t.status === 'resolvido').length,
-        fechado: allTickets.filter(t => t.status === 'fechado').length,
+        fechado: 0,
       };
       
       const porPrioridade = {
@@ -648,7 +648,7 @@ export const appRouter = router({
       const performance = serviceTypes.map(type => {
         const typeTickets = allTickets.filter(t => t.serviceTypeId === type.id);
         const total = typeTickets.length;
-        const resolved = typeTickets.filter(t => t.status === 'resolvido' || t.status === 'fechado');
+        const resolved = typeTickets.filter(t => t.status === 'resolvido');
         
         // Tempo médio de resolução
         let avgResolutionTime = 0;
@@ -669,7 +669,7 @@ export const appRouter = router({
           aberto: typeTickets.filter(t => t.status === 'aberto').length,
           em_progresso: typeTickets.filter(t => t.status === 'em_progresso').length,
           resolvido: typeTickets.filter(t => t.status === 'resolvido').length,
-          fechado: typeTickets.filter(t => t.status === 'fechado').length,
+          fechado: 0,
         };
         
         return {
@@ -919,7 +919,7 @@ export const appRouter = router({
         equipment: z.string().min(1).optional(),
         problemType: z.string().min(1).optional(),
         priority: z.enum(["baixa", "media", "alta", "urgente"]).optional(),
-        status: z.enum(["aberto", "em_progresso", "resolvido", "fechado"]).optional(),
+        status: z.enum(["aberto", "em_progresso", "resolvido"]).optional(),
         location: z.string().min(1).optional(),
         description: z.string().min(1).optional(),
         notes: z.string().optional(),
@@ -948,7 +948,6 @@ export const appRouter = router({
 
           if (input.status === "resolvido") {
             dataToUpdate.resolvedAt = new Date();
-          } else if (input.status === "fechado") {
             dataToUpdate.closedAt = new Date();
           }
 

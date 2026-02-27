@@ -100,9 +100,9 @@ export async function getClientTicketStats(clientId: number) {
   const abertos = allTickets.filter(t => t.status === 'aberto').length;
   const emProgresso = allTickets.filter(t => t.status === 'em_progresso').length;
   const resolvidos = allTickets.filter(t => t.status === 'resolvido').length;
-  const fechados = allTickets.filter(t => t.status === 'fechado').length;
+  const fechados = 0;
 
-  // Calcular tempo médio de resolução (apenas tickets resolvidos/fechados)
+  // Calcular tempo médio de resolução (apenas tickets resolvidos)
   const resolvedTickets = allTickets.filter(t => t.resolvedAt);
   let avgResolutionTime = 0;
   if (resolvedTickets.length > 0) {
@@ -199,8 +199,8 @@ export async function getSlaMetrics() {
 
     totalTickets++;
 
-    const resolvedDate = ticket.resolvedAt || ticket.closedAt;
-    if (!resolvedDate) continue; // Apenas tickets resolvidos/fechados
+    const resolvedDate = ticket.resolvedAt;
+    if (!resolvedDate) continue; // Apenas tickets resolvidos
 
     const elapsed = resolvedDate.getTime() - ticket.createdAt.getTime();
     const hoursElapsed = elapsed / (1000 * 60 * 60);

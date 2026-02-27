@@ -153,8 +153,7 @@ export default function Dashboard() {
   const estadoData = [
     { name: "Aberto", value: stats.porEstado.aberto, color: "#EF4444" },
     { name: "Em Progresso", value: stats.porEstado.em_progresso, color: "#F15A24" },
-    { name: "Resolvido", value: stats.porEstado.resolvido, color: "#10B981" },
-    { name: "Fechado", value: stats.porEstado.fechado, color: "#6B7280" },
+    { name: "Resolvido", value: stats.porEstado.resolvido + (stats.porEstado.fechado || 0), color: "#10B981" },
   ];
 
   const prioridadeData = [

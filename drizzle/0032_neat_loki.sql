@@ -1,0 +1,1 @@
+ALTER TABLE `tickets` MODIFY COLUMN `status` enum('aberto','em_progresso','resolvido') NOT NULL DEFAULT 'aberto';

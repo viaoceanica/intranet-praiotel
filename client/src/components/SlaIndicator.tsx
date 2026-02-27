@@ -22,8 +22,8 @@ export function SlaIndicator({ createdAt, priority, status, resolvedAt }: SlaInd
   const percentageUsed = Math.min(100, (hoursElapsed / slaHours) * 100);
   const isBreached = hoursElapsed > slaHours;
 
-  // Se o ticket está resolvido ou fechado, mostrar apenas se violou SLA
-  if (status === "resolvido" || status === "fechado") {
+  // Se o ticket está resolvido, mostrar apenas se violou SLA
+  if (status === "resolvido") {
     if (isBreached) {
       return (
         <Badge variant="destructive" className="gap-1">

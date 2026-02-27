@@ -95,14 +95,12 @@ export default function Tickets() {
     aberto: "Aberto",
     em_progresso: "Em Progresso",
     resolvido: "Resolvido",
-    fechado: "Fechado",
   };
 
   const statusColors: Record<string, string> = {
     aberto: "bg-blue-100 text-blue-800",
     em_progresso: "bg-yellow-100 text-yellow-800",
     resolvido: "bg-green-100 text-green-800",
-    fechado: "bg-gray-100 text-gray-800",
   };
 
   const priorityLabels: Record<string, string> = {
@@ -214,7 +212,6 @@ export default function Tickets() {
                   <SelectItem value="aberto">Aberto</SelectItem>
                   <SelectItem value="em_progresso">Em Progresso</SelectItem>
                   <SelectItem value="resolvido">Resolvido</SelectItem>
-                  <SelectItem value="fechado">Fechado</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -446,7 +443,6 @@ export default function Tickets() {
                   <SelectItem value="aberto">Aberto</SelectItem>
                   <SelectItem value="em_progresso">Em Progresso</SelectItem>
                   <SelectItem value="resolvido">Resolvido</SelectItem>
-                  <SelectItem value="fechado">Fechado</SelectItem>
                 </SelectContent>
               </Select>
             </div>

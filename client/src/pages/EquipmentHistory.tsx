@@ -23,7 +23,6 @@ const statusColors = {
   aberto: "bg-red-500",
   em_progresso: "bg-yellow-500",
   resolvido: "bg-green-500",
-  fechado: "bg-gray-500",
 };
 
 export default function EquipmentHistory() {
@@ -148,7 +147,7 @@ function EquipmentHistoryContent() {
                         <Badge className={getPriorityColor(ticket.priority)}>
                           {ticket.priority}
                         </Badge>
-                        <Badge className={statusColors[ticket.status]}>
+                        <Badge className={statusColors[ticket.status as keyof typeof statusColors] || "bg-green-500"}>
                           {ticket.status.replace("_", " ")}
                         </Badge>
                       </div>

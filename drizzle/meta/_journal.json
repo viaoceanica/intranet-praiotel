@@ -225,6 +225,13 @@
       "when": 1772117381033,
       "tag": "0031_faithful_sleepwalker",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "5",
+      "when": 1772196592480,
+      "tag": "0032_neat_loki",
+      "breakpoints": true
     }
   ]
 }

@@ -97,7 +97,7 @@ export const tickets = mysqlTable("tickets", {
   equipment: varchar("equipment", { length: 255 }).notNull(),
   problemType: varchar("problemType", { length: 255 }).notNull(),
   priority: varchar("priority", { length: 50 }).default("media").notNull(), // Alterado para varchar
-  status: mysqlEnum("status", ["aberto", "em_progresso", "resolvido", "fechado"]).default("aberto").notNull(),
+  status: mysqlEnum("status", ["aberto", "em_progresso", "resolvido"]).default("aberto").notNull(),
   assignedToId: int("assignedToId"),
   serviceTypeId: int("serviceTypeId"),
   location: varchar("location", { length: 100 }).notNull(),

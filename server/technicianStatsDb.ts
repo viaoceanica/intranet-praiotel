@@ -31,15 +31,15 @@ export async function getTechnicianStats(technicianId: number, startDate?: Date,
   const total = technicianTickets.length;
   const abertos = technicianTickets.filter(t => t.status === 'aberto').length;
   const emProgresso = technicianTickets.filter(t => t.status === 'em_progresso').length;
-  const resolvidos = technicianTickets.filter(t => t.status === 'resolvido' || t.status === 'fechado').length;
+  const resolvidos = technicianTickets.filter(t => t.status === 'resolvido').length;
 
   // Calcular tempo médio de resolução
-  const resolvedTickets = technicianTickets.filter(t => t.resolvedAt || t.closedAt);
+  const resolvedTickets = technicianTickets.filter(t => t.resolvedAt);
   let avgResolutionTimeMs = 0;
   if (resolvedTickets.length > 0) {
     const totalTime = resolvedTickets.reduce((sum, ticket) => {
       const created = new Date(ticket.createdAt).getTime();
-      const resolved = (ticket.resolvedAt || ticket.closedAt)!.getTime();
+      const resolved = ticket.resolvedAt!.getTime();
       return sum + (resolved - created);
     }, 0);
     avgResolutionTimeMs = totalTime / resolvedTickets.length;

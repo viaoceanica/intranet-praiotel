@@ -579,13 +579,11 @@ export default function NewTicket() {
                           <div className="flex items-center gap-2">
                             <span className="font-medium text-sm">#{ticket.ticketNumber}</span>
                             <span className={`text-xs px-2 py-0.5 rounded ${
-                              ticket.status === 'fechado' ? 'bg-gray-100 text-gray-700' :
                               ticket.status === 'resolvido' ? 'bg-green-100 text-green-700' :
                               ticket.status === 'em_progresso' ? 'bg-blue-100 text-blue-700' :
                               'bg-yellow-100 text-yellow-700'
                             }`}>
-                              {ticket.status === 'fechado' ? 'Fechado' :
-                               ticket.status === 'resolvido' ? 'Resolvido' :
+                              {ticket.status === 'resolvido' ? 'Resolvido' :
                                ticket.status === 'em_progresso' ? 'Em Progresso' : 'Aberto'}
                             </span>
                             <span className={`text-xs px-2 py-0.5 rounded ${
