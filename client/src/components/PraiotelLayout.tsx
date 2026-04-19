@@ -584,11 +584,13 @@ export default function PraiotelLayout({ children, hideFooter = false }: Praiote
           {!hideFooter && (
             <footer className="border-t bg-white mt-auto">
               <div className="container py-6 max-w-7xl mx-auto px-4">
-                <img 
-                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
-                  alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
-                  className="w-full max-w-[640px] mx-auto h-auto"
-                />
+                <a href="https://portugal2030.pt/avisos/" target="_blank" rel="noopener noreferrer">
+                  <img 
+                    src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
+                    alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
+                    className="w-full max-w-[640px] mx-auto h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                  />
+                </a>
               </div>
             </footer>
           )}

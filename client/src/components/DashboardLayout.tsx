@@ -270,11 +270,13 @@ function DashboardLayoutContent({
           <main className="flex-1 p-4">{children}</main>
           <footer className="border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur mt-auto">
             <div className="container py-6">
-              <img 
-                src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
-                alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
-                className="w-full max-w-[640px] mx-auto h-auto"
-              />
+              <a href="https://portugal2030.pt/avisos/" target="_blank" rel="noopener noreferrer">
+                <img 
+                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
+                  alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
+                  className="w-full max-w-[640px] mx-auto h-auto cursor-pointer hover:opacity-90 transition-opacity"
+                />
+              </a>
             </div>
           </footer>
         </div>

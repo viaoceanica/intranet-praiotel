@@ -1285,3 +1285,6 @@
 - [x] Corrigir para limpar assignedToId ao selecionar "Todos os Técnicos"
 - [x] Testar fluxo completo de atribuição e desatribuição
 - [x] Nota: BD confirma assignedToId=-1 correto; problema apenas na versão publicada (desatualizada)
+
+## Link nos Logotipos do Governo
+- [x] Adicionar link https://portugal2030.pt/avisos/ nos logotipos do governo (nova aba)
