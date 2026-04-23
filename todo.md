@@ -1288,3 +1288,9 @@
 
 ## Link nos Logotipos do Governo
 - [x] Adicionar link https://portugal2030.pt/avisos/ nos logotipos do governo (nova aba)
+
+## Migração para Base de Dados MySQL Externa (api.viaoceanica.com)
+- [x] Atualizar DATABASE_URL nas secrets do projeto
+- [x] Executar pnpm db:push para criar tabelas na nova BD (48 tabelas criadas)
+- [x] Migrar dados existentes da BD TiDB para a nova BD (4746 registos migrados)
+- [x] Verificar funcionamento completo com nova BD
