@@ -272,7 +272,7 @@ function DashboardLayoutContent({
             <div className="container py-6">
               <a href="https://portugal2030.pt/avisos/" target="_blank" rel="noopener noreferrer">
                 <img 
-                  src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663297235596/RskRLkxuHYMIfrgR.png" 
+                  src="https://pub-0b6dc54f02d94773a939976cee36d63e.r2.dev/assets/logos-governo.webp" 
                   alt="Logotipos do projeto - PRR, Governo dos Açores, República Portuguesa, Financiado pela União Europeia" 
                   className="w-full max-w-[640px] mx-auto h-auto cursor-pointer hover:opacity-90 transition-opacity"
                 />

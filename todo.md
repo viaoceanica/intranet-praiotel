@@ -1294,3 +1294,11 @@
 - [x] Executar pnpm db:push para criar tabelas na nova BD (48 tabelas criadas)
 - [x] Migrar dados existentes da BD TiDB para a nova BD (4746 registos migrados)
 - [x] Verificar funcionamento completo com nova BD
+
+## Configuração Cloudflare R2 (bucket praiotel)
+- [x] Configurar credenciais R2 no storage.ts
+- [x] Criar script de conversão de imagens para WebP
+- [x] Migrar imagens existentes para R2 (logos-governo.webp)
+- [x] Atualizar projeto para usar URLs do R2 (3 ficheiros: DashboardLayout, PraiotelLayout, Login)
+- [x] Remover ficheiros sensíveis de migração (migrate-data.mjs, migrate-images-to-r2.mjs)
+- [x] Corrigir erro crm_tasks (tabela já existe na BD MySQL)
