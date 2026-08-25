@@ -715,8 +715,6 @@ export const appRouter = router({
         manualClientAddress: z.string().optional(),
       }))
       .mutation(async ({ input, ctx }) => {
-        const ticketNumber = await ticketsDb.generateTicketNumber();
-        
         // Se é cliente manual de assistência técnica, criar o cliente na BD
         let finalClientId = input.clientId;
         if (input.isManualClient && input.clientType === "assistencia" && !input.clientId) {
@@ -780,7 +778,6 @@ export const appRouter = router({
         }
 
         const ticketData = {
-          ticketNumber,
           clientId: input.clientType === "assistencia" ? finalClientId : undefined,
           commercialClientId: input.clientType === "comercial" ? input.commercialClientId : undefined,
           clientType: input.clientType,
@@ -795,7 +792,7 @@ export const appRouter = router({
           createdById: ctx.user.id,
         };
 
-        await ticketsDb.createTicket(ticketData);
+        const { ticketNumber } = await ticketsDb.createTicketWithGeneratedNumber(ticketData);
 
         // Obter ID do ticket recém-criado
         const createdTicket = await ticketsDb.getTicketByNumber(ticketNumber);

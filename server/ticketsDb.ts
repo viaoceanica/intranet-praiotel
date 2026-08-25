@@ -10,6 +10,52 @@ export async function createTicket(ticket: InsertTicket) {
   return result;
 }
 
+const MAX_TICKET_NUMBER_ATTEMPTS = 10;
+
+function isTicketNumberUniqueConstraintError(error: unknown) {
+  const errors = [error];
+
+  if (error && typeof error === "object" && "cause" in error) {
+    errors.push((error as { cause?: unknown }).cause);
+  }
+
+  return errors.some(candidate => {
+    if (!candidate || typeof candidate !== "object") return false;
+
+    const databaseError = candidate as { code?: unknown; message?: unknown };
+    const message = typeof databaseError.message === "string" ? databaseError.message : "";
+
+    return (
+      (databaseError.code === "ER_DUP_ENTRY" || /duplicate|unique constraint/i.test(message)) &&
+      /ticketNumber|ticket_number/i.test(message)
+    );
+  });
+}
+
+/**
+ * Creates a ticket with a unique annual number, retrying only when a concurrent
+ * request has claimed the same generated number first.
+ */
+export async function createTicketWithGeneratedNumber(ticket: Omit<InsertTicket, "ticketNumber">) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  for (let attempt = 0; attempt < MAX_TICKET_NUMBER_ATTEMPTS; attempt++) {
+    const ticketNumber = await generateTicketNumber();
+
+    try {
+      await db.insert(tickets).values({ ...ticket, ticketNumber });
+      return { ticketNumber };
+    } catch (error) {
+      if (!isTicketNumberUniqueConstraintError(error)) {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error("Não foi possível atribuir um número único ao ticket.");
+}
+
 export async function getTicketById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
