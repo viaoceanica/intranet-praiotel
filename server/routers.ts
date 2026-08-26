@@ -702,12 +702,14 @@ export const appRouter = router({
         commercialClientId: z.number().optional(),
         clientType: z.enum(["assistencia", "comercial"]).default("assistencia"),
         clientName: z.string().min(1),
+        equipmentId: z.number().optional(),
         equipment: z.string().min(1),
         problemType: z.string().min(1),
         priority: z.enum(["baixa", "media", "alta", "urgente"]),
         location: z.string().min(1),
         description: z.string().min(1),
         assignedToId: z.number().optional(),
+        serviceTypeId: z.number().optional(),
         isManualClient: z.boolean().optional(),
         manualClientNif: z.string().optional(),
         manualClientEmail: z.string().optional(),
@@ -782,6 +784,7 @@ export const appRouter = router({
           commercialClientId: input.clientType === "comercial" ? input.commercialClientId : undefined,
           clientType: input.clientType,
           clientName: input.clientName,
+          equipmentId: input.equipmentId,
           equipment: input.equipment,
           problemType: input.problemType,
           priority: finalPriority,
@@ -789,6 +792,7 @@ export const appRouter = router({
           location: input.location,
           description: input.description,
           assignedToId: input.assignedToId,
+          serviceTypeId: input.serviceTypeId,
           createdById: ctx.user.id,
         };
 
@@ -906,7 +910,7 @@ export const appRouter = router({
           }
         }
 
-        return { success: true, ticketNumber };
+        return { success: true, ticketId: createdTicket.id, ticketNumber };
       }),
 
     update: isAuthenticated

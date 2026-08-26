@@ -124,45 +124,39 @@ export default function NewTicket() {
     onSuccess: async (data) => {
       // Se houver anexos, fazer upload após criar ticket
       if (attachments.length > 0) {
-        const ticketNumber = data.ticketNumber;
-        // Buscar o ticket recém-criado para obter o ID
-        const tickets = await utils.tickets.list.fetch();
-        const newTicket = tickets.find(t => t.ticketNumber === ticketNumber);
-        
-        if (newTicket) {
-          // Upload de cada anexo
-          const totalFiles = attachments.length;
-          for (let i = 0; i < attachments.length; i++) {
-            const attachment = attachments[i];
-            setUploadProgress({ current: i + 1, total: totalFiles, fileName: attachment.file.name });
-            
-            try {
-              const reader = new FileReader();
-              await new Promise((resolve, reject) => {
-                reader.onload = async () => {
-                  try {
-                    const base64 = (reader.result as string).split(',')[1];
-                    await uploadAttachmentMutation.mutateAsync({
-                      ticketId: newTicket.id,
-                      fileName: attachment.file.name,
-                      fileData: base64,
-                      mimeType: attachment.file.type,
-                    });
-                    resolve(true);
-                  } catch (error) {
-                    reject(error);
-                  }
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(attachment.file);
-              });
-            } catch (error) {
-              console.error('Erro ao fazer upload de anexo:', error);
-              toast.error(`Erro ao fazer upload de ${attachment.file.name}`);
-            }
+        // O endpoint de criação devolve o ID persistido; não é necessário voltar
+        // a carregar toda a lista de tickets para localizar o novo registo.
+        const totalFiles = attachments.length;
+        for (let i = 0; i < attachments.length; i++) {
+          const attachment = attachments[i];
+          setUploadProgress({ current: i + 1, total: totalFiles, fileName: attachment.file.name });
+          
+          try {
+            const reader = new FileReader();
+            await new Promise((resolve, reject) => {
+              reader.onload = async () => {
+                try {
+                  const base64 = (reader.result as string).split(',')[1];
+                  await uploadAttachmentMutation.mutateAsync({
+                    ticketId: data.ticketId,
+                    fileName: attachment.file.name,
+                    fileData: base64,
+                    mimeType: attachment.file.type,
+                  });
+                  resolve(true);
+                } catch (error) {
+                  reject(error);
+                }
+              };
+              reader.onerror = reject;
+              reader.readAsDataURL(attachment.file);
+            });
+          } catch (error) {
+            console.error('Erro ao fazer upload de anexo:', error);
+            toast.error(`Erro ao fazer upload de ${attachment.file.name}`);
           }
-          setUploadProgress(null);
         }
+        setUploadProgress(null);
       }
       
       toast.success(`Ticket ${data.ticketNumber} criado com sucesso!`);
