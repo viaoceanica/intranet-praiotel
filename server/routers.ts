@@ -40,6 +40,7 @@ import * as crmDuplicatesDb from "./crmDuplicatesDb";
 import * as systemSettingsDb from "./systemSettingsDb";
 import * as commercialClientsDb from "./commercialClientsDb";
 import { validatePasswordStrength } from "./passwordValidation";
+import { ticketUpdateInputSchema } from "./ticketUpdateInput";
 import * as XLSX from "xlsx";
 import { storagePut } from "./storage";
 import { SignJWT } from "jose";
@@ -914,18 +915,7 @@ export const appRouter = router({
       }),
 
     update: isAuthenticated
-      .input(z.object({
-        id: z.number(),
-        clientName: z.string().min(1).optional(),
-        equipment: z.string().min(1).optional(),
-        problemType: z.string().min(1).optional(),
-        priority: z.enum(["baixa", "media", "alta", "urgente"]).optional(),
-        status: z.enum(["aberto", "em_progresso", "resolvido"]).optional(),
-        location: z.string().min(1).optional(),
-        description: z.string().min(1).optional(),
-        notes: z.string().optional(),
-        assignedToId: z.number().optional(),
-      }))
+      .input(ticketUpdateInputSchema)
       .mutation(async ({ input, ctx }) => {
         const { id, ...updateData } = input;
         

@@ -42,7 +42,7 @@ export default function Tickets() {
   const [quickEditData, setQuickEditData] = useState({
     status: "",
     priority: "",
-    assignedToId: undefined as number | undefined,
+    assignedToId: null as number | null,
   });
 
   const utils = trpc.useUtils();
@@ -68,7 +68,7 @@ export default function Tickets() {
     setQuickEditData({
       status: ticket.status,
       priority: ticket.priority,
-      assignedToId: ticket.assignedToId,
+      assignedToId: ticket.assignedToId ?? null,
     });
     setShowQuickEditModal(true);
   };
@@ -473,7 +473,7 @@ export default function Tickets() {
                 onValueChange={(value) => 
                   setQuickEditData({ 
                     ...quickEditData, 
-                    assignedToId: value === "none" ? undefined : (value === "-1" ? -1 : parseInt(value))
+                    assignedToId: value === "none" ? null : (value === "-1" ? -1 : parseInt(value))
                   })
                 }
               >
